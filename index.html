@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerala PSC Tradesman CHM - Rank 1 MCQ Prep App</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="navigate('home')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-indigo-500 flex items-center justify-center font-black text-xl text-white shadow-inner">
+          <i class="fa-solid fa-microchip"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+            CHM Rank 1 Master
+            <span class="text-xs bg-amber-400 text-slate-900 font-extrabold px-2 py-0.5 rounded-full">Cat: 884/2025</span>
+          </h1>
+          <p class="text-xs text-indigo-200">Kerala PSC Tradesman Computer Hardware</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-4">
+        <button onclick="openAiGeneratorModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm border border-emerald-400/30">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          <span>Generate MCQ Now</span>
+        </button>
+        <button onclick="openSettingsModal()" class="flex items-center gap-2 bg-indigo-800/80 hover:bg-indigo-700 px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
+          <i class="fa-solid fa-sheet-plastic text-emerald-400"></i>
+          <span class="hidden sm:inline">Google Sheet Sync</span>
+        </button>
+        <button onclick="openMistakeNotebook()" class="flex items-center gap-1.5 bg-rose-900/60 hover:bg-rose-800 text-rose-200 px-3 py-1.5 rounded-lg text-sm transition border border-rose-700/50">
+          <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+          <span id="mistake-count-badge" class="font-bold bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-xs">0</span>
+          <span class="hidden md:inline">Mistakes</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+
+    <!-- VIEW 1: HOME DASHBOARD -->
+    <section id="view-home" class="space-y-8">
+      
+      <!-- Exam Info Hero Banner -->
+      <div class="bg-gradient-to-r from-indigo-700 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+        <div class="relative z-10 max-w-2xl">
+          <span class="inline-block px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-semibold rounded-full mb-3">
+            Exam Date: 17/12/2026 • 100 Marks • 10 Modules
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">Target Rank 1: Daily MCQ Practice</h2>
+          <p class="text-indigo-200 text-sm sm:text-base mb-6">
+            ഓരോ മൊഡ്യൂളും ആഴത്തിൽ പഠിച്ച് തെറ്റിയ ചോദ്യങ്ങൾ വീണ്ടും പരിശീലിക്കൂ. ഗൂഗിൾ ഷീറ്റിൽ ചോദ്യങ്ങൾ ആഡ് ചെയ്യുന്ന മുറയ്ക്ക് തത്സമയം വെബ് ആപ്പിൽ ലഭ്യമാകും.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+              Generate MCQ Now (AI)
+            </button>
+            <button onclick="startFullMockExam()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
+              <i class="fa-solid fa-play"></i>
+              PSC 100Q Full Mock Test (75 Min)
+            </button>
+            <button onclick="openMistakeNotebook()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/10">
+              <i class="fa-solid fa-book-bookmark text-amber-300"></i>
+              Mistake Notebook (<span id="home-mistakes-count">0</span>)
+            </button>
+          </div>
+        </div>
+        <div class="absolute -right-10 -bottom-10 opacity-10 text-white text-[15rem] pointer-events-none">
+          <i class="fa-solid fa-award"></i>
+        </div>
+      </div>
+
+      <!-- Quick Stats Card -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <div>
+            <div id="stat-total-questions" class="text-2xl font-black text-slate-800">0</div>
+            <div class="text-xs font-medium text-slate-500">Total Questions</div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <div id="stat-accuracy" class="text-2xl font-black text-slate-800">0%</div>
+            <div class="text-xs font-medium text-slate-500">Overall Accuracy</div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-rotate-left"></i>
+          </div>
+          <div>
+            <div id="stat-mistakes" class="text-2xl font-black text-rose-600">0</div>
+            <div class="text-xs font-medium text-slate-500">Unresolved Errors</div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div>
+            <div id="stat-bookmarks" class="text-2xl font-black text-slate-800">0</div>
+            <div class="text-xs font-medium text-slate-500">Bookmarks</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module Selection Grid -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">Module-wise Question Practice</h3>
+            <p class="text-xs text-slate-500">സിലബസിലെ 10 മൊഡ്യൂളുകളിൽ നിന്നും ഇഷ്ടമുള്ളത് തിരഞ്ഞെടുത്ത് പരിശീലിക്കുക</p>
+          </div>
+          <span class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-semibold">10 Modules</span>
+        </div>
+
+        <div id="modules-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Dynamically populated module cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: QUIZ / PRACTICE VIEW -->
+    <section id="view-quiz" class="hidden max-w-4xl mx-auto space-y-6">
+      <!-- Quiz Header Bar -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+          <button onclick="confirmExitQuiz()" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition">
+            <i class="fa-solid fa-arrow-left text-lg"></i>
+          </button>
+          <div>
+            <span id="quiz-mode-badge" class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Practice Mode</span>
+            <h3 id="quiz-title" class="font-bold text-slate-800 text-base sm:text-lg leading-tight">Module Name</h3>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Timer for Exam Mode -->
+          <div id="quiz-timer-container" class="hidden flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl font-mono font-bold text-base border border-rose-200">
+            <i class="fa-regular fa-clock animate-pulse"></i>
+            <span id="quiz-timer">75:00</span>
+          </div>
+
+          <button id="bookmark-btn" onclick="toggleCurrentBookmark()" class="p-2 text-slate-400 hover:text-amber-500 rounded-lg hover:bg-slate-100 transition text-lg" title="Bookmark Question">
+            <i class="fa-regular fa-star"></i>
+          </button>
+
+          <span class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
+            Q <span id="current-q-index">1</span> / <span id="total-q-count">10</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Question Palette / Quick Nav (Only in Exam Mode) -->
+      <div id="exam-palette" class="hidden bg-white p-3 rounded-2xl border border-slate-200 overflow-x-auto custom-scrollbar flex gap-2">
+        <!-- Palette dots generated in JS -->
+      </div>
+
+      <!-- Question Card -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+        <!-- Subtopic & Marks tag -->
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+          <span id="question-subtopic" class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">General</span>
+          <span id="question-marks-tag" class="text-indigo-600">+1.00 / -0.33</span>
+        </div>
+
+        <!-- Question Text -->
+        <div class="text-lg sm:text-xl font-bold text-slate-900 leading-relaxed" id="question-text">
+          Question Loading...
+        </div>
+
+        <!-- Options List -->
+        <div class="space-y-3" id="options-container">
+          <!-- Dynamically filled options -->
+        </div>
+
+        <!-- Explanation Box (Appears after answer in Practice Mode) -->
+        <div id="explanation-box" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-sm text-emerald-900 space-y-2">
+          <div class="flex items-center gap-2 font-bold text-emerald-800 text-base">
+            <i class="fa-solid fa-lightbulb text-amber-500"></i>
+            <span>Explanation & Syllabus Reference:</span>
+          </div>
+          <p id="explanation-text" class="text-slate-700 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- Navigation & Action Buttons -->
+      <div class="flex items-center justify-between gap-3">
+        <button id="prev-btn" onclick="prevQuestion()" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-5 py-2.5 rounded-xl border border-slate-200 transition flex items-center gap-2">
+          <i class="fa-solid fa-angle-left"></i> Previous
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button id="submit-exam-btn" onclick="submitExam()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-flag-checkered"></i> Submit Test
+          </button>
+          <button id="next-btn" onclick="nextQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+            Next <i class="fa-solid fa-angle-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: RESULTS SCREEN -->
+    <section id="view-results" class="hidden max-w-3xl mx-auto space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center space-y-6">
+        <div class="w-20 h-20 mx-auto rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl shadow-inner">
+          <i class="fa-solid fa-trophy text-amber-500"></i>
+        </div>
+        
+        <div>
+          <h2 class="text-2xl font-black text-slate-900">Exam Analysis & Scorecard</h2>
+          <p class="text-sm text-slate-500" id="result-subtitle">PSC Marking: +1 for correct, -0.33 for wrong</p>
+        </div>
+
+        <!-- Big Score Display -->
+        <div class="bg-slate-50 rounded-2xl p-6 max-w-md mx-auto border border-slate-200">
+          <div class="text-xs uppercase font-extrabold text-slate-400 tracking-wider mb-1">Your Total Score</div>
+          <div id="final-score" class="text-5xl font-black text-indigo-600">0.00</div>
+          <div class="text-sm text-slate-500 mt-1">out of <span id="final-total-marks">100</span> marks</div>
+        </div>
+
+        <!-- Stats Breakdown Grid -->
+        <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
+          <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+            <div id="final-correct" class="text-xl font-black text-emerald-600">0</div>
+            <div class="text-xs text-emerald-800 font-medium">Correct (+1)</div>
+          </div>
+          <div class="p-3 bg-rose-50 border border-rose-100 rounded-xl">
+            <div id="final-wrong" class="text-xl font-black text-rose-600">0</div>
+            <div class="text-xs text-rose-800 font-medium">Wrong (-0.33)</div>
+          </div>
+          <div class="p-3 bg-slate-100 border border-slate-200 rounded-xl">
+            <div id="final-unattempted" class="text-xl font-black text-slate-600">0</div>
+            <div class="text-xs text-slate-600 font-medium">Skipped (0)</div>
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-3 pt-4">
+          <button onclick="navigate('home')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-6 py-2.5 rounded-xl transition">
+            Home Dashboard
+          </button>
+          <button onclick="reviewCurrentTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl transition shadow">
+            Review Questions
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: MISTAKE NOTEBOOK / BOOKMARKS -->
+    <section id="view-mistakes" class="hidden max-w-4xl mx-auto space-y-6">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition">
+            <i class="fa-solid fa-arrow-left text-lg"></i>
+          </button>
+          <div>
+            <h3 class="font-bold text-slate-800 text-lg leading-tight" id="mistake-view-title">Mistake Revision Notebook</h3>
+            <p class="text-xs text-slate-500">നിങ്ങൾ തെറ്റിച്ച ചോദ്യങ്ങൾ മാത്രം വീണ്ടും പ്രാക്ടീസ് ചെയ്യുക</p>
+          </div>
+        </div>
+        <button id="clear-mistakes-btn" onclick="clearMistakes()" class="text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-200 transition">
+          Clear Solved
+        </button>
+      </div>
+
+      <div id="mistake-list" class="space-y-4">
+        <!-- Mistake list items -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Google Sheet Sync Settings Modal -->
+  <div id="settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-sheet-plastic"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-lg">Google Sheets Integration</h3>
+            <p class="text-xs text-slate-500">Connect your live questions database</p>
+          </div>
+        </div>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-sm">
+        <label class="block font-semibold text-slate-700">
+          Google Apps Script Web App URL:
+        </label>
+        <input type="url" id="sheet-api-url" placeholder="https://script.google.com/macros/s/.../exec" 
+          class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono">
+        <p class="text-xs text-slate-500 leading-relaxed">
+          ഗൂഗിൾ ഷീറ്റിൽ <span class="font-semibold text-slate-700">Extensions ➡️ Apps Script</span> വഴി ഡിപ്ലോയ് ചെയ്ത Web App URL ഇവിടെ പേസ്റ്റ് ചെയ്യുക.
+        </p>
+      </div>
+
+      <div id="sync-status" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="resetToSampleQuestions()" class="px-4 py-2 text-xs text-slate-500 hover:text-slate-800 font-semibold">
+          Use Built-in Questions
+        </button>
+        <button onclick="syncWithGoogleSheet()" id="btn-sync-now" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
+          <i class="fa-solid fa-rotate"></i> Sync Questions Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant AI MCQ Generator Modal -->
+  <div id="ai-generator-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-emerald-500 text-white flex items-center justify-center text-xl shadow">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-lg">Instant AI MCQ Generator</h3>
+            <p class="text-xs text-slate-500">Gemini AI വഴി തത്സമയം പുതിയ ചോദ്യങ്ങൾ നിർമ്മിക്കുക</p>
+          </div>
+        </div>
+        <button onclick="closeAiGeneratorModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div>
+          <label class="block font-bold text-slate-700 text-xs mb-1.5">ഏത് മൊഡ്യൂളിലെ ചോദ്യങ്ങളാണ് വേണ്ടത്?</label>
+          <select id="gen-module-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium">
+            <option value="ALL">✨ All 10 Modules (Full PSC Mixed Set)</option>
+            <option value="Module_1_Electronics">Module 1: Basic Electronics (12 Marks)</option>
+            <option value="Module_2_Comp_Fundamentals">Module 2: Computer Fundamentals (8 Marks)</option>
+            <option value="Module_3_Adv_Hardware_Storage">Module 3: Advanced Hardware & Storage (10 Marks)</option>
+            <option value="Module_4_OS_Deployment">Module 4: Operating Systems & Deployment (10 Marks)</option>
+            <option value="Module_5_System_Utilities">Module 5: System Utilities & Maintenance (10 Marks)</option>
+            <option value="Module_6_Office_Applications">Module 6: Office Applications (10 Marks)</option>
+            <option value="Module_7_IO_Devices">Module 7: I/O Devices & Maintenance (10 Marks)</option>
+            <option value="Module_8_Networking">Module 8: Networking Fundamentals (10 Marks)</option>
+            <option value="Module_9_Protocols_Servers">Module 9: Application Protocols & Servers (10 Marks)</option>
+            <option value="Module_10_Security_Cloud_Law">Module 10: Security, Cloud & IT Law (10 Marks)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 text-xs mb-1.5">എത്ര ചോദ്യങ്ങൾ വേണം?</label>
+            <select id="gen-count-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium">
+              <option value="5">5 ചോദ്യങ്ങൾ (~3 sec)</option>
+              <option value="10" selected>10 ചോദ്യങ്ങൾ (~6 sec)</option>
+              <option value="20">20 ചോദ്യങ്ങൾ (~12 sec)</option>
+              <option value="50">50 ചോദ്യങ്ങൾ (~25 sec)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 text-xs mb-1.5">നിലവാരം (Difficulty):</label>
+            <select id="gen-difficulty-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-medium">
+              <option value="standard" selected>Kerala PSC Tradesman</option>
+              <option value="hard">Hard / Rank Deciding</option>
+              <option value="moderate">Moderate Standard</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 text-xs mb-1.5 flex items-center justify-between">
+            <span>Gemini API Key (Google AI Studio):</span>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 hover:underline font-normal text-[11px]">സൗജന്യ API Key എടുക്കാൻ ക്ലിക്ക് ചെയ്യുക</a>
+          </label>
+          <input type="password" id="gen-api-key" placeholder="AI Studio-ൽ നിന്നുള്ള സൗജന്യ API Key പേസ്റ്റ് ചെയ്യുക..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs font-mono">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 text-xs mb-1.5">
+            Reference / NotebookLM Focus (Optional):
+          </label>
+          <textarea id="gen-custom-notes" rows="2" placeholder="ഉദാ: SMPS pinout voltages, Laser printer fuser drum, Linux ext4 commands, or paste notes..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"></textarea>
+          <p class="text-[11px] text-slate-500 mt-1">നിങ്ങളുടെ NotebookLM-ൽ നിന്നോ പ്രീവിയസ് ചോദ്യങ്ങളിൽ നിന്നോ ഉള്ള പോയിന്റുകൾ ഇവിടെ നൽകിയാൽ അവയിൽ ഊന്നൽ നൽകി ചോദ്യങ്ങൾ വരും.</p>
+        </div>
+
+        <!-- Progress / Status Box -->
+        <div id="gen-status-box" class="hidden p-3.5 rounded-xl text-xs font-medium"></div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+        <button onclick="closeAiGeneratorModal()" class="px-4 py-2 text-xs text-slate-500 hover:text-slate-800 font-semibold">
+          Cancel
+        </button>
+        <button id="btn-run-generator" onclick="runAiGenerationNow()" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          <span>Generate MCQs Now</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="sample_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+

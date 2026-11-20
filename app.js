@@ -1,0 +1,979 @@
+// Kerala PSC Tradesman - Computer Hardware Maintenance
+// Main Application Logic (app.js)
+
+const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzHzi5PAfwKoqcrBI6OoTiY63fEVa6T_0zM3ik2BhDvZxbIafWhz52dpBW9OStKYBUvYA/exec";
+const DEFAULT_GEMINI_KEY = "";
+
+let state = {
+  questions: [],
+  activeSession: null,
+  mistakes: JSON.parse(localStorage.getItem('chm_mistakes') || '[]'),
+  bookmarks: JSON.parse(localStorage.getItem('chm_bookmarks') || '[]'),
+  stats: JSON.parse(localStorage.getItem('chm_stats') || '{"attempted": 0, "correct": 0, "wrong": 0}'),
+  apiUrl: localStorage.getItem('chm_api_url') || DEFAULT_API_URL,
+  geminiKey: localStorage.getItem('chm_gemini_key') || ""
+};
+
+// Initialize Application
+document.addEventListener('DOMContentLoaded', () => {
+  loadQuestions();
+  renderDashboard();
+  updateMistakeBadge();
+  if (state.apiUrl) {
+    document.getElementById('sheet-api-url').value = state.apiUrl;
+  }
+  // Auto-sync from your Google Sheet on first load if never synced before
+  if (!localStorage.getItem('chm_last_synced') && state.apiUrl) {
+    syncWithGoogleSheet(true);
+  }
+});
+
+// Load Questions from LocalStorage or Fallback to Sample Data
+function loadQuestions() {
+  const cached = localStorage.getItem('chm_cached_questions');
+  if (cached) {
+    try {
+      state.questions = JSON.parse(cached);
+    } catch (e) {
+      state.questions = SAMPLE_QUESTIONS;
+    }
+  } else {
+    state.questions = SAMPLE_QUESTIONS;
+  }
+}
+
+// Navigation Router
+function navigate(viewName) {
+  ['home', 'quiz', 'results', 'mistakes'].forEach(v => {
+    const el = document.getElementById(`view-${v}`);
+    if (el) el.classList.add('hidden');
+  });
+
+  const target = document.getElementById(`view-${viewName}`);
+  if (target) target.classList.remove('hidden');
+
+  if (viewName === 'home') {
+    renderDashboard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// Render Dashboard
+function renderDashboard() {
+  // Update stats
+  document.getElementById('stat-total-questions').innerText = state.questions.length;
+  
+  const total = state.stats.attempted || 0;
+  const correct = state.stats.correct || 0;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('stat-accuracy').innerText = `${accuracy}%`;
+  
+  document.getElementById('stat-mistakes').innerText = state.mistakes.length;
+  document.getElementById('home-mistakes-count').innerText = state.mistakes.length;
+  document.getElementById('stat-bookmarks').innerText = state.bookmarks.length;
+
+  // Render Module Cards
+  const container = document.getElementById('modules-container');
+  container.innerHTML = '';
+
+  MODULE_DEFINITIONS.forEach(mod => {
+    const modQuestions = state.questions.filter(q => q.sheetName === mod.id);
+    const count = modQuestions.length;
+
+    const card = document.createElement('div');
+    card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:border-indigo-400 hover:shadow-md transition flex flex-col justify-between";
+    card.innerHTML = `
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-md">
+            ${mod.marks} Marks
+          </span>
+          <span class="text-xs text-slate-500 font-medium">
+            <i class="fa-solid fa-list-check text-slate-400 mr-1"></i> ${count} Questions
+          </span>
+        </div>
+        <h4 class="font-bold text-slate-800 text-base mb-1">${mod.name}</h4>
+        <p class="text-xs text-slate-500 mb-4">Syllabus weightage: ${mod.marks}% of total exam</p>
+      </div>
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+        <button onclick="startModulePractice('${mod.id}')" class="flex-1 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-book-open"></i> Practice
+        </button>
+        <button onclick="openAiGeneratorModal('${mod.id}')" class="bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold text-xs py-2 px-2.5 rounded-xl transition" title="Generate New AI Questions for this Module">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI
+        </button>
+        <button onclick="startModuleExam('${mod.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-3 rounded-xl transition" title="Timed Test">
+          <i class="fa-solid fa-stopwatch"></i> Test
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Start Module Practice Mode
+function startModulePractice(moduleId) {
+  const modDef = MODULE_DEFINITIONS.find(m => m.id === moduleId);
+  let questions = state.questions.filter(q => q.sheetName === moduleId);
+  
+  if (questions.length === 0) {
+    alert(`No questions found in ${modDef ? modDef.name : moduleId}. Please add questions in your Google Sheet or use Sync!`);
+    return;
+  }
+
+  // Shuffle questions for practice
+  questions = [...questions].sort(() => Math.random() - 0.5);
+
+  state.activeSession = {
+    mode: 'practice',
+    title: modDef ? modDef.name : moduleId,
+    questions: questions,
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+
+  initQuizUI();
+}
+
+// Start Full PSC Mock Exam Mode (100 Questions, 75 Minutes, -0.33 negative)
+function startFullMockExam() {
+  if (state.questions.length === 0) {
+    alert("No questions available! Please connect Google Sheet or load sample questions.");
+    return;
+  }
+
+  let examQuestions = [...state.questions].sort(() => Math.random() - 0.5);
+  // Cap at 100 or total available
+  if (examQuestions.length > 100) {
+    examQuestions = examQuestions.slice(0, 100);
+  }
+
+  state.activeSession = {
+    mode: 'exam',
+    title: 'PSC CHM Full Mock Exam (Cat: 884/2025)',
+    questions: examQuestions,
+    currentIndex: 0,
+    userAnswers: {},
+    timeRemaining: 75 * 60, // 75 minutes in seconds
+    timerInterval: null,
+    isSubmitted: false
+  };
+
+  initQuizUI();
+  startExamTimer();
+}
+
+// Start Timed Test for a Specific Module
+function startModuleExam(moduleId) {
+  const modDef = MODULE_DEFINITIONS.find(m => m.id === moduleId);
+  let questions = state.questions.filter(q => q.sheetName === moduleId);
+  
+  if (questions.length === 0) {
+    alert("No questions found for this module!");
+    return;
+  }
+
+  questions = [...questions].sort(() => Math.random() - 0.5);
+
+  state.activeSession = {
+    mode: 'exam',
+    title: `${modDef ? modDef.name : moduleId} (Timed Test)`,
+    questions: questions,
+    currentIndex: 0,
+    userAnswers: {},
+    timeRemaining: Math.max(questions.length * 60, 300), // 1 min per question or min 5 min
+    timerInterval: null,
+    isSubmitted: false
+  };
+
+  initQuizUI();
+  startExamTimer();
+}
+
+// Initialize Quiz UI
+function initQuizUI() {
+  const session = state.activeSession;
+  navigate('quiz');
+
+  document.getElementById('quiz-title').innerText = session.title;
+  document.getElementById('total-q-count').innerText = session.questions.length;
+
+  const modeBadge = document.getElementById('quiz-mode-badge');
+  const timerContainer = document.getElementById('quiz-timer-container');
+  const palette = document.getElementById('exam-palette');
+  const submitBtn = document.getElementById('submit-exam-btn');
+  const nextBtn = document.getElementById('next-btn');
+
+  if (session.mode === 'exam') {
+    modeBadge.innerText = 'PSC Exam Mode (-0.33 Mark)';
+    modeBadge.className = 'text-xs font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded';
+    timerContainer.classList.remove('hidden');
+    palette.classList.remove('hidden');
+    submitBtn.classList.remove('hidden');
+    renderExamPalette();
+  } else {
+    modeBadge.innerText = session.mode === 'mistakes' ? 'Mistake Revision Mode' : 'Practice Mode';
+    modeBadge.className = 'text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded';
+    timerContainer.classList.add('hidden');
+    palette.classList.add('hidden');
+    submitBtn.classList.add('hidden');
+  }
+
+  renderCurrentQuestion();
+}
+
+// Render Question on Screen
+function renderCurrentQuestion() {
+  const session = state.activeSession;
+  const q = session.questions[session.currentIndex];
+  const idx = session.currentIndex;
+
+  document.getElementById('current-q-index').innerText = idx + 1;
+  document.getElementById('question-subtopic').innerText = q.subtopic || q.sheetName || 'CHM';
+  document.getElementById('question-text').innerText = q.question;
+
+  // Bookmark icon update
+  const isBookmarked = state.bookmarks.includes(q.id);
+  const bmBtn = document.getElementById('bookmark-btn');
+  bmBtn.innerHTML = isBookmarked ? '<i class="fa-solid fa-star text-amber-500"></i>' : '<i class="fa-regular fa-star"></i>';
+
+  // Options
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+
+  const options = [
+    { key: 'A', text: q.option_a },
+    { key: 'B', text: q.option_b },
+    { key: 'C', text: q.option_c },
+    { key: 'D', text: q.option_d }
+  ];
+
+  const userAnswer = session.userAnswers[idx];
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = "w-full text-left p-4 rounded-2xl border-2 transition flex items-center justify-between text-sm sm:text-base font-medium ";
+
+    if (session.mode === 'practice' || session.isSubmitted) {
+      // In practice or after submission, show instant correct/wrong
+      if (userAnswer) {
+        if (opt.key === q.correct_answer) {
+          btn.className += "border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold";
+          btn.innerHTML = `<span><strong>(${opt.key})</strong> ${opt.text}</span> <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>`;
+        } else if (userAnswer.selected === opt.key) {
+          btn.className += "border-rose-500 bg-rose-50 text-rose-950";
+          btn.innerHTML = `<span><strong>(${opt.key})</strong> ${opt.text}</span> <i class="fa-solid fa-circle-xmark text-rose-600 text-lg"></i>`;
+        } else {
+          btn.className += "border-slate-200 bg-white text-slate-500 opacity-60";
+          btn.innerHTML = `<span><strong>(${opt.key})</strong> ${opt.text}</span>`;
+        }
+      } else {
+        btn.className += "border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/50 text-slate-800";
+        btn.innerHTML = `<span><strong>(${opt.key})</strong> ${opt.text}</span>`;
+        btn.onclick = () => selectOption(opt.key);
+      }
+    } else {
+      // In Exam mode: just record choice without revealing correctness
+      if (userAnswer && userAnswer.selected === opt.key) {
+        btn.className += "border-indigo-600 bg-indigo-50 text-indigo-950 font-bold shadow-sm";
+        btn.innerHTML = `<span><strong>(${opt.key})</strong> ${opt.text}</span> <i class="fa-solid fa-check text-indigo-600"></i>`;
+      } else {
+        btn.className += "border-slate-200 bg-white hover:border-indigo-300 text-slate-800";
+        btn.innerHTML = `<span><strong>(${opt.key})</strong> ${opt.text}</span>`;
+      }
+      btn.onclick = () => selectOption(opt.key);
+    }
+
+    container.appendChild(btn);
+  });
+
+  // Explanation Box handling
+  const explanationBox = document.getElementById('explanation-box');
+  const explanationText = document.getElementById('explanation-text');
+  if ((session.mode === 'practice' || session.isSubmitted) && userAnswer) {
+    explanationBox.classList.remove('hidden');
+    explanationText.innerText = q.explanation || "No explanation provided for this question.";
+  } else {
+    explanationBox.classList.add('hidden');
+  }
+
+  // Prev / Next button states
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('prev-btn').classList.toggle('opacity-40', idx === 0);
+
+  if (session.mode === 'exam') {
+    renderExamPalette();
+  }
+}
+
+// Select an Option
+function selectOption(optKey) {
+  const session = state.activeSession;
+  const q = session.questions[session.currentIndex];
+  const isCorrect = (optKey === q.correct_answer);
+
+  session.userAnswers[session.currentIndex] = {
+    selected: optKey,
+    isCorrect: isCorrect
+  };
+
+  // Update Global Stats if practice mode
+  if (session.mode === 'practice') {
+    state.stats.attempted++;
+    if (isCorrect) {
+      state.stats.correct++;
+      // Remove from mistakes if it was there
+      state.mistakes = state.mistakes.filter(m => m.id !== q.id);
+    } else {
+      state.stats.wrong++;
+      // Add to mistakes
+      if (!state.mistakes.some(m => m.id === q.id)) {
+        state.mistakes.push(q);
+      }
+    }
+    saveUserData();
+  }
+
+  renderCurrentQuestion();
+}
+
+function nextQuestion() {
+  const session = state.activeSession;
+  if (session.currentIndex < session.questions.length - 1) {
+    session.currentIndex++;
+    renderCurrentQuestion();
+  }
+}
+
+function prevQuestion() {
+  const session = state.activeSession;
+  if (session.currentIndex > 0) {
+    session.currentIndex--;
+    renderCurrentQuestion();
+  }
+}
+
+// Exam Palette for fast jumping
+function renderExamPalette() {
+  const palette = document.getElementById('exam-palette');
+  const session = state.activeSession;
+  palette.innerHTML = '';
+
+  session.questions.forEach((q, i) => {
+    const dot = document.createElement('button');
+    dot.className = "w-8 h-8 rounded-lg text-xs font-bold flex-shrink-0 transition flex items-center justify-center ";
+    
+    const ans = session.userAnswers[i];
+    if (i === session.currentIndex) {
+      dot.className += "ring-2 ring-indigo-600 ";
+    }
+
+    if (ans) {
+      dot.className += "bg-emerald-600 text-white";
+    } else {
+      dot.className += "bg-slate-100 text-slate-600 hover:bg-slate-200";
+    }
+
+    dot.innerText = i + 1;
+    dot.onclick = () => {
+      session.currentIndex = i;
+      renderCurrentQuestion();
+    };
+    palette.appendChild(dot);
+  });
+}
+
+// Exam Timer
+function startExamTimer() {
+  clearInterval(state.activeSession.timerInterval);
+  state.activeSession.timerInterval = setInterval(() => {
+    state.activeSession.timeRemaining--;
+    const t = state.activeSession.timeRemaining;
+    if (t <= 0) {
+      clearInterval(state.activeSession.timerInterval);
+      submitExam();
+      return;
+    }
+
+    const mins = Math.floor(t / 60);
+    const secs = t % 60;
+    document.getElementById('quiz-timer').innerText = 
+      `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }, 1000);
+}
+
+// Submit Full Exam
+function submitExam() {
+  const session = state.activeSession;
+  if (!session) return;
+  clearInterval(session.timerInterval);
+  session.isSubmitted = true;
+
+  let correct = 0;
+  let wrong = 0;
+  let unattempted = 0;
+
+  session.questions.forEach((q, i) => {
+    const ans = session.userAnswers[i];
+    if (!ans) {
+      unattempted++;
+    } else if (ans.isCorrect) {
+      correct++;
+    } else {
+      wrong++;
+      // Add wrong questions to mistake revision
+      if (!state.mistakes.some(m => m.id === q.id)) {
+        state.mistakes.push(q);
+      }
+    }
+  });
+
+  // Kerala PSC Marking: +1 for right, -0.33 for wrong
+  const score = (correct * 1.0) - (wrong * 0.33);
+
+  // Update Lifetime Stats
+  state.stats.attempted += (correct + wrong);
+  state.stats.correct += correct;
+  state.stats.wrong += wrong;
+  saveUserData();
+
+  // Show Results
+  document.getElementById('final-score').innerText = score.toFixed(2);
+  document.getElementById('final-total-marks').innerText = session.questions.length;
+  document.getElementById('final-correct').innerText = correct;
+  document.getElementById('final-wrong').innerText = wrong;
+  document.getElementById('final-unattempted').innerText = unattempted;
+
+  navigate('results');
+}
+
+function reviewCurrentTest() {
+  navigate('quiz');
+  state.activeSession.currentIndex = 0;
+  renderCurrentQuestion();
+}
+
+function confirmExitQuiz() {
+  if (state.activeSession && state.activeSession.mode === 'exam' && !state.activeSession.isSubmitted) {
+    if (confirm("Are you sure you want to quit the exam? Your progress will be lost.")) {
+      clearInterval(state.activeSession.timerInterval);
+      navigate('home');
+    }
+  } else {
+    navigate('home');
+  }
+}
+
+// Bookmark Toggle
+function toggleCurrentBookmark() {
+  const session = state.activeSession;
+  if (!session) return;
+  const q = session.questions[session.currentIndex];
+  
+  if (state.bookmarks.includes(q.id)) {
+    state.bookmarks = state.bookmarks.filter(id => id !== q.id);
+  } else {
+    state.bookmarks.push(q.id);
+  }
+  saveUserData();
+  renderCurrentQuestion();
+}
+
+// Mistake Notebook Feature
+function openMistakeNotebook() {
+  if (state.mistakes.length === 0) {
+    alert("ഹർഷം! നിങ്ങളുടെ Mistake Notebook-ൽ ഇപ്പോൾ ചോദ്യങ്ങൾ ഒന്നുമില്ല. പ്രാക്ടീസ് ചെയ്യുമ്പോൾ തെറ്റുന്ന ചോദ്യങ്ങൾ ഇവിടെ തനിയെ എത്തിച്ചേരും!");
+    return;
+  }
+
+  navigate('mistakes');
+  const container = document.getElementById('mistake-list');
+  container.innerHTML = '';
+
+  state.mistakes.forEach((q, index) => {
+    const card = document.createElement('div');
+    card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3";
+    card.innerHTML = `
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+        <span class="bg-rose-50 text-rose-700 px-2 py-0.5 rounded">${q.sheetName || 'Module'}</span>
+        <button onclick="removeMistake('${q.id}')" class="text-slate-400 hover:text-emerald-600 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-check"></i> Mark Solved
+        </button>
+      </div>
+      <h4 class="font-bold text-slate-800 text-base">${index + 1}. ${q.question}</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div class="p-2 rounded-lg bg-slate-50"><strong>A:</strong> ${q.option_a}</div>
+        <div class="p-2 rounded-lg bg-slate-50"><strong>B:</strong> ${q.option_b}</div>
+        <div class="p-2 rounded-lg bg-slate-50"><strong>C:</strong> ${q.option_c}</div>
+        <div class="p-2 rounded-lg bg-slate-50"><strong>D:</strong> ${q.option_d}</div>
+      </div>
+      <div class="p-3 bg-emerald-50 text-emerald-900 rounded-xl text-xs space-y-1">
+        <div class="font-bold">Correct Answer: Option (${q.correct_answer})</div>
+        <p class="text-slate-600">${q.explanation || 'No explanation'}</p>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function removeMistake(questionId) {
+  state.mistakes = state.mistakes.filter(m => m.id !== questionId);
+  saveUserData();
+  openMistakeNotebook();
+}
+
+function clearMistakes() {
+  if (confirm("Clear all questions from your mistake notebook?")) {
+    state.mistakes = [];
+    saveUserData();
+    navigate('home');
+  }
+}
+
+// Google Sheets Sync
+function openSettingsModal() {
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+
+function closeSettingsModal() {
+  document.getElementById('settings-modal').classList.add('hidden');
+}
+
+async function syncWithGoogleSheet(isAutoSync = false) {
+  const urlInput = document.getElementById('sheet-api-url').value.trim() || state.apiUrl;
+  const statusEl = document.getElementById('sync-status');
+  const syncBtn = document.getElementById('btn-sync-now');
+
+  if (!urlInput) {
+    if (!isAutoSync) alert("Please enter a valid Google Apps Script Web App URL!");
+    return;
+  }
+
+  if (statusEl) {
+    statusEl.className = "p-3 rounded-xl text-xs font-medium bg-amber-50 text-amber-800 block";
+    statusEl.innerText = "Connecting to Google Sheet & fetching all module questions...";
+  }
+  if (syncBtn) syncBtn.disabled = true;
+
+  try {
+    const fetchUrl = urlInput.includes('?') ? `${urlInput}&module=all` : `${urlInput}?module=all`;
+    const res = await fetch(fetchUrl);
+    const data = await res.json();
+
+    if (data.status === "success" && data.questions) {
+      state.questions = data.questions;
+      state.apiUrl = urlInput;
+      localStorage.setItem('chm_cached_questions', JSON.stringify(data.questions));
+      localStorage.setItem('chm_api_url', urlInput);
+      localStorage.setItem('chm_last_synced', new Date().toISOString());
+
+      if (statusEl) {
+        statusEl.className = "p-3 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-800 block";
+        statusEl.innerText = `Success! Fetched ${data.questions.length} questions across your Google Sheet modules.`;
+      }
+      renderDashboard();
+      if (!isAutoSync) {
+        setTimeout(closeSettingsModal, 1800);
+      }
+    } else {
+      throw new Error(data.message || "Invalid response format from Apps Script");
+    }
+  } catch (err) {
+    if (statusEl) {
+      statusEl.className = "p-3 rounded-xl text-xs font-medium bg-rose-50 text-rose-800 block";
+      statusEl.innerText = `Error syncing: ${err.message}. Make sure your script is deployed as 'Web app' with access 'Anyone'.`;
+    }
+  } finally {
+    if (syncBtn) syncBtn.disabled = false;
+  }
+}
+
+function resetToSampleQuestions() {
+  localStorage.removeItem('chm_cached_questions');
+  state.questions = SAMPLE_QUESTIONS;
+  renderDashboard();
+  alert("Reset to built-in sample questions.");
+  closeSettingsModal();
+}
+
+function saveUserData() {
+  localStorage.setItem('chm_mistakes', JSON.stringify(state.mistakes));
+  localStorage.setItem('chm_bookmarks', JSON.stringify(state.bookmarks));
+  localStorage.setItem('chm_stats', JSON.stringify(state.stats));
+  updateMistakeBadge();
+}
+
+function updateMistakeBadge() {
+  const badge = document.getElementById('mistake-count-badge');
+  if (badge) badge.innerText = state.mistakes.length;
+}
+
+// ============================================================================
+// 🤖 INSTANT IN-APP AI MCQ GENERATOR (GEMINI API)
+// ============================================================================
+
+const MODULE_TOPIC_MAP = {
+  "Module_1_Electronics": "Basic Electronics (Inductors, capacitors, PN diode, Zener diode, BJT transistors, rectifiers, filter circuits, SMPS basics, logic gates AND/OR/NOT/NAND/NOR/XOR)",
+  "Module_2_Comp_Fundamentals": "Computer Fundamentals & Architecture (CPU generations, microprocessors, motherboard forms ATX/MicroATX, chipset Northbridge/Southbridge, system bus, BIOS, UEFI, CMOS battery, clock generator)",
+  "Module_3_Adv_Hardware_Storage": "Advanced Hardware & Storage (RAM types DDR3/DDR4/DDR5, ECC vs Non-ECC, HDD sectors/tracks, SSD SATA/NVMe M.2, optical drives, RAID levels RAID 0/1/5/10, expansion slots PCIe/PCI)",
+  "Module_4_OS_Deployment": "Operating Systems & Deployment (Windows 10/11 installation, Linux Ubuntu/Debian fundamentals, bash commands, file systems NTFS, FAT32, ext4, disk partition MBR vs GPT, bootloaders GRUB/BCD, dual boot)",
+  "Module_5_System_Utilities": "System Utilities & Maintenance (PC troubleshooting, POST beep codes, BSOD debugging, multimeter voltage checking on SMPS yellow 12V/red 5V/orange 3.3V, Windows Registry, Task Manager, Event Viewer, preventive maintenance)",
+  "Module_6_Office_Applications": "Office Applications (MS Office & LibreOffice: Word formatting, mail merge, Excel formulas SUM/VLOOKUP/IF, charts, PowerPoint slide transitions, shortcut keys, PDF exporting)",
+  "Module_7_IO_Devices": "I/O Devices & Maintenance (Printers: Dot Matrix, Inkjet, Laser printer drum/corona wire/fuser assembly, scanners, monitors CRT/LCD/OLED, keyboard/mouse protocols, USB 2.0/3.0/Type-C, HDMI, DisplayPort, VGA)",
+  "Module_8_Networking": "Networking Fundamentals (OSI 7 layers, TCP/IP model, Ethernet standards, Cat5e/Cat6/Cat6a cabling, RJ45 crimping T568A/T568B, straight-through vs crossover cables, IPv4 addressing, subnet masks, topologies star/mesh/bus)",
+  "Module_9_Protocols_Servers": "Application Protocols & Servers (DNS port 53, DHCP port 67/68, HTTP port 80, HTTPS port 443, FTP port 20/21, SSH port 22, SMTP port 25, POP3 port 110, IMAP port 143, web servers Apache/IIS, domain controllers)",
+  "Module_10_Security_Cloud_Law": "Security, Cloud & IT Law (Antivirus, firewalls, malware types Trojan/Ransomware/Worm/Spyware, phishing, cloud models IaaS/PaaS/SaaS, public/private/hybrid cloud, India Information Technology Act 2000, Section 66, cyber forensics basics)"
+};
+
+let latestGeneratedBatch = [];
+
+function openAiGeneratorModal(moduleId = null) {
+  const modal = document.getElementById('ai-generator-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  const select = document.getElementById('gen-module-select');
+  if (select) {
+    select.value = moduleId || "ALL";
+  }
+
+  const keyInput = document.getElementById('gen-api-key');
+  if (keyInput) {
+    keyInput.value = state.geminiKey || "";
+  }
+
+  const statusBox = document.getElementById('gen-status-box');
+  if (statusBox) {
+    statusBox.className = "hidden p-3.5 rounded-xl text-xs font-medium";
+    statusBox.innerHTML = "";
+  }
+}
+
+function closeAiGeneratorModal() {
+  const modal = document.getElementById('ai-generator-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function runAiGenerationNow() {
+  const modSelect = document.getElementById('gen-module-select').value;
+  const count = parseInt(document.getElementById('gen-count-select').value, 10) || 10;
+  const difficulty = document.getElementById('gen-difficulty-select').value;
+  const customNotes = document.getElementById('gen-custom-notes').value.trim();
+  const statusBox = document.getElementById('gen-status-box');
+  const runBtn = document.getElementById('btn-run-generator');
+
+  const keyInput = document.getElementById('gen-api-key');
+  if (keyInput && keyInput.value.trim()) {
+    state.geminiKey = keyInput.value.trim();
+    localStorage.setItem('chm_gemini_key', state.geminiKey);
+  }
+
+  if (!state.geminiKey) {
+    alert("ദയവായി നിങ്ങളുടെ Gemini API Key നൽകുക! Google AI Studio-ൽ നിന്ന് സൗജന്യമായി കീ എടുക്കാം.");
+    if (keyInput) keyInput.focus();
+    return;
+  }
+
+  // Update UI to loading state
+  statusBox.className = "p-3.5 rounded-xl text-xs font-medium bg-amber-50 text-amber-900 border border-amber-200 block space-y-1";
+  statusBox.innerHTML = `
+    <div class="flex items-center gap-2 font-bold text-amber-800">
+      <i class="fa-solid fa-spinner fa-spin"></i> Gemini AI ചോദ്യങ്ങൾ തയ്യാറാക്കുന്നു...
+    </div>
+    <p class="text-amber-700">Kerala PSC Tradesman സിലബസ് അടിസ്ഥാനമാക്കി ${count} ചോദ്യങ്ങളും വിശദീകരണങ്ങളും നിർമ്മിക്കുന്നു. ദയവായി കുറച്ച് സെക്കൻഡുകൾ കാത്തിരിക്കുക.</p>
+  `;
+  runBtn.disabled = true;
+  runBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+  try {
+    let topicDescription = "";
+    let defaultModule = "Module_1_Electronics";
+
+    if (modSelect === "ALL") {
+      topicDescription = "A balanced mix across all 10 modules of Kerala PSC Tradesman Computer Hardware Maintenance: Electronics, CPU architecture, storage, OS installation, system troubleshooting, office tools, printers/monitors, networking, servers/protocols, IT Act/cyber security.";
+      defaultModule = "Module_2_Comp_Fundamentals";
+    } else {
+      topicDescription = MODULE_TOPIC_MAP[modSelect] || modSelect;
+      defaultModule = modSelect;
+    }
+
+    let notesContext = "";
+    if (customNotes) {
+      notesContext = `\nCANDIDATE REFERENCE NOTES & PREVIOUS EXAM QUESTIONS FROM NOTEBOOK:
+"""
+${customNotes}
+"""
+Please strictly align the concepts, technical terms, difficulty level, and question patterns with the above candidate notes.\n`;
+    }
+
+    const promptText = `You are an expert Kerala PSC examiner creating authentic multiple choice questions for Kerala PSC Tradesman - Computer Hardware Maintenance (Cat. No. 884/2025).
+Topic Focus: ${topicDescription}
+Difficulty: ${difficulty}
+Target Question Count: ${count}
+${notesContext}
+REQUIREMENTS:
+1. Each question must test practical and theoretical concepts according to Kerala PSC standard.
+2. Provide exactly 4 options (option_a, option_b, option_c, option_d) in English.
+3. Provide the correct answer (A, B, C, or D).
+4. Provide a clear, technically sound explanation.
+5. In the "sheetName" field, provide one of the following exact module IDs:
+["Module_1_Electronics", "Module_2_Comp_Fundamentals", "Module_3_Adv_Hardware_Storage", "Module_4_OS_Deployment", "Module_5_System_Utilities", "Module_6_Office_Applications", "Module_7_IO_Devices", "Module_8_Networking", "Module_9_Protocols_Servers", "Module_10_Security_Cloud_Law"]
+(If a specific module was requested, set sheetName to "${defaultModule}").
+6. Output ONLY raw JSON array, with no Markdown ticks, no wrapper.
+
+JSON FORMAT:
+[
+  {
+    "question": "Question text here...",
+    "option_a": "Option A text",
+    "option_b": "Option B text",
+    "option_c": "Option C text",
+    "option_d": "Option D text",
+    "correct_answer": "A",
+    "explanation": "Clear explanation of why this answer is correct...",
+    "sheetName": "${defaultModule}",
+    "subtopic": "Relevant subtopic name"
+  }
+]`;
+
+    // Call Gemini with dynamic model discovery and fallback
+    const data = await callGeminiWithAutoModel(state.geminiKey, promptText);
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("No response generated from Gemini API.");
+
+    // Clean up potential markdown code fences
+    text = text.trim();
+    if (text.startsWith("```json")) {
+      text = text.replace(/^```json/, '').replace(/```$/, '').trim();
+    } else if (text.startsWith("```")) {
+      text = text.replace(/^```/, '').replace(/```$/, '').trim();
+    }
+
+    const parsedQuestions = JSON.parse(text);
+    if (!Array.isArray(parsedQuestions) || parsedQuestions.length === 0) {
+      throw new Error("Invalid question format received.");
+    }
+
+    // Process & assign IDs
+    const now = Date.now();
+    const formatted = parsedQuestions.map((q, idx) => ({
+      id: `AI_${now}_${idx + 1}`,
+      sheetName: q.sheetName || defaultModule,
+      question: q.question,
+      option_a: q.option_a,
+      option_b: q.option_b,
+      option_c: q.option_c,
+      option_d: q.option_d,
+      correct_answer: (q.correct_answer || 'A').toUpperCase(),
+      explanation: q.explanation || "Correct answer as per standard computer hardware maintenance syllabus.",
+      subtopic: q.subtopic || "AI Generated"
+    }));
+
+    // Prepend new questions to state
+    latestGeneratedBatch = formatted;
+    state.questions = [...formatted, ...state.questions];
+    localStorage.setItem('chm_cached_questions', JSON.stringify(state.questions));
+
+    // Update UI
+    renderDashboard();
+
+    // ഗൂഗിൾ ഷീറ്റിലേക്ക് ചോദ്യങ്ങൾ ഓട്ടോമാറ്റിക്കായി പുഷ് ചെയ്യുന്നു
+    let sheetSyncMsg = "";
+    if (state.apiUrl) {
+      sheetSyncMsg = `<div id="sheet-sync-status-msg" class="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 p-2 rounded-lg flex items-center gap-2">
+        <i class="fa-solid fa-spinner fa-spin"></i> ഗൂഗിൾ ഷീറ്റിലെ അതാത് മൊഡ്യൂളുകളിലേക്ക് ചോദ്യങ്ങൾ സേവ് ചെയ്യുന്നു...
+      </div>`;
+      pushQuestionsToGoogleSheet(formatted).then(success => {
+        const syncEl = document.getElementById('sheet-sync-status-msg');
+        if (syncEl) {
+          if (success) {
+            syncEl.className = "text-xs text-emerald-800 bg-emerald-100/80 border border-emerald-200 p-2 rounded-lg flex items-center gap-2 font-medium";
+            syncEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> ഗൂഗിൾ ഷീറ്റിലെ അതാത് മൊഡ്യൂളുകളിലേക്ക് ചോദ്യങ്ങൾ വിജയകരമായി ചേർത്തു!`;
+          } else {
+            syncEl.className = "text-xs text-amber-800 bg-amber-50 border border-amber-200 p-2 rounded-lg flex items-center gap-2";
+            syncEl.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-600"></i> ഷീറ്റ് സിങ്ക് ചെയ്യാൻ കഴിഞ്ഞില്ല. ഗൂഗിൾ ഷീറ്റ് URL ശരിയാണെന്ന് ഉറപ്പാക്കുക.`;
+          }
+        }
+      });
+    }
+
+    statusBox.className = "p-4 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-900 border border-emerald-200 block space-y-3";
+    statusBox.innerHTML = `
+      <div class="flex items-center gap-2 font-bold text-emerald-800 text-sm">
+        <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+        <span>🎉 ${formatted.length} പുതിയ PSC ചോദ്യങ്ങൾ വിജയകരമായി തയ്യാറാക്കി!</span>
+      </div>
+      <p class="text-emerald-700">ചോദ്യങ്ങൾ ആപ്പിലെ ചോദ്യശേഖരത്തിലേക്ക് തത്സമയം ചേർത്തിട്ടുണ്ട്. ആകെ ചോദ്യങ്ങൾ: <strong>${state.questions.length}</strong>.</p>
+      ${sheetSyncMsg}
+      <div class="flex flex-wrap gap-2 pt-1">
+        <button onclick="startPracticeWithLatestBatch()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-lg text-xs shadow flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-play"></i> ഈ ചോദ്യങ്ങൾ ഇപ്പോൾ പരിശീലിക്കുക
+        </button>
+        <button onclick="pushLatestBatchToSheetManually()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-lg text-xs shadow flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-cloud-arrow-up"></i> ഷീറ്റിലേക്ക് വീണ്ടും സേവ് ചെയ്യുക
+        </button>
+        <button onclick="closeAiGeneratorModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-2 rounded-lg text-xs transition">
+          ഡാഷ്‌ബോർഡിലേക്ക് മടങ്ങുക
+        </button>
+      </div>
+    `;
+
+  } catch (err) {
+    console.error("AI Generation failed:", err);
+    statusBox.className = "p-3.5 rounded-xl text-xs font-medium bg-rose-50 text-rose-900 border border-rose-200 block";
+    statusBox.innerHTML = `
+      <div class="font-bold text-rose-800 mb-1">
+        <i class="fa-solid fa-triangle-exclamation"></i> ചോദ്യങ്ങൾ ഉണ്ടാക്കുന്നതിൽ തടസ്സം നേരിട്ടു:
+      </div>
+      <p class="text-rose-700">${err.message}</p>
+    `;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+}
+
+function startPracticeWithLatestBatch() {
+  if (!latestGeneratedBatch || latestGeneratedBatch.length === 0) return;
+  closeAiGeneratorModal();
+
+  state.activeSession = {
+    mode: 'practice',
+    title: `⚡ AI Generated Set (${latestGeneratedBatch.length} Questions)`,
+    questions: [...latestGeneratedBatch],
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+
+  navigate('quiz');
+  renderCurrentQuestion();
+}
+
+/**
+ * ചോദ്യങ്ങൾ ഗൂഗിൾ ഷീറ്റിലേക്ക് പുഷ് ചെയ്യുന്നു
+ */
+async function pushQuestionsToGoogleSheet(questions) {
+  if (!state.apiUrl) {
+    console.warn("No Google Sheet API URL configured.");
+    return false;
+  }
+  try {
+    const payload = JSON.stringify({ questions: questions });
+    // Apps Script CORS preflight തടയാൻ text/plain ഉപയോഗിക്കുന്നു
+    await fetch(state.apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: payload,
+      mode: "no-cors"
+    });
+    return true;
+  } catch (err) {
+    console.error("Failed to push to Google Sheet:", err);
+    return false;
+  }
+}
+
+async function pushLatestBatchToSheetManually() {
+  if (!latestGeneratedBatch || latestGeneratedBatch.length === 0) {
+    alert("പുതിയ ചോദ്യങ്ങൾ ഒന്നും കാണുന്നില്ല!");
+    return;
+  }
+  if (!state.apiUrl) {
+    alert("ദയവായി മുകളിലെ 'Google Sheet Sync' ബട്ടൺ ക്ലിക്ക് ചെയ്ത് നിങ്ങളുടെ Apps Script URL നൽകുക!");
+    return;
+  }
+  
+  const syncEl = document.getElementById('sheet-sync-status-msg');
+  if (syncEl) {
+    syncEl.className = "text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 p-2 rounded-lg flex items-center gap-2";
+    syncEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ഗൂഗിൾ ഷീറ്റിലേക്ക് ചോദ്യങ്ങൾ സേവ് ചെയ്യുന്നു...`;
+  }
+  
+  const ok = await pushQuestionsToGoogleSheet(latestGeneratedBatch);
+  if (syncEl) {
+    if (ok) {
+      syncEl.className = "text-xs text-emerald-800 bg-emerald-100/80 border border-emerald-200 p-2 rounded-lg flex items-center gap-2 font-medium";
+      syncEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> ${latestGeneratedBatch.length} ചോദ്യങ്ങൾ ഗൂഗിൾ ഷീറ്റിലേക്ക് വിജയകരമായി അയച്ചു! ഷീറ്റ് റീഫ്രഷ് ചെയ്തു നോക്കൂ.`;
+    } else {
+      syncEl.className = "text-xs text-rose-800 bg-rose-50 border border-rose-200 p-2 rounded-lg flex items-center gap-2";
+      syncEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600"></i> ഷീറ്റിലേക്ക് അയക്കാൻ കഴിഞ്ഞില്ല.`;
+    }
+  }
+}
+
+/**
+ * Gemini API മോഡൽ ഓട്ടോമാറ്റിക്കായി കണ്ടുപിടിച്ച് കോൾ ചെയ്യുന്നു
+ */
+async function callGeminiWithAutoModel(apiKey, promptText) {
+  let targetModels = [];
+
+  // 1. ലൈവായി ലഭ്യമായ മോഡലുകളുടെ ലിസ്റ്റ് എടുക്കാൻ ശ്രമിക്കുന്നു
+  try {
+    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (listRes.ok) {
+      const listData = await listRes.json();
+      if (listData.models && Array.isArray(listData.models)) {
+        const supported = listData.models
+          .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+          .map(m => m.name.replace(/^models\//, ''));
+        
+        // Flash മോഡലുകൾക്ക് മുൻഗണന നൽകുന്നു
+        const flashModels = supported.filter(m => m.includes('flash'));
+        const otherModels = supported.filter(m => !m.includes('flash'));
+        targetModels = [...flashModels, ...otherModels].map(m => ({ version: 'v1beta', name: m }));
+      }
+    }
+  } catch (e) {
+    console.warn("Could not fetch models list:", e);
+  }
+
+  // 2. ലിസ്റ്റ് കിട്ടിയില്ലെങ്കിൽ സ്ഥിരസ്ഥിതിയായ മുൻഗണനാ ലിസ്റ്റ് ഉപയോഗിക്കുന്നു
+  if (targetModels.length === 0) {
+    targetModels = [
+      { version: 'v1beta', name: 'gemini-2.0-flash' },
+      { version: 'v1beta', name: 'gemini-2.5-flash' },
+      { version: 'v1beta', name: 'gemini-1.5-flash-8b' },
+      { version: 'v1beta', name: 'gemini-2.0-flash-exp' },
+      { version: 'v1', name: 'gemini-1.5-flash' },
+      { version: 'v1beta', name: 'gemini-1.5-pro' },
+      { version: 'v1', name: 'gemini-pro' }
+    ];
+  }
+
+  let lastError = null;
+
+  for (const item of targetModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/${item.version}/models/${item.name}:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: {
+          temperature: 0.35,
+          responseMimeType: "application/json"
+        }
+      };
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        return await res.json();
+      } else {
+        const errText = await res.text();
+        lastError = new Error(`${item.name} (${res.status}): ${errText}`);
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("Failed to generate content with available Gemini models.");
+}
+
+
+
