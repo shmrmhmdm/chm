@@ -223,6 +223,48 @@ function initQuizUI() {
   renderCurrentQuestion();
 }
 
+// Format explanation with English and Malayalam sections
+function formatExplanation(text, malayalamText = null) {
+  let english = text || "";
+  let malayalam = malayalamText || "";
+
+  if (!malayalam) {
+    if (english.includes("[മലയാളം]:")) {
+      const parts = english.split("[മലയാളം]:");
+      english = parts[0].trim();
+      malayalam = parts[1].trim();
+    } else if (english.includes("മലയാളം വിശദീകരണം:")) {
+      const parts = english.split("മലയാളം വിശദീകരണം:");
+      english = parts[0].trim();
+      malayalam = parts[1].trim();
+    }
+  }
+
+  const formattedEn = english.replace(/\n/g, '<br>');
+  if (!malayalam) {
+    return `<div class="text-slate-700 leading-relaxed">${formattedEn}</div>`;
+  }
+
+  const formattedMl = malayalam.replace(/\n/g, '<br>');
+  return `
+    <div class="space-y-3">
+      <div class="text-slate-700 text-sm leading-relaxed">
+        <span class="inline-block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">English</span>
+        <div>${formattedEn}</div>
+      </div>
+      <div class="bg-white/90 border border-emerald-200/90 rounded-xl p-3.5 space-y-1 shadow-sm">
+        <div class="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-language text-emerald-600 text-base"></i>
+          <span>മലയാളം വിശദീകരണം:</span>
+        </div>
+        <div class="text-slate-800 text-sm leading-relaxed font-medium">
+          ${formattedMl}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // Render Question on Screen
 function renderCurrentQuestion() {
   const session = state.activeSession;
@@ -293,7 +335,7 @@ function renderCurrentQuestion() {
   const explanationText = document.getElementById('explanation-text');
   if ((session.mode === 'practice' || session.isSubmitted) && userAnswer) {
     explanationBox.classList.remove('hidden');
-    explanationText.innerText = q.explanation || "No explanation provided for this question.";
+    explanationText.innerHTML = formatExplanation(q.explanation, q.explanation_malayalam);
   } else {
     explanationBox.classList.add('hidden');
   }
@@ -508,9 +550,9 @@ function openMistakeNotebook() {
         <div class="p-2 rounded-lg bg-slate-50"><strong>C:</strong> ${q.option_c}</div>
         <div class="p-2 rounded-lg bg-slate-50"><strong>D:</strong> ${q.option_d}</div>
       </div>
-      <div class="p-3 bg-emerald-50 text-emerald-900 rounded-xl text-xs space-y-1">
-        <div class="font-bold">Correct Answer: Option (${q.correct_answer})</div>
-        <p class="text-slate-600">${q.explanation || 'No explanation'}</p>
+      <div class="p-3 bg-emerald-50 text-emerald-900 rounded-xl text-xs space-y-2">
+        <div class="font-bold text-sm">Correct Answer: Option (${q.correct_answer})</div>
+        <div>${formatExplanation(q.explanation, q.explanation_malayalam)}</div>
       </div>
     `;
     container.appendChild(card);
@@ -716,7 +758,9 @@ REQUIREMENTS:
 1. Each question must test practical and theoretical concepts according to Kerala PSC standard.
 2. Provide exactly 4 options (option_a, option_b, option_c, option_d) in English.
 3. Provide the correct answer (A, B, C, or D).
-4. Provide a clear, technically sound explanation.
+4. Provide a comprehensive explanation containing BOTH English and a clear, simple Malayalam explanation.
+   Format the "explanation" field strictly as:
+   "Concise technical explanation in English.\n\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം."
 5. In the "sheetName" field, provide one of the following exact module IDs:
 ["Module_1_Electronics", "Module_2_Comp_Fundamentals", "Module_3_Adv_Hardware_Storage", "Module_4_OS_Deployment", "Module_5_System_Utilities", "Module_6_Office_Applications", "Module_7_IO_Devices", "Module_8_Networking", "Module_9_Protocols_Servers", "Module_10_Security_Cloud_Law"]
 (If a specific module was requested, set sheetName to "${defaultModule}").
@@ -731,7 +775,7 @@ JSON FORMAT:
     "option_c": "Option C text",
     "option_d": "Option D text",
     "correct_answer": "A",
-    "explanation": "Clear explanation of why this answer is correct...",
+    "explanation": "Concise technical explanation in English.\n\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം.",
     "sheetName": "${defaultModule}",
     "subtopic": "Relevant subtopic name"
   }

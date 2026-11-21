@@ -614,9 +614,10 @@ Starting ID index: ${startId}
 ${refSection}
 REQUIREMENTS:
 1. Each question must strictly follow the Kerala PSC exam standard.
-2. English language questions, options, and explanations.
+2. English language questions and options.
 3. Realistic options, with exactly one indisputably correct answer (A, B, C, or D).
-4. Detailed technical explanation justifying the correct answer.
+4. Detailed technical explanation justifying the correct answer in English, followed by a simple Malayalam explanation:
+   Format the explanation field strictly as: "English explanation here.\n\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം."
 5. Return ONLY a valid raw JSON array of objects, with NO MARKDOWN formatting, NO \`\`\`json wrappers.
 
 JSON SCHEMA:
@@ -629,7 +630,7 @@ JSON SCHEMA:
     "option_c": "Option C text",
     "option_d": "Option D text",
     "correct_answer": "A",
-    "explanation": "Why this answer is correct...",
+    "explanation": "English technical explanation.\n\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം.",
     "subtopic": "Specific subtopic name"
   }
 ]`;

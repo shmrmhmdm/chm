@@ -25,7 +25,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "Resistor",
     option_d: "Zener Diode",
     correct_answer: "B",
-    explanation: "An inductor opposes sudden changes in electric current due to Lenz's law and self-inductance. Capacitors oppose sudden changes in voltage.",
+    explanation: "An inductor opposes sudden changes in electric current due to Lenz's law and self-inductance. Capacitors oppose sudden changes in voltage.\n\n[മലയാളം]: ലെൻസിന്റെ നിയമം അനുസരിച്ച് കറന്റിലുണ്ടാകുന്ന പെട്ടെന്നുള്ള മാറ്റങ്ങളെ തടസ്സപ്പെടുത്തുന്ന ഉപകരണമാണ് ഇൻഡക്ടർ (Inductor). വോൾട്ടേജിലെ മാറ്റത്തെ തടയുന്നത് കപ്പാസിറ്ററാണ് (Capacitor).",
     subtopic: "Inductors"
   },
   {
@@ -37,7 +37,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "1.1 V",
     option_d: "0.2 V",
     correct_answer: "B",
-    explanation: "Silicon diode barrier potential is approximately 0.7 V, while for Germanium it is around 0.3 V.",
+    explanation: "Silicon diode barrier potential is approximately 0.7 V, while for Germanium it is around 0.3 V.\n\n[മലയാളം]: സിലിക്കൺ (Si) ഡയോഡിന്റെ ബാരിയർ പൊട്ടൻഷ്യൽ 0.7 വോൾട്ടും ജർമ്മേനിയത്തിന് (Ge) 0.3 വോൾട്ടുമാണ്.",
     subtopic: "Semiconductors"
   },
   {
@@ -49,7 +49,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "TRIAC",
     option_d: "UJT",
     correct_answer: "C",
-    explanation: "TRIAC (Triode for Alternating Current) is a bidirectional thyristor that can conduct current in either direction and be triggered by either polarity.",
+    explanation: "TRIAC (Triode for Alternating Current) is a bidirectional thyristor that can conduct current in either direction and be triggered by either polarity.\n\n[മലയാളം]: രണ്ട് ദിശകളിലേക്കും കറന്റ് കടത്തിവിടാൻ സാധിക്കുന്നതും പോസിറ്റീവ്, നെഗറ്റീവ് ഗേറ്റ് പൾസുകൾ വഴി ട്രിഗർ ചെയ്യാവുന്നതുമായ ഉപകരണമാണ് TRIAC.",
     subtopic: "Power Devices"
   },
   {
@@ -61,7 +61,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "+5 V",
     option_d: "+9 V",
     correct_answer: "C",
-    explanation: "78xx series ICs are positive voltage regulators; the last two digits specify the output voltage. '7805' outputs +5V. (79xx is for negative voltages).",
+    explanation: "78xx series ICs are positive voltage regulators; the last two digits specify the output voltage. '7805' outputs +5V. (79xx is for negative voltages).\n\n[മലയാളം]: 78xx പോസിറ്റീവ് വോൾട്ടേജ് റെഗുലേറ്ററുകളാണ്. ഇതിലെ അവസാന രണ്ട് അക്കങ്ങൾ ഔട്ട്പുട്ട് വോൾട്ടേജിനെ സൂചിപ്പിക്കുന്നു (7805 എന്നാൽ +5V). 79xx നെഗറ്റീവ് വോൾട്ടേജിനുള്ളതാണ്.",
     subtopic: "Voltage Regulation"
   },
 
@@ -75,7 +75,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "RAM",
     option_d: "EEPROM",
     correct_answer: "C",
-    explanation: "RAM (Random Access Memory) is volatile; contents are lost when system power is turned off.",
+    explanation: "RAM (Random Access Memory) is volatile; contents are lost when system power is turned off.\n\n[മലയാളം]: കമ്പ്യൂട്ടറിലെ പവർ ഓഫാകുമ്പോൾ ഉള്ളടക്കം നഷ്ടപ്പെടുന്ന താൽക്കാലിക മെമ്മറിയാണ് (Volatile Memory) റാം (RAM).",
     subtopic: "Memory Hierarchy"
   },
   {
@@ -87,7 +87,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "L3 Cache",
     option_d: "Virtual Memory",
     correct_answer: "A",
-    explanation: "L1 (Level 1) cache is the fastest, smallest cache integrated directly into the CPU core.",
+    explanation: "L1 (Level 1) cache is the fastest, smallest cache integrated directly into the CPU core.\n\n[മലയാളം]: പ്രോസസ്സർ കോറിനോട് ഏറ്റവും അടുത്ത് സ്ഥിതിചെയ്യുന്നതും ഏറ്റവും വേഗതയേറിയതുമായ കാഷെ മെമ്മറിയാണ് L1 കാഷെ.",
     subtopic: "Cache Memory"
   },
 
@@ -101,7 +101,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "RAID 5",
     option_d: "RAID 10",
     correct_answer: "A",
-    explanation: "RAID 0 divides data evenly across two or more disks (striping) without parity or redundancy; if one drive fails, all data is lost.",
+    explanation: "RAID 0 divides data evenly across two or more disks (striping) without parity or redundancy; if one drive fails, all data is lost.\n\n[മലയാളം]: ഫാൾട്ട് ടോളറൻസോ ഡാറ്റാ ബാക്കപ്പോ ഇല്ലാതെ വേഗത കൂട്ടാൻ വേണ്ടി മാത്രം ഡാറ്റ വീതിച്ചു സൂക്ഷിക്കുന്ന (Striping) രീതിയാണ് RAID 0.",
     subtopic: "RAID"
   },
   {
@@ -113,7 +113,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "NVMe",
     option_d: "SCSI",
     correct_answer: "C",
-    explanation: "NVMe (Non-Volatile Memory Express) is designed specifically for flash memory communicating over high-speed PCIe lanes.",
+    explanation: "NVMe (Non-Volatile Memory Express) is designed specifically for flash memory communicating over high-speed PCIe lanes.\n\n[മലയാളം]: PCIe ലൈനുകൾ വഴി അതിവേഗത്തിൽ ഡാറ്റ കൈമാറാൻ SSD-കൾക്കായി പ്രത്യേകം തയ്യാറാക്കിയ പ്രോട്ടോക്കോളാണ് NVMe.",
     subtopic: "Storage Interfaces"
   },
 
@@ -127,7 +127,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "4 TB",
     option_d: "8 TB",
     correct_answer: "B",
-    explanation: "MBR partitioning uses 32-bit sector addressing, limiting partition capacity to 2.19 TB (approx. 2 TB). GPT is used for larger disks.",
+    explanation: "MBR partitioning uses 32-bit sector addressing, limiting partition capacity to 2.19 TB (approx. 2 TB). GPT is used for larger disks.\n\n[മലയാളം]: പരമ്പരാഗത MBR പാർട്ടീഷൻ രീതിയിൽ പരമാവധി 2 TB വരെയുള്ള ഡിസ്കുകളെ പിന്തുണയ്ക്കൂ. അതിൽ കൂടുതലുള്ളവയ്ക്ക് GPT ഉപയോഗിക്കുന്നു.",
     subtopic: "Partition Schemes"
   },
   {
@@ -139,7 +139,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "pwd",
     option_d: "cd",
     correct_answer: "C",
-    explanation: "'pwd' stands for 'Print Working Directory', which outputs the absolute path of the current directory.",
+    explanation: "'pwd' stands for 'Print Working Directory', which outputs the absolute path of the current directory.\n\n[മലയാളം]: ലിനക്സിൽ നിലവിലെ വർക്കിംഗ് ഡയറക്ടറിയുടെ പാത (Path) കാണാൻ ഉപയോഗിക്കുന്ന കമാൻഡാണ് 'pwd' (Print Working Directory).",
     subtopic: "Linux Commands"
   },
 
@@ -153,7 +153,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "C:\\Windows\\Temp",
     option_d: "C:\\Users",
     correct_answer: "B",
-    explanation: "C:\\Windows\\System32 contains essential core operating system files, DLLs, and commands.",
+    explanation: "C:\\Windows\\System32 contains essential core operating system files, DLLs, and commands.\n\n[മലയാളം]: വിൻഡോസ് ഓപ്പറേറ്റിംഗ് സിസ്റ്റത്തിന്റെ പ്രധാന സിസ്റ്റം ഫയലുകളും DLL-കളും സൂക്ഷിച്ചിരിക്കുന്നത് System32 ഫോൾഡറിലാണ്.",
     subtopic: "System Files"
   },
   {
@@ -165,7 +165,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "services",
     option_d: "lmhosts",
     correct_answer: "B",
-    explanation: "The 'hosts' file (located in C:\\Windows\\System32\\drivers\\etc\\hosts) provides local static name resolution overriding DNS.",
+    explanation: "The 'hosts' file (located in C:\\Windows\\System32\\drivers\\etc\\hosts) provides local static name resolution overriding DNS.\n\n[മലയാളം]: DNS സെർവറിന് മുൻപായി പ്രാദേശികമായി ഐ.പി വിലാസങ്ങൾ മാപ്പ് ചെയ്യാൻ ഉപയോഗിക്കുന്ന സിസ്റ്റം ഫയലാണ് 'hosts' ഫയൽ.",
     subtopic: "Malware & System Maintenance"
   },
 
@@ -179,7 +179,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "AutoCorrect",
     option_d: "Macro",
     correct_answer: "B",
-    explanation: "Mail Merge allows creating multiple documents (letters, envelopes, certificates) combining a standard template with a data source.",
+    explanation: "Mail Merge allows creating multiple documents (letters, envelopes, certificates) combining a standard template with a data source.\n\n[മലയാളം]: ഒരു പൊതുവായ ടെംപ്ലേറ്റിലേക്ക് ഒരേസമയം നിരവധി ആളുകളുടെ വിവരങ്ങൾ ചേർത്ത് കത്തുകൾ തയ്യാറാക്കാൻ ഉപയോഗിക്കുന്ന വേർഡ് പ്രോസസ്സിംഗ് ഫീച്ചറാണ് മെയിൽ മെർജ് (Mail Merge).",
     subtopic: "Word Processing"
   },
 
@@ -193,7 +193,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "Thermal Printer",
     option_d: "Laser Printer",
     correct_answer: "D",
-    explanation: "Laser printers use an electrostatic digital printing process with a rotating photosensitive drum and powdered toner.",
+    explanation: "Laser printers use an electrostatic digital printing process with a rotating photosensitive drum and powdered toner.\n\n[മലയാളം]: ഡ്രം, ലേസർ ബീം, ടോണർ പൗഡർ എന്നിവ ഉപയോഗിച്ച് ഇലക്ട്രോസ്റ്റാറ്റിക് രീതിയിൽ പ്രിന്റ് ചെയ്യുന്ന പ്രിന്ററുകളാണ് ലേസർ പ്രിന്ററുകൾ.",
     subtopic: "Printers"
   },
 
@@ -207,7 +207,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "Transport Layer (Layer 4)",
     option_d: "Session Layer (Layer 5)",
     correct_answer: "B",
-    explanation: "The Network Layer (Layer 3) handles IP addressing, packet forwarding, and routing protocols.",
+    explanation: "The Network Layer (Layer 3) handles IP addressing, packet forwarding, and routing protocols.\n\n[മലയാളം]: ഐ.പി വിലാസങ്ങളും (IP Addressing) റൂട്ടിംഗും നിർവ്വഹിക്കുന്ന OSI മോഡലിലെ ലെയറാണ് നെറ്റ്‌വർക്ക് ലെയർ (Layer 3).",
     subtopic: "OSI Reference Model"
   },
   {
@@ -219,7 +219,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "RJ-45",
     option_d: "ST Connector",
     correct_answer: "C",
-    explanation: "RJ-45 (Registered Jack 45) is an 8P8C modular connector standard for Ethernet network cables.",
+    explanation: "RJ-45 (Registered Jack 45) is an 8P8C modular connector standard for Ethernet network cables.\n\n[മലയാളം]: ഇഥർനെറ്റ് നെറ്റ്വർക്ക് കേബിളുകളിൽ (Cat6) കണക്ട് ചെയ്യാൻ ഉപയോഗിക്കുന്ന 8-പിൻ കണക്ടറാണ് RJ-45.",
     subtopic: "Transmission Media"
   },
 
@@ -233,7 +233,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "SNMP",
     option_d: "SMTP",
     correct_answer: "B",
-    explanation: "DHCP (Dynamic Host Configuration Protocol) automatically assigns IP configuration parameters to network devices.",
+    explanation: "DHCP (Dynamic Host Configuration Protocol) automatically assigns IP configuration parameters to network devices.\n\n[മലയാളം]: നെറ്റ്വർക്കിലുള്ള കമ്പ്യൂട്ടറുകൾക്ക് ഓട്ടോമാറ്റിക്കായി ഐ.പി വിലാസം നൽകുന്ന പ്രോട്ടോക്കോളാണ് DHCP.",
     subtopic: "Application Protocols"
   },
 
@@ -247,7 +247,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "Denial of Service (DoS / DDoS)",
     option_d: "Man-in-the-Middle",
     correct_answer: "C",
-    explanation: "DoS (Denial of Service) attacks overload server resources or bandwidth so that intended users cannot access the service.",
+    explanation: "DoS (Denial of Service) attacks overload server resources or bandwidth so that intended users cannot access the service.\n\n[മലയാളം]: സെർവറിലേക്ക് അമിതമായ ട്രാഫിക് അയച്ച് യഥാർത്ഥ ഉപഭോക്താക്കൾക്ക് സേവനം തടസ്സപ്പെടുത്തുന്ന സൈബർ ആക്രമണമാണ് DoS / DDoS അറ്റാക്ക്.",
     subtopic: "Security Concepts"
   },
   {
@@ -259,7 +259,7 @@ const SAMPLE_QUESTIONS = [
     option_c: "Digital Data Act 1998",
     option_d: "Copyright Act 1957",
     correct_answer: "B",
-    explanation: "The Information Technology Act, 2000 (IT Act) is the primary law in India dealing with cybercrime and electronic commerce.",
+    explanation: "The Information Technology Act, 2000 (IT Act) is the primary law in India dealing with cybercrime and electronic commerce.\n\n[മലയാളം]: ഇന്ത്യയിൽ സൈബർ കുറ്റകൃത്യങ്ങളും ഇലക്ട്രോണിക് ഇടപാടുകളും നിയന്ത്രിക്കുന്ന പ്രധാന നിയമമാണ് ഇൻഫർമേഷൻ ടെക്നോളജി ആക്ട് 2000 (IT Act).",
     subtopic: "IT Act & Cyber Laws"
   },
 
