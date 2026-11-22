@@ -28,17 +28,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+const CURRENT_DATA_VERSION = "2026_11_22_100Q_ML_V2";
+
 // Load Questions from LocalStorage or Fallback to Sample Data
 function loadQuestions() {
+  const version = localStorage.getItem('chm_data_version');
   const cached = localStorage.getItem('chm_cached_questions');
-  if (cached) {
+
+  if (version !== CURRENT_DATA_VERSION || !cached) {
+    state.questions = SAMPLE_QUESTIONS;
+    localStorage.setItem('chm_cached_questions', JSON.stringify(SAMPLE_QUESTIONS));
+    localStorage.setItem('chm_data_version', CURRENT_DATA_VERSION);
+  } else {
     try {
       state.questions = JSON.parse(cached);
     } catch (e) {
       state.questions = SAMPLE_QUESTIONS;
     }
-  } else {
-    state.questions = SAMPLE_QUESTIONS;
   }
 }
 
@@ -340,12 +346,39 @@ function renderCurrentQuestion() {
     explanationBox.classList.add('hidden');
   }
 
+  // Quick Action Button (Practice mode show explanation toggle)
+  const quickActions = document.getElementById('practice-quick-actions');
+  if (quickActions) {
+    if (session.mode === 'practice' || session.isSubmitted) {
+      quickActions.classList.remove('hidden');
+    } else {
+      quickActions.classList.add('hidden');
+    }
+  }
+
   // Prev / Next button states
   document.getElementById('prev-btn').disabled = idx === 0;
   document.getElementById('prev-btn').classList.toggle('opacity-40', idx === 0);
 
   if (session.mode === 'exam') {
     renderExamPalette();
+  }
+}
+
+// Toggle Explanation Manually in Practice Mode
+function toggleExplanation() {
+  const session = state.activeSession;
+  if (!session) return;
+  const q = session.questions[session.currentIndex];
+  const box = document.getElementById('explanation-box');
+  const textEl = document.getElementById('explanation-text');
+  if (!box || !textEl) return;
+
+  if (box.classList.contains('hidden')) {
+    box.classList.remove('hidden');
+    textEl.innerHTML = formatExplanation(q.explanation, q.explanation_malayalam);
+  } else {
+    box.classList.add('hidden');
   }
 }
 
