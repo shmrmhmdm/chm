@@ -1,0 +1,25 @@
+{
+  "name": "Kerala PSC Tradesman CHM - Rank 1 MCQ Master",
+  "short_name": "CHM PSC Master",
+  "description": "Kerala PSC Tradesman Computer Hardware Maintenance (Cat No. 884/2025) Exam MCQ Preparation App",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#312e81",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

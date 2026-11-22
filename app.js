@@ -10,6 +10,7 @@ let state = {
   mistakes: JSON.parse(localStorage.getItem('chm_mistakes') || '[]'),
   bookmarks: JSON.parse(localStorage.getItem('chm_bookmarks') || '[]'),
   stats: JSON.parse(localStorage.getItem('chm_stats') || '{"attempted": 0, "correct": 0, "wrong": 0}'),
+  moduleStats: JSON.parse(localStorage.getItem('chm_module_stats') || '{}'),
   apiUrl: localStorage.getItem('chm_api_url') || DEFAULT_API_URL,
   geminiKey: localStorage.getItem('chm_gemini_key') || DEFAULT_GEMINI_KEY
 };
@@ -50,7 +51,7 @@ function loadQuestions() {
 
 // Navigation Router
 function navigate(viewName) {
-  ['home', 'quiz', 'results', 'mistakes'].forEach(v => {
+  ['home', 'quiz', 'results', 'mistakes', 'revision'].forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
   });
@@ -60,6 +61,9 @@ function navigate(viewName) {
 
   if (viewName === 'home') {
     renderDashboard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (viewName === 'revision') {
+    renderRevisionContent();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
@@ -77,6 +81,9 @@ function renderDashboard() {
   document.getElementById('stat-mistakes').innerText = state.mistakes.length;
   document.getElementById('home-mistakes-count').innerText = state.mistakes.length;
   document.getElementById('stat-bookmarks').innerText = state.bookmarks.length;
+
+  // Render Module Analytics
+  renderModuleAnalytics();
 
   // Render Module Cards
   const container = document.getElementById('modules-container');
@@ -115,6 +122,83 @@ function renderDashboard() {
     `;
     container.appendChild(card);
   });
+}
+
+// Render Module Analytics & Weak Area Progress Bars
+function renderModuleAnalytics() {
+  const container = document.getElementById('module-analytics-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  MODULE_DEFINITIONS.forEach(mod => {
+    const stats = state.moduleStats[mod.id] || { attempted: 0, correct: 0, wrong: 0 };
+    const attempted = stats.attempted || 0;
+    const correct = stats.correct || 0;
+    const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
+
+    let badgeClass = "bg-slate-100 text-slate-600";
+    let badgeText = "പരിശീലിച്ചിട്ടില്ല";
+    let barColor = "bg-slate-300";
+
+    if (attempted > 0) {
+      if (accuracy >= 75) {
+        badgeClass = "bg-emerald-100 text-emerald-800 border border-emerald-300";
+        badgeText = `🟢 Strong (${accuracy}%)`;
+        barColor = "bg-emerald-500";
+      } else if (accuracy >= 50) {
+        badgeClass = "bg-amber-100 text-amber-800 border border-amber-300";
+        badgeText = `🟡 Average (${accuracy}%)`;
+        barColor = "bg-amber-500";
+      } else {
+        badgeClass = "bg-rose-100 text-rose-800 border border-rose-300";
+        badgeText = `🔴 Weak Area (${accuracy}%)`;
+        barColor = "bg-rose-500";
+      }
+    }
+
+    const item = document.createElement('div');
+    item.className = "p-3.5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between";
+    item.innerHTML = `
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <div class="font-bold text-xs sm:text-sm text-slate-800 truncate" title="${mod.name}">
+            ${mod.name}
+          </div>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap ${badgeClass}">
+            ${badgeText}
+          </span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1.5">
+          <span>പരിശീലിച്ചത്: <strong>${attempted}</strong> ചോദ്യങ്ങൾ (${correct} ശരി)</span>
+          <span class="font-bold text-indigo-700">${mod.marks} Marks</span>
+        </div>
+        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mb-2">
+          <div class="${barColor} h-full transition-all duration-500" style="width: ${attempted > 0 ? accuracy : 0}%"></div>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/50">
+        <button onclick="startModulePractice('${mod.id}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 hover:underline">
+          <i class="fa-solid fa-play text-[10px]"></i> പരിശീലിക്കുക
+        </button>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+// Record Result for Module
+function recordModuleResult(moduleId, isCorrect) {
+  if (!moduleId) return;
+  if (!state.moduleStats[moduleId]) {
+    state.moduleStats[moduleId] = { attempted: 0, correct: 0, wrong: 0 };
+  }
+  state.moduleStats[moduleId].attempted++;
+  if (isCorrect) {
+    state.moduleStats[moduleId].correct++;
+  } else {
+    state.moduleStats[moduleId].wrong++;
+  }
+  saveUserData();
 }
 
 // Start Module Practice Mode
@@ -395,6 +479,7 @@ function selectOption(optKey) {
 
   // Update Global Stats if practice mode
   if (session.mode === 'practice') {
+    recordModuleResult(q.sheetName, isCorrect);
     state.stats.attempted++;
     if (isCorrect) {
       state.stats.correct++;
@@ -495,8 +580,10 @@ function submitExam() {
       unattempted++;
     } else if (ans.isCorrect) {
       correct++;
+      recordModuleResult(q.sheetName, true);
     } else {
       wrong++;
+      recordModuleResult(q.sheetName, false);
       // Add wrong questions to mistake revision
       if (!state.mistakes.some(m => m.id === q.id)) {
         state.mistakes.push(q);
@@ -505,7 +592,8 @@ function submitExam() {
   });
 
   // Kerala PSC Marking: +1 for right, -0.33 for wrong
-  const score = (correct * 1.0) - (wrong * 0.33);
+  const penalty = wrong * 0.33;
+  const score = Math.max(0, (correct * 1.0) - penalty);
 
   // Update Lifetime Stats
   state.stats.attempted += (correct + wrong);
@@ -519,6 +607,40 @@ function submitExam() {
   document.getElementById('final-correct').innerText = correct;
   document.getElementById('final-wrong').innerText = wrong;
   document.getElementById('final-unattempted').innerText = unattempted;
+
+  // Detailed PSC Marking Breakdown & Rank Estimate
+  const breakdownEl = document.getElementById('result-calc-breakdown');
+  if (breakdownEl) {
+    breakdownEl.innerText = `+${(correct * 1.0).toFixed(2)} (ശരി) - ${penalty.toFixed(2)} (നെഗറ്റീവ് പെനാൽറ്റി) = ${score.toFixed(2)} മാർക്ക്`;
+  }
+
+  const badgeEl = document.getElementById('result-rank-badge');
+  if (badgeEl) {
+    const totalQ = session.questions.length || 100;
+    const pct = (score / totalQ) * 100;
+    if (pct >= 70) {
+      badgeEl.className = "mt-2 inline-block px-3.5 py-1 bg-emerald-100 text-emerald-900 rounded-full font-bold text-xs border border-emerald-300";
+      badgeEl.innerHTML = '🏆 Rank 1 - 20 സാധ്യത (Outstanding Performance)';
+    } else if (pct >= 50) {
+      badgeEl.className = "mt-2 inline-block px-3.5 py-1 bg-amber-100 text-amber-900 rounded-full font-bold text-xs border border-amber-300";
+      badgeEl.innerHTML = '🌟 Shortlist സാധ്യത (Competitive Zone)';
+    } else if (pct >= 35) {
+      badgeEl.className = "mt-2 inline-block px-3.5 py-1 bg-blue-100 text-blue-900 rounded-full font-bold text-xs border border-blue-300";
+      badgeEl.innerHTML = '📈 ശരാശരി നിലവാരം (Needs More Practice)';
+    } else {
+      badgeEl.className = "mt-2 inline-block px-3.5 py-1 bg-rose-100 text-rose-900 rounded-full font-bold text-xs border border-rose-300";
+      badgeEl.innerHTML = '⚠️ റിവിഷൻ ആവശ്യമാണ് (Focus on Weak Modules)';
+    }
+  }
+
+  const negAlert = document.getElementById('negative-mark-text');
+  if (negAlert) {
+    if (wrong > 0) {
+      negAlert.innerHTML = `തെറ്റായ <strong>${wrong}</strong> ഉത്തരങ്ങൾ കാരണം <strong>-${penalty.toFixed(2)}</strong> മാർക്ക് കുറഞ്ഞു! യഥാർത്ഥ PSC പരീക്ഷയിൽ ഉറപ്പില്ലാത്ത ചോദ്യങ്ങൾ ഒഴിവാക്കുന്നത് കൂടുതൽ ഉയർന്ന റാങ്ക് നേടാൻ സഹായിക്കും.`;
+    } else {
+      negAlert.innerHTML = `അഭിനന്ദനങ്ങൾ! നിങ്ങൾ നൽകിയ ഉത്തരങ്ങളിൽ ഒന്നുപോലും തെറ്റിയിട്ടില്ല (നെഗറ്റീവ് മാർക്ക് 0.00).`;
+    }
+  }
 
   navigate('results');
 }
@@ -676,6 +798,7 @@ function saveUserData() {
   localStorage.setItem('chm_mistakes', JSON.stringify(state.mistakes));
   localStorage.setItem('chm_bookmarks', JSON.stringify(state.bookmarks));
   localStorage.setItem('chm_stats', JSON.stringify(state.stats));
+  localStorage.setItem('chm_module_stats', JSON.stringify(state.moduleStats));
   updateMistakeBadge();
 }
 
@@ -1104,6 +1227,281 @@ async function callGeminiWithAutoModel(apiKey, promptText) {
   }
 
   throw lastError || new Error("Failed to generate content with available Gemini models.");
+}
+
+// ============================================================================
+// 📲 PWA & OFFLINE SERVICE WORKER SUPPORT
+// ============================================================================
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const installBtn = document.getElementById('btn-install-app');
+  if (installBtn) {
+    installBtn.classList.remove('hidden');
+    installBtn.classList.add('flex');
+  }
+});
+
+function installPwaApp() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then((choiceResult) => {
+      deferredInstallPrompt = null;
+      const installBtn = document.getElementById('btn-install-app');
+      if (installBtn) installBtn.classList.add('hidden');
+    });
+  } else {
+    alert("ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യാൻ നിങ്ങളുടെ ബ്രൗസർ മെനുവിൽ (മുകളിൽ വലതുവശത്തെ 3 ഡോട്ട്സ്) നിന്ന് 'Add to Home Screen' അല്ലെങ്കിൽ 'Install App' ക്ലിക്ക് ചെയ്യുക.");
+  }
+}
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => console.log('Service Worker Active:', reg.scope))
+      .catch(err => console.log('Service Worker Error:', err));
+  });
+}
+
+// ============================================================================
+// ⚡ QUICK REVISION & FLASHCARDS CONTROLLER
+// ============================================================================
+let activeRevisionTab = 'ports';
+let revisionSearchQuery = '';
+
+function openRevisionView(tab = 'ports') {
+  activeRevisionTab = tab;
+  navigate('revision');
+}
+
+function switchRevisionTab(tabName) {
+  activeRevisionTab = tabName;
+  ['ports', 'resistors', 'cables', 'acronyms'].forEach(t => {
+    const btn = document.getElementById(`rev-tab-${t}`);
+    if (btn) {
+      if (t === tabName) {
+        btn.className = "px-4 py-2.5 rounded-xl bg-indigo-600 text-white shadow-sm flex items-center gap-2 whitespace-nowrap transition";
+      } else {
+        btn.className = "px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition";
+      }
+    }
+  });
+  renderRevisionContent();
+}
+
+function filterRevisionContent() {
+  const input = document.getElementById('revision-search-input');
+  if (input) {
+    revisionSearchQuery = input.value.trim().toLowerCase();
+    renderRevisionContent();
+  }
+}
+
+function renderRevisionContent() {
+  const container = document.getElementById('revision-content-container');
+  if (!container || typeof REVISION_DATA === 'undefined') return;
+
+  const query = revisionSearchQuery;
+
+  if (activeRevisionTab === 'ports') {
+    let list = REVISION_DATA.ports || [];
+    if (query) {
+      list = list.filter(p => 
+        String(p.port).includes(query) || 
+        p.name.toLowerCase().includes(query) || 
+        p.desc.toLowerCase().includes(query) ||
+        (p.note_ml && p.note_ml.toLowerCase().includes(query))
+      );
+    }
+
+    if (list.length === 0) {
+      container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">No matching ports found for "${query}"</div>`;
+      return;
+    }
+
+    let html = `
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+    `;
+    list.forEach(item => {
+      html += `
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-base font-black px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-900 font-mono">
+                Port ${item.port}
+              </span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-mono">
+                ${item.proto}
+              </span>
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-sm mb-1">${item.name}</h4>
+            <p class="text-xs text-slate-500 mb-2 leading-relaxed">${item.desc}</p>
+          </div>
+          <div class="pt-2 border-t border-slate-200/60 text-xs text-indigo-950 font-medium bg-indigo-50/60 p-2 rounded-xl">
+            💡 ${item.note_ml}
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+  } else if (activeRevisionTab === 'resistors') {
+    let list = REVISION_DATA.resistors || [];
+    let html = `
+      <div class="space-y-4">
+        <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl text-xs text-amber-950 space-y-1">
+          <div class="font-bold flex items-center gap-1.5 text-sm text-amber-900">
+            <i class="fa-solid fa-lightbulb text-amber-500"></i>
+            <span>Memory Mnemonic (ഓർമ്മിക്കാൻ സൂത്രം):</span>
+          </div>
+          <p class="font-mono font-bold text-indigo-900">
+            "B B R O Y of Great Britain had a Very Good Wife"
+          </p>
+          <p class="text-slate-600">
+            Black(0), Brown(1), Red(2), Orange(3), Yellow(4), Green(5), Blue(6), Violet(7), Grey(8), White(9)
+          </p>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider">
+              <tr>
+                <th class="p-3">Color</th>
+                <th class="p-3">Digit (1st & 2nd Band)</th>
+                <th class="p-3">Multiplier (3rd Band)</th>
+                <th class="p-3">Tolerance (4th Band)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+    `;
+    list.forEach(r => {
+      html += `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 flex items-center gap-2.5 font-bold">
+            <span class="w-4 h-4 rounded-full border border-slate-300 shadow-inner flex-shrink-0" style="background-color: ${r.hex};"></span>
+            <span>${r.color}</span>
+          </td>
+          <td class="p-3 font-mono font-bold text-slate-800">${r.digit}</td>
+          <td class="p-3 font-mono text-slate-600">${r.mult}</td>
+          <td class="p-3 font-mono font-semibold ${r.tol !== '-' ? 'text-amber-700 font-bold' : 'text-slate-400'}">${r.tol}</td>
+        </tr>
+      `;
+    });
+    html += `
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    container.innerHTML = html;
+  } else if (activeRevisionTab === 'cables') {
+    const data = REVISION_DATA.cablePinout;
+    let html = `
+      <div class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- T-568A Standard -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-sm text-slate-900">T-568A Wiring Scheme</h4>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Green Starts</span>
+            </div>
+            <div class="space-y-1.5 font-mono text-xs">
+    `;
+    data.t568a.forEach(pin => {
+      html += `
+        <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-100">
+          <span class="font-bold text-slate-600">Pin ${pin.pin}</span>
+          <span class="flex items-center gap-2 font-semibold">
+            <span class="w-3.5 h-3.5 rounded-full border border-slate-300 inline-block shadow-sm" style="background-color: ${pin.hex};"></span>
+            <span>${pin.color}</span>
+          </span>
+        </div>
+      `;
+    });
+    html += `
+            </div>
+          </div>
+
+          <!-- T-568B Standard -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-sm text-slate-900">T-568B Wiring Scheme</h4>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Orange Starts (Most Common)</span>
+            </div>
+            <div class="space-y-1.5 font-mono text-xs">
+    `;
+    data.t568b.forEach(pin => {
+      html += `
+        <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-100">
+          <span class="font-bold text-slate-600">Pin ${pin.pin}</span>
+          <span class="flex items-center gap-2 font-semibold">
+            <span class="w-3.5 h-3.5 rounded-full border border-slate-300 inline-block shadow-sm" style="background-color: ${pin.hex};"></span>
+            <span>${pin.color}</span>
+          </span>
+        </div>
+      `;
+    });
+    html += `
+            </div>
+          </div>
+        </div>
+
+        <!-- Cable Rules Box -->
+        <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl text-xs text-indigo-950 space-y-2">
+          <div class="font-bold text-sm text-indigo-900 flex items-center gap-1.5">
+            <i class="fa-solid fa-arrows-split-up-and-left"></i>
+            <span>Straight-Through vs Crossover Cable Rules:</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1.5 text-slate-700 leading-relaxed">
+            <li><strong>Straight-Through Cable:</strong> രണ്ട് അറ്റത്തും ഒരേ സ്റ്റാൻഡേർഡ് (T-568B to T-568B അല്ലെങ്കിൽ T-568A to T-568A). വ്യത്യസ്ത ഉപകരണങ്ങൾ തമ്മിൽ ബന്ധിപ്പിക്കാൻ (PC to Switch, Switch to Router).</li>
+            <li><strong>Crossover Cable:</strong> ഒരു അറ്റത്ത് T-568A, മറ്റേ അറ്റത്ത് T-568B. ഒരേ തരത്തിലുള്ള ഉപകരണങ്ങൾ തമ്മിൽ നേരിട്ട് ബന്ധിപ്പിക്കാൻ (PC to PC, Switch to Switch, Router to PC).</li>
+          </ul>
+        </div>
+      </div>
+    `;
+    container.innerHTML = html;
+  } else if (activeRevisionTab === 'acronyms') {
+    let list = REVISION_DATA.acronyms || [];
+    if (query) {
+      list = list.filter(a => 
+        a.abbr.toLowerCase().includes(query) || 
+        a.full.toLowerCase().includes(query) || 
+        a.desc.toLowerCase().includes(query)
+      );
+    }
+
+    if (list.length === 0) {
+      container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">No matching acronyms found for "${query}"</div>`;
+      return;
+    }
+
+    let html = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+    `;
+    list.forEach(item => {
+      html += `
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="text-base font-black text-indigo-700 font-mono tracking-wide">
+                ${item.abbr}
+              </span>
+              <span class="text-[10px] uppercase font-bold text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200">
+                Hardware Term
+              </span>
+            </div>
+            <h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-1">${item.full}</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+  }
 }
 
 

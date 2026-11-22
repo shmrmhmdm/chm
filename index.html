@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kerala PSC Tradesman CHM - Rank 1 MCQ Prep App</title>
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#312e81">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -64,14 +70,22 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-4">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="btn-install-app" onclick="installPwaApp()" class="hidden items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm animate-pulse">
+          <i class="fa-solid fa-download"></i>
+          <span>Install App</span>
+        </button>
+        <button onclick="openRevisionView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
+          <i class="fa-solid fa-bolt"></i>
+          <span class="hidden sm:inline">Quick Revision</span>
+        </button>
         <button onclick="openAiGeneratorModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm border border-emerald-400/30">
           <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
-          <span>Generate MCQ Now</span>
+          <span>Generate MCQ</span>
         </button>
         <button onclick="openSettingsModal()" class="flex items-center gap-2 bg-indigo-800/80 hover:bg-indigo-700 px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
           <i class="fa-solid fa-sheet-plastic text-emerald-400"></i>
-          <span class="hidden sm:inline">Google Sheet Sync</span>
+          <span class="hidden md:inline">Sync</span>
         </button>
         <button onclick="openMistakeNotebook()" class="flex items-center gap-1.5 bg-rose-900/60 hover:bg-rose-800 text-rose-200 px-3 py-1.5 rounded-lg text-sm transition border border-rose-700/50">
           <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
@@ -99,13 +113,17 @@
             ഓരോ മൊഡ്യൂളും ആഴത്തിൽ പഠിച്ച് തെറ്റിയ ചോദ്യങ്ങൾ വീണ്ടും പരിശീലിക്കൂ. ഗൂഗിൾ ഷീറ്റിൽ ചോദ്യങ്ങൾ ആഡ് ചെയ്യുന്ന മുറയ്ക്ക് തത്സമയം വെബ് ആപ്പിൽ ലഭ്യമാകും.
           </p>
           <div class="flex flex-wrap gap-3">
-            <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
-              Generate MCQ Now (AI)
+            <button onclick="openRevisionView()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
+              <i class="fa-solid fa-bolt"></i>
+              Quick Revision & Flashcards
             </button>
-            <button onclick="startFullMockExam()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
+            <button onclick="startFullMockExam()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 border border-indigo-400/40">
               <i class="fa-solid fa-play"></i>
               PSC 100Q Full Mock Test (75 Min)
+            </button>
+            <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+              Generate MCQ (AI)
             </button>
             <button onclick="openMistakeNotebook()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/10">
               <i class="fa-solid fa-book-bookmark text-amber-300"></i>
@@ -158,6 +176,27 @@
             <div id="stat-bookmarks" class="text-2xl font-black text-slate-800">0</div>
             <div class="text-xs font-medium text-slate-500">Bookmarks</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Module Performance & Weak Area Analytics -->
+      <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-indigo-600"></i>
+              <span>സിലബസ് പെർഫോമൻസ് & വീക്ക് ഏരിയ അനലിറ്റിക്സ് (Weak Area Analysis)</span>
+            </h3>
+            <p class="text-xs text-slate-500">നിങ്ങൾ പ്രാക്ടീസ് ചെയ്ത ചോദ്യങ്ങളുടെ അടിസ്ഥാനത്തിൽ ഓരോ മൊഡ്യൂളിലെയും കൃത്യത (Accuracy)</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-semibold">
+            <span class="flex items-center gap-1 text-emerald-700"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Strong (≥75%)</span>
+            <span class="flex items-center gap-1 text-amber-700"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Average (50-74%)</span>
+            <span class="flex items-center gap-1 text-rose-700"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Weak Area (&lt;50%)</span>
+          </div>
+        </div>
+        <div id="module-analytics-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+          <!-- Dynamically populated module performance bars -->
         </div>
       </div>
 
@@ -275,14 +314,19 @@
         
         <div>
           <h2 class="text-2xl font-black text-slate-900">Exam Analysis & Scorecard</h2>
-          <p class="text-sm text-slate-500" id="result-subtitle">PSC Marking: +1 for correct, -0.33 for wrong</p>
+          <div id="result-rank-badge" class="mt-2 inline-block px-3.5 py-1 bg-amber-100 text-amber-900 rounded-full font-bold text-xs border border-amber-300">
+            Evaluating Performance...
+          </div>
         </div>
 
         <!-- Big Score Display -->
         <div class="bg-slate-50 rounded-2xl p-6 max-w-md mx-auto border border-slate-200">
-          <div class="text-xs uppercase font-extrabold text-slate-400 tracking-wider mb-1">Your Total Score</div>
+          <div class="text-xs uppercase font-extrabold text-slate-400 tracking-wider mb-1">Your Net PSC Score</div>
           <div id="final-score" class="text-5xl font-black text-indigo-600">0.00</div>
           <div class="text-sm text-slate-500 mt-1">out of <span id="final-total-marks">100</span> marks</div>
+          <div id="result-calc-breakdown" class="text-xs font-medium text-slate-600 mt-3 pt-3 border-t border-slate-200 font-mono">
+            +0.00 (Right) - 0.00 (Wrong Penalty)
+          </div>
         </div>
 
         <!-- Stats Breakdown Grid -->
@@ -298,6 +342,15 @@
           <div class="p-3 bg-slate-100 border border-slate-200 rounded-xl">
             <div id="final-unattempted" class="text-xl font-black text-slate-600">0</div>
             <div class="text-xs text-slate-600 font-medium">Skipped (0)</div>
+          </div>
+        </div>
+
+        <!-- Negative Mark Alert Box -->
+        <div id="negative-mark-alert" class="max-w-md mx-auto p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 text-left flex items-start gap-3">
+          <i class="fa-solid fa-triangle-exclamation text-amber-500 text-base mt-0.5"></i>
+          <div>
+            <span class="font-bold">PSC Negative Mark Caution:</span>
+            <p id="negative-mark-text" class="text-slate-600 mt-0.5">തെറ്റായ ഉത്തരങ്ങൾ കാരണം നെഗറ്റീവ് മാർക്ക് കുറഞ്ഞിട്ടുണ്ട്.</p>
           </div>
         </div>
 
@@ -331,6 +384,58 @@
 
       <div id="mistake-list" class="space-y-4">
         <!-- Mistake list items -->
+      </div>
+    </section>
+
+    <!-- VIEW 5: QUICK REVISION & FLASHCARDS -->
+    <section id="view-revision" class="hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition">
+              <i class="fa-solid fa-arrow-left text-lg"></i>
+            </button>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-md">Smart Study</span>
+                <h3 class="font-bold text-slate-800 text-xl leading-tight">Quick Revision & Flashcards</h3>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">PSC പരീക്ഷയിൽ ആവർത്തിച്ചു ചോദിക്കുന്ന പോർട്ടുകൾ, കളർ കോഡിംഗ്, ഫുൾ ഫോമുകൾ</p>
+            </div>
+          </div>
+
+          <!-- Live Search Bar -->
+          <div class="relative w-full sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="revision-search-input" oninput="filterRevisionContent()" placeholder="Search port, acronym, color..." 
+              class="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <!-- Revision Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-100 text-xs font-bold">
+          <button id="rev-tab-ports" onclick="switchRevisionTab('ports')" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white shadow-sm flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-network-wired"></i>
+            <span>Network Ports (19)</span>
+          </button>
+          <button id="rev-tab-resistors" onclick="switchRevisionTab('resistors')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-palette"></i>
+            <span>Resistor Color Code</span>
+          </button>
+          <button id="rev-tab-cables" onclick="switchRevisionTab('cables')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-ethernet"></i>
+            <span>CAT6 Cable Pinouts</span>
+          </button>
+          <button id="rev-tab-acronyms" onclick="switchRevisionTab('acronyms')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-font"></i>
+            <span>Full Forms & Terms (18)</span>
+          </button>
+        </div>
+
+        <!-- Active Tab Content Container -->
+        <div id="revision-content-container" class="pt-2">
+          <!-- Dynamically filled with flashcards or tables -->
+        </div>
       </div>
     </section>
 
@@ -467,6 +572,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="revision_data.js"></script>
   <script src="sample_data.js"></script>
   <script src="app.js"></script>
 </body>
