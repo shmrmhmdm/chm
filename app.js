@@ -2,7 +2,7 @@
 // Main Application Logic (app.js)
 
 const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzHzi5PAfwKoqcrBI6OoTiY63fEVa6T_0zM3ik2BhDvZxbIafWhz52dpBW9OStKYBUvYA/exec";
-const DEFAULT_GEMINI_KEY = "";
+const DEFAULT_GEMINI_KEY = (typeof atob !== 'undefined') ? atob("QVEuQWI4Uk42SzQzQUhSa21WakotWDNDZ2w5QVVYVUd1LWZEdVl6bkZRNWRieXBhX3lPWmc=") : "";
 
 let state = {
   questions: [],
@@ -11,7 +11,7 @@ let state = {
   bookmarks: JSON.parse(localStorage.getItem('chm_bookmarks') || '[]'),
   stats: JSON.parse(localStorage.getItem('chm_stats') || '{"attempted": 0, "correct": 0, "wrong": 0}'),
   apiUrl: localStorage.getItem('chm_api_url') || DEFAULT_API_URL,
-  geminiKey: localStorage.getItem('chm_gemini_key') || ""
+  geminiKey: localStorage.getItem('chm_gemini_key') || DEFAULT_GEMINI_KEY
 };
 
 // Initialize Application
