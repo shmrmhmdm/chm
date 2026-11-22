@@ -301,14 +301,15 @@ function initQuizUI() {
     timerContainer.classList.remove('hidden');
     palette.classList.remove('hidden');
     submitBtn.classList.remove('hidden');
-    renderExamPalette();
   } else {
     modeBadge.innerText = session.mode === 'mistakes' ? 'Mistake Revision Mode' : 'Practice Mode';
     modeBadge.className = 'text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded';
     timerContainer.classList.add('hidden');
-    palette.classList.add('hidden');
+    palette.classList.remove('hidden'); // Visible in practice mode for easy question jumping
     submitBtn.classList.add('hidden');
   }
+
+  renderQuestionPalette();
 
   renderCurrentQuestion();
 }
@@ -444,9 +445,7 @@ function renderCurrentQuestion() {
   document.getElementById('prev-btn').disabled = idx === 0;
   document.getElementById('prev-btn').classList.toggle('opacity-40', idx === 0);
 
-  if (session.mode === 'exam') {
-    renderExamPalette();
-  }
+  renderQuestionPalette();
 }
 
 // Toggle Explanation Manually in Practice Mode
@@ -514,34 +513,105 @@ function prevQuestion() {
   }
 }
 
-// Exam Palette for fast jumping
-function renderExamPalette() {
+// Jump Directly to Question by Index
+function jumpToQuestion(index) {
+  const session = state.activeSession;
+  if (!session) return;
+  if (index >= 0 && index < session.questions.length) {
+    session.currentIndex = index;
+    renderCurrentQuestion();
+  }
+}
+
+// Update Question Jump Dropdown
+function updateJumpDropdown() {
+  const dropdown = document.getElementById('question-jump-dropdown');
+  const session = state.activeSession;
+  if (!dropdown || !session) return;
+
+  dropdown.innerHTML = '';
+  session.questions.forEach((q, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    const ans = session.userAnswers[i];
+    let icon = "⚪";
+    if (session.mode === 'practice' || session.isSubmitted) {
+      if (ans) {
+        icon = ans.isCorrect ? "🟢" : "🔴";
+      }
+    } else {
+      if (ans) icon = "🔵";
+    }
+
+    let qPreview = q.question.length > 28 ? q.question.substring(0, 28) + '...' : q.question;
+    opt.text = `${icon} Q ${i + 1}: ${qPreview}`;
+    if (i === session.currentIndex) {
+      opt.selected = true;
+    }
+    dropdown.appendChild(opt);
+  });
+}
+
+// Question Palette for fast jumping (Practice & Exam Mode)
+function renderQuestionPalette() {
   const palette = document.getElementById('exam-palette');
   const session = state.activeSession;
+  if (!palette || !session) return;
   palette.innerHTML = '';
 
   session.questions.forEach((q, i) => {
     const dot = document.createElement('button');
-    dot.className = "w-8 h-8 rounded-lg text-xs font-bold flex-shrink-0 transition flex items-center justify-center ";
+    dot.className = "min-w-[2.25rem] h-9 px-2.5 rounded-xl text-xs font-extrabold flex-shrink-0 transition-all flex items-center justify-center gap-1 shadow-sm ";
     
     const ans = session.userAnswers[i];
-    if (i === session.currentIndex) {
-      dot.className += "ring-2 ring-indigo-600 ";
+    const isCurrent = (i === session.currentIndex);
+
+    if (isCurrent) {
+      dot.className += "ring-2 ring-indigo-600 ring-offset-2 scale-105 font-black ";
     }
 
-    if (ans) {
-      dot.className += "bg-emerald-600 text-white";
+    if (session.mode === 'practice' || session.isSubmitted) {
+      if (ans) {
+        if (ans.isCorrect) {
+          dot.className += "bg-emerald-600 text-white hover:bg-emerald-700";
+          dot.innerHTML = `<span>${i + 1}</span><i class="fa-solid fa-check text-[9px]"></i>`;
+        } else {
+          dot.className += "bg-rose-500 text-white hover:bg-rose-600";
+          dot.innerHTML = `<span>${i + 1}</span><i class="fa-solid fa-xmark text-[9px]"></i>`;
+        }
+      } else {
+        dot.className += isCurrent 
+          ? "bg-indigo-50 text-indigo-700 border border-indigo-300" 
+          : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200";
+        dot.innerHTML = `<span>${i + 1}</span>`;
+      }
     } else {
-      dot.className += "bg-slate-100 text-slate-600 hover:bg-slate-200";
+      // Exam Mode
+      if (ans) {
+        dot.className += "bg-emerald-600 text-white";
+      } else {
+        dot.className += isCurrent 
+          ? "bg-indigo-50 text-indigo-700 border border-indigo-300"
+          : "bg-slate-100 text-slate-600 hover:bg-slate-200";
+      }
+      dot.innerHTML = `<span>${i + 1}</span>`;
     }
 
-    dot.innerText = i + 1;
+    dot.title = `Question ${i + 1}${ans ? (ans.isCorrect ? ' (Correct)' : ' (Wrong)') : ''}`;
     dot.onclick = () => {
       session.currentIndex = i;
       renderCurrentQuestion();
     };
     palette.appendChild(dot);
   });
+
+  // Smooth scroll active dot into view horizontally
+  const activeDot = palette.children[session.currentIndex];
+  if (activeDot) {
+    activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  updateJumpDropdown();
 }
 
 // Exam Timer

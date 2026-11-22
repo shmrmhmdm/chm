@@ -230,7 +230,7 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
           <!-- Timer for Exam Mode -->
           <div id="quiz-timer-container" class="hidden flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl font-mono font-bold text-base border border-rose-200">
             <i class="fa-regular fa-clock animate-pulse"></i>
@@ -241,15 +241,36 @@
             <i class="fa-regular fa-star"></i>
           </button>
 
-          <span class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
+          <!-- Jump to Question Selector -->
+          <div class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 transition border border-slate-200 px-2 py-1.5 rounded-xl">
+            <i class="fa-solid fa-list-ol text-slate-500 text-xs"></i>
+            <select id="question-jump-dropdown" onchange="jumpToQuestion(parseInt(this.value))" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[180px]">
+              <!-- Dynamically populated in JS -->
+            </select>
+          </div>
+
+          <span class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl whitespace-nowrap">
             Q <span id="current-q-index">1</span> / <span id="total-q-count">10</span>
           </span>
         </div>
       </div>
 
-      <!-- Question Palette / Quick Nav (Only in Exam Mode) -->
-      <div id="exam-palette" class="hidden bg-white p-3 rounded-2xl border border-slate-200 overflow-x-auto custom-scrollbar flex gap-2">
-        <!-- Palette dots generated in JS -->
+      <!-- Question Palette / Quick Nav (Available in Practice & Exam Mode) -->
+      <div id="palette-wrapper" class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-table-cells text-indigo-600"></i>
+            <span>ആവശ്യമുള്ള ചോദ്യം തെരഞ്ഞെടുക്കുക (Question Palette):</span>
+          </div>
+          <div class="flex items-center gap-2.5 text-[11px] font-semibold text-slate-500">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> ശരി</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> തെറ്റ്</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-200 border border-slate-300 inline-block"></span> ചെയ്യാത്തവ</span>
+          </div>
+        </div>
+        <div id="exam-palette" class="overflow-x-auto custom-scrollbar flex gap-2 py-1">
+          <!-- Palette dots generated in JS -->
+        </div>
       </div>
 
       <!-- Question Card -->
@@ -289,17 +310,27 @@
       </div>
 
       <!-- Navigation & Action Buttons -->
-      <div class="flex items-center justify-between gap-3">
-        <button id="prev-btn" onclick="prevQuestion()" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-5 py-2.5 rounded-xl border border-slate-200 transition flex items-center gap-2">
-          <i class="fa-solid fa-angle-left"></i> Previous
-        </button>
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+          <button onclick="jumpToQuestion(0)" class="bg-white hover:bg-slate-100 text-slate-600 font-bold px-3 py-2.5 rounded-xl border border-slate-200 transition text-xs sm:text-sm flex items-center gap-1.5" title="First Question">
+            <i class="fa-solid fa-backward-step"></i>
+            <span class="hidden sm:inline">First</span>
+          </button>
+          <button id="prev-btn" onclick="prevQuestion()" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-4 sm:px-5 py-2.5 rounded-xl border border-slate-200 transition flex items-center gap-2 text-xs sm:text-sm">
+            <i class="fa-solid fa-angle-left"></i> Previous
+          </button>
+        </div>
 
         <div class="flex items-center gap-2">
-          <button id="submit-exam-btn" onclick="submitExam()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+          <button id="submit-exam-btn" onclick="submitExam()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-xs sm:text-sm">
             <i class="fa-solid fa-flag-checkered"></i> Submit Test
           </button>
-          <button id="next-btn" onclick="nextQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+          <button id="next-btn" onclick="nextQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 sm:px-6 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-xs sm:text-sm">
             Next <i class="fa-solid fa-angle-right"></i>
+          </button>
+          <button onclick="jumpToQuestion(state.activeSession.questions.length - 1)" class="bg-white hover:bg-slate-100 text-slate-600 font-bold px-3 py-2.5 rounded-xl border border-slate-200 transition text-xs sm:text-sm flex items-center gap-1.5" title="Last Question">
+            <span class="hidden sm:inline">Last</span>
+            <i class="fa-solid fa-forward-step"></i>
           </button>
         </div>
       </div>

@@ -86,3 +86,4 @@ const REVISION_DATA = {
     { abbr: "VLAN", full: "Virtual Local Area Network", desc: "Logically segments physical switch ports into isolated broadcast domains (IEEE 802.1Q)." }
   ]
 };
+
