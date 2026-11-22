@@ -475,52 +475,52 @@ function generateQuestionsForAllModules(countPerModule = 10) {
     {
       sheet: "Module_1_Electronics",
       prefix: "M1",
-      topic: "Basic Electronics for Computer Hardware (Passive components, inductors, capacitors, PN diode, Zener diode, BJT transistors, rectifiers, filter circuits, SMPS basics, logic gates AND/OR/NOT/NAND/NOR/XOR)"
+      topic: "Module 1: Basic Electronics (Marks: 12) - Electricity (Voltage, current, resistance, power, Ohm's/Kirchhoff's law), Resistors (color coding, power rating, series/parallel), Capacitors (dielectrics, series/parallel), Inductors & Transformers (mutual inductance, magnetic cores, inductive reactance, turns ratio, impedance matching), Semiconductors (intrinsic/extrinsic, p/n doping, PN junction), PN Diode (forward/reverse bias, barrier potential, breakdown, specialized diodes), Power devices (SCR structure, triggering, latching/holding current, phase control; DIAC bidirectional switching; TRIAC operations), Transistors (NPN/PNP, BJT switch/amplifier, FET, JFET, MOSFET), Power Supplies (Zener, current limiting, thermal protection, 3-Pin IC Regulators 78xx/79xx, SMPS linear/switching regulation), Digital Electronics (number systems, logic gates)."
     },
     {
       sheet: "Module_2_Comp_Fundamentals",
       prefix: "M2",
-      topic: "Computer Fundamentals & Architecture (CPU generations, microprocessors, motherboard forms ATX/MicroATX, chipset Northbridge/Southbridge, system bus, BIOS, UEFI, CMOS battery, clock generator)"
+      topic: "Module 2: Computer Fundamentals (Marks: 08) - Characteristics, generations, classification, applications, hardware/software concepts, functional blocks, internal architecture, instruction cycle, motherboard components, Cabinet and motherboard form factors, expansion slots, bus architecture, add-on cards, chipset architecture, processor families, socket types, Memory hierarchy, memory units, primary memory, RAM, ROM, cache memory."
     },
     {
       sheet: "Module_3_Adv_Hardware_Storage",
       prefix: "M3",
-      topic: "Advanced Hardware & Storage (RAM types DDR3/DDR4/DDR5, ECC vs Non-ECC, HDD sectors/tracks, SSD SATA/NVMe M.2, optical drives, RAID levels RAID 0/1/5/10, expansion slots PCIe/PCI)"
+      topic: "Module 3: Advanced Hardware & Storage (Marks: 10) - CPU Technology (Internal organization, modern architectures, multicore processing, thermal cooling mechanisms, overclocking), Storage Devices (Magnetic storage, HDD internal architecture, hard drive controller electronics, SSD solid state devices, storage interfaces SATA/NVMe/PCIe, optical storage, RAID concepts and levels 0/1/5/10, NAS network attached storage)."
     },
     {
       sheet: "Module_4_OS_Deployment",
       prefix: "M4",
-      topic: "Operating Systems & Deployment (Windows 10/11 installation, Linux Ubuntu/Debian fundamentals, bash commands, file systems NTFS, FAT32, ext4, disk partition MBR vs GPT, bootloaders GRUB/BCD, dual boot)"
+      topic: "Module 4: Operating Systems and deployment (Marks: 10) - Software classification (system, application, utilities, high/low level languages), OS Setup & Recovery (OS functions, open source/proprietary, DOS, GUI, deployment methods, recovery partitions, system image creation, backup/restore, registry fundamentals, Linux features/structure, file system, process architecture, basic commands), Partition schemes (MBR, partition tables, primary/extended/logical), Boot management (boot loaders, Windows Boot Manager, alternative boot managers, multi-boot)."
     },
     {
       sheet: "Module_5_System_Utilities",
       prefix: "M5",
-      topic: "System Utilities & Maintenance (PC troubleshooting, POST beep codes, BSOD debugging, multimeter voltage checking on SMPS yellow 12V/red 5V/orange 3.3V, Windows Registry, Task Manager, Event Viewer, preventive maintenance)"
+      topic: "Module 5: System Utilities & Maintenance (Marks: 10) - System Files & Commands (Windows Explorer, file system properties, 32/64-bit architecture, critical system32 files, CLI & PowerShell basics, Task Manager, Windows services, process priorities, Event Viewer, System Monitor, Safe Mode), User Account Security (account types, UAC, access levels, permissions, group policies, time-based expiration), Malware & Maintenance (antivirus configuration, definitions update, port blocking, hosts file modification, junk cleanup, defragmentation, licensing compliance)."
     },
     {
       sheet: "Module_6_Office_Applications",
       prefix: "M6",
-      topic: "Office Applications (MS Office & LibreOffice: Word formatting, mail merge, Excel formulas SUM/VLOOKUP/IF, charts, PowerPoint slide transitions, shortcut keys, PDF exporting)"
+      topic: "Module 6: Office Applications (Marks: 10) - Word Processing & Spreadsheets (document creation, editing, formatting, page setup, mail merge, spreadsheet creation, cell formulas, chart generation, data sorting/filtering), Presentations (slide creation, themes, formatting, animation, multimedia integration)."
     },
     {
       sheet: "Module_7_IO_Devices",
       prefix: "M7",
-      topic: "I/O Devices & Maintenance (Printers: Dot Matrix, Inkjet, Laser printer drum/corona wire/fuser assembly, scanners, monitors CRT/LCD/OLED, keyboard/mouse protocols, USB 2.0/3.0/Type-C, HDMI, DisplayPort, VGA)"
+      topic: "Module 7: I/O Devices & Maintenance (Marks: 10) - I/O Devices (keyboards, mice, audio/visual input, biometric/commercial peripherals, display technologies, video interfacing, audio I/O), Printers (impact & non-impact: Dot Matrix, Inkjet, Laser printer drum/toner/fuser), scanners, MFDs, peripheral bus standards USB/HDMI/DisplayPort/VGA, installation, configuration, driver deployment, diagnostics, maintenance & repair."
     },
     {
       sheet: "Module_8_Networking",
       prefix: "M8",
-      topic: "Networking Fundamentals (OSI 7 layers, TCP/IP model, Ethernet standards, Cat5e/Cat6/Cat6a cabling, RJ45 crimping T568A/T568B, straight-through vs crossover cables, IPv4 addressing, subnet masks, topologies star/mesh/bus)"
+      topic: "Module 8: Networking Fundamentals (Marks: 10) - Architectures & Topologies (P2P, Client-Server, Star/Mesh/Bus/Ring topologies, LAN/MAN/PAN/WAN, IEEE standards, Wireless), Transmission media & standards (twisted-pair Cat6, coaxial, fiber-optic, RJ-45/RJ-11/BNC, wiring conventions T568A/T568B, simplex/half-duplex/full-duplex), Reference models (OSI 7 layers, TCP/IP suite), Hardware (hubs, switches, routers, gateways, repeaters, transceivers, WAPs, firewalls), IP Addressing & Services (IPv4, IPv6, subnetting, TCP/IP utilities ping/traceroute/netstat)."
     },
     {
       sheet: "Module_9_Protocols_Servers",
       prefix: "M9",
-      topic: "Application Protocols & Servers (DNS port 53, DHCP port 67/68, HTTP port 80, HTTPS port 443, FTP port 20/21, SSH port 22, SMTP port 25, POP3 port 110, IMAP port 143, web servers Apache/IIS, domain controllers)"
+      topic: "Module 9: Application Protocols and Server Administration (Marks: 10) - Application Protocols (DHCP, DNS, FTP, Telnet, SSH, HTTP, HTTPS, SMTP, VLAN concepts, packet simulators), Server Systems (hardware, Windows and Linux server deployment, network management utilities, remote administration RDP/SSH)."
     },
     {
       sheet: "Module_10_Security_Cloud_Law",
       prefix: "M10",
-      topic: "Security, Cloud & IT Law (Antivirus, firewalls, malware types Trojan/Ransomware/Worm/Spyware, phishing, cloud models IaaS/PaaS/SaaS, public/private/hybrid cloud, India Information Technology Act 2000, Section 66, cyber forensics basics)"
+      topic: "Module 10: Network Security, Cloud Computing & IT Law (Marks: 10) - Network Security (concepts, attack types DoS/DDoS/phishing/malware, prevention, threats, data breaches, safe browsing, email security, cryptography & authentication), Virtualization & Cloud (server virtualization, VM requirements, cloud infrastructure IaaS/PaaS/SaaS, public/private/hybrid cloud), IT Act & Cyber Laws (IT Act 2000, Section 66, legal provisions, cybercrime, digital signatures, e-governance, data privacy)."
     }
   ];
 

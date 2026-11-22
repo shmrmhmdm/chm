@@ -656,16 +656,65 @@ function updateMistakeBadge() {
 // ============================================================================
 
 const MODULE_TOPIC_MAP = {
-  "Module_1_Electronics": "Basic Electronics (Inductors, capacitors, PN diode, Zener diode, BJT transistors, rectifiers, filter circuits, SMPS basics, logic gates AND/OR/NOT/NAND/NOR/XOR)",
-  "Module_2_Comp_Fundamentals": "Computer Fundamentals & Architecture (CPU generations, microprocessors, motherboard forms ATX/MicroATX, chipset Northbridge/Southbridge, system bus, BIOS, UEFI, CMOS battery, clock generator)",
-  "Module_3_Adv_Hardware_Storage": "Advanced Hardware & Storage (RAM types DDR3/DDR4/DDR5, ECC vs Non-ECC, HDD sectors/tracks, SSD SATA/NVMe M.2, optical drives, RAID levels RAID 0/1/5/10, expansion slots PCIe/PCI)",
-  "Module_4_OS_Deployment": "Operating Systems & Deployment (Windows 10/11 installation, Linux Ubuntu/Debian fundamentals, bash commands, file systems NTFS, FAT32, ext4, disk partition MBR vs GPT, bootloaders GRUB/BCD, dual boot)",
-  "Module_5_System_Utilities": "System Utilities & Maintenance (PC troubleshooting, POST beep codes, BSOD debugging, multimeter voltage checking on SMPS yellow 12V/red 5V/orange 3.3V, Windows Registry, Task Manager, Event Viewer, preventive maintenance)",
-  "Module_6_Office_Applications": "Office Applications (MS Office & LibreOffice: Word formatting, mail merge, Excel formulas SUM/VLOOKUP/IF, charts, PowerPoint slide transitions, shortcut keys, PDF exporting)",
-  "Module_7_IO_Devices": "I/O Devices & Maintenance (Printers: Dot Matrix, Inkjet, Laser printer drum/corona wire/fuser assembly, scanners, monitors CRT/LCD/OLED, keyboard/mouse protocols, USB 2.0/3.0/Type-C, HDMI, DisplayPort, VGA)",
-  "Module_8_Networking": "Networking Fundamentals (OSI 7 layers, TCP/IP model, Ethernet standards, Cat5e/Cat6/Cat6a cabling, RJ45 crimping T568A/T568B, straight-through vs crossover cables, IPv4 addressing, subnet masks, topologies star/mesh/bus)",
-  "Module_9_Protocols_Servers": "Application Protocols & Servers (DNS port 53, DHCP port 67/68, HTTP port 80, HTTPS port 443, FTP port 20/21, SSH port 22, SMTP port 25, POP3 port 110, IMAP port 143, web servers Apache/IIS, domain controllers)",
-  "Module_10_Security_Cloud_Law": "Security, Cloud & IT Law (Antivirus, firewalls, malware types Trojan/Ransomware/Worm/Spyware, phishing, cloud models IaaS/PaaS/SaaS, public/private/hybrid cloud, India Information Technology Act 2000, Section 66, cyber forensics basics)"
+  "Module_1_Electronics": `Module 1: Basic Electronics (Marks: 12)
+- Basic principles of electricity: Voltage, current, resistance, power, energy, ohm's law, Kirchhoff's law.
+- Resistors: types, color coding, power rating, series/parallel combinations, applications.
+- Capacitors: principles, dielectric materials, types, series/parallel circuits.
+- Inductors & Transformers: inductance, mutual inductance, magnetic cores, inductive reactance, transformer action, turns ratio, and impedance matching.
+- Semiconductor fundamentals: intrinsic and extrinsic semiconductors, p-type and n-type doping, majority/minority carriers, PN junction formation.
+- PN junction diode: Forward and reverse bias characteristics, barrier potential, breakdown mechanisms, diode applications, specialized diodes.
+- Power semiconductor devices: SCR: Structure, triggering methods, latching and holding current, phase control circuits. DIAC: Construction, bidirectional switching characteristics, triggering applications. TRIAC: Operations, power control.
+- Transistor operation: NPN and PNP structures, biasing conditions. Configurations: BJT as a switch & amplifier, FET, JFET, MOSFET, Applications, amplifiers.
+- Power Supplies & voltage regulation: Linear Regulators: Zener regulators, current limiting, and thermal protection. Fixed & adjustable 3-Pin IC Regulators, power fluctuation hazards and protection devices.
+- Switched-Mode Power Supplies (SMPS): Linear, Switching regulation.
+- Digital Electronics: Number systems, Logic gates.`,
+
+  "Module_2_Comp_Fundamentals": `Module 2: Computer Fundamentals (Marks: 08)
+- Computer Fundamentals: Characteristics of digital computers, generations, classification, applications.
+- Hardware and software concepts, functional blocks, internal architecture, instruction cycle.
+- Motherboard components, Cabinet form factors, motherboard form factors, expansion slots, bus architecture, add-on cards, chipset architecture, processor families, socket types.
+- Memory hierarchy, memory units, primary memory, RAM, ROM, cache memory.`,
+
+  "Module_3_Adv_Hardware_Storage": `Module 3: Advanced Hardware & Storage (Marks: 10)
+- CPU Technology: Internal organization, Modern CPU architectures, multicore processing, thermal cooling mechanisms, over clocking.
+- Storage Devices: Magnetic storage devices, hard disk drive (HDD), Internal architecture, hard drive controller electronics, solid state devices (SSD), storage interfaces (SATA, NVMe, PCIe), optical storage devices, redundant array of independent disks (RAID concepts and levels: RAID 0, 1, 5, 10), network attached storage (NAS).`,
+
+  "Module_4_OS_Deployment": `Module 4: Operating Systems and deployment (Marks: 10)
+- Software Classification: System software, application software, utility programs, high level language, low level language.
+- OS Setup & Recovery: OS functions, open source and proprietary softwares, disk operating system (DOS), GUI environments, OS deployment methods, recovery partitions, system image creation, backup and restore, registry fundamentals, Linux OS features and structure, file system and process architecture, basic commands.
+- Partition Schemes: Master boot record (MBR), partition tables, primary, extended, logical partitions.
+- Boot Management: Boot loaders, windows boot manager and alternative boot managers, multi-boot configuration.`,
+
+  "Module_5_System_Utilities": `Module 5: System Utilities & Maintenance (Marks: 10)
+- System Files & Commands: Windows Explorer, file system properties, 32-bit, 64-bit architecture, critical system32 directory files, command-line operations and PowerShell basics, task manager, windows services, process priorities, event viewer, system monitor, safe mode functionality.
+- User Account Security: Account types, user account control (UAC), user access levels, permissions, group policies, and time-based permission expiration.
+- Malware & System Maintenance: Antivirus configuration, definitions update, port blocking, hosts file modification, junk file cleanup, defragmentation, and software licensing compliance.`,
+
+  "Module_6_Office_Applications": `Module 6: Office Applications (Marks: 10)
+- Word Processing & Spreadsheets: Document creation, editing, formatting, page setup, mail merge, spreadsheet creation, cell formulas, chart generation, data sorting/filtering.
+- Presentations: Slide creation, themes, formatting, animation, and multimedia integration.`,
+
+  "Module_7_IO_Devices": `Module 7: I/O Devices & Maintenance (Marks: 10)
+- I/O Devices: Keyboards, mice, audio & visual input, biometric & commercial input output peripherals.
+- Display technologies, video interfacing: audio i/o systems.
+- Impact and non-impact printers (Dot Matrix, Inkjet, Laser printers), scanners & MFDs, other i/o devices.
+- Peripheral bus standards (USB, HDMI, DisplayPort, VGA), installation, configuration, driver deployment, diagnostics, maintenance & repair.`,
+
+  "Module_8_Networking": `Module 8: Networking Fundamentals (Marks: 10)
+- Network Architectures & Topologies: Peer-to-Peer, Client-Server models, Topologies (Star, Mesh, Bus, Ring). LAN, MAN, PAN, WAN structures. IEEE standards, Wireless networking.
+- Transmission Media & Standards: Twisted-pair, coaxial, and fiber-optic cables; RJ-45, RJ-11, and BNC connectors, CAT6 wiring conventions (T568A/T568B), simplex, half-duplex, and full-duplex data transmission.
+- Reference Models: Layered architectures and functions of the OSI 7-Layer model and TCP/IP protocol suite.
+- Hardware: Hubs, switches, routers, gateways, repeaters, transceivers, wireless access points, firewalls.
+- IP Addressing & Network Services: IPv4, IPv6, sub netting, TCP/IP utilities (ping, traceroute, netstat, ipconfig/ifconfig).`,
+
+  "Module_9_Protocols_Servers": `Module 9: Application Protocols and Server Administration (Marks: 10)
+- Application Protocols: DHCP, DNS, FTP, Telnet, SSH, HTTP, HTTPS, SMTP. Virtual LAN (VLAN) concepts, packet simulators.
+- Server Systems: Hardware, Windows and Linux Server deployment, network management utilities, remote administration (RDP, SSH).`,
+
+  "Module_10_Security_Cloud_Law": `Module 10: Network Security, Cloud Computing & IT Law (Marks: 10)
+- Network Security Fundamentals: Security concepts, types of network attacks (DoS, DDoS, Phishing, Man-in-the-Middle, Malware), identification and prevention strategies, cyber threats, data breaches, safe browsing practices, email security, cryptography & authentication.
+- Virtualization & Cloud Computing: Server virtualization, virtual machine requirements, cloud infrastructure, models (IaaS, PaaS, SaaS, Public/Private/Hybrid cloud), public cloud services.
+- The IT Act & Cyber Laws: Introduction to the Information Technology (IT) Act 2000, legal provisions regarding cybercrime (Section 66, etc.), digital signatures, legal frameworks for electronic governance, data privacy regulations.`
 };
 
 let latestGeneratedBatch = [];
