@@ -1055,7 +1055,8 @@ REQUIREMENTS:
 (If a specific module was requested, set sheetName to "${defaultModule}").
 6. Distribute questions specifically across the individual subtopics listed in the syllabus above (e.g., Color coding, SCR/TRIAC, Instruction Cycle, RAID, Linux commands, System32/PowerShell, Mail Merge, Laser printer fuser/drum, Cat6 wiring, DHCP/DNS, IT Act 2000 Section 66, etc.).
 7. In the "subtopic" field, explicitly state the exact syllabus subtopic name being tested.
-8. Output ONLY raw JSON array, with no Markdown ticks, no wrapper.
+8. Output ONLY a valid RFC 8259 JSON array. All newlines inside strings MUST be properly escaped as \\n. Do NOT include raw unescaped control characters or unescaped newlines inside strings.
+9. Output ONLY raw JSON array, with no Markdown ticks or wrapper text.
 
 JSON FORMAT:
 [
@@ -1066,7 +1067,7 @@ JSON FORMAT:
     "option_c": "Option C text",
     "option_d": "Option D text",
     "correct_answer": "A",
-    "explanation": "Concise technical explanation in English.\n\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം.",
+    "explanation": "Concise technical explanation in English.\\n\\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം.",
     "sheetName": "${defaultModule}",
     "subtopic": "Specific syllabus subtopic name"
   }
@@ -1077,17 +1078,10 @@ JSON FORMAT:
     let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error("No response generated from Gemini API.");
 
-    // Clean up potential markdown code fences
-    text = text.trim();
-    if (text.startsWith("```json")) {
-      text = text.replace(/^```json/, '').replace(/```$/, '').trim();
-    } else if (text.startsWith("```")) {
-      text = text.replace(/^```/, '').replace(/```$/, '').trim();
-    }
-
-    const parsedQuestions = JSON.parse(text);
+    // Robust parsing that handles unescaped control characters and markdown fences
+    const parsedQuestions = safeParseGeminiJson(text);
     if (!Array.isArray(parsedQuestions) || parsedQuestions.length === 0) {
-      throw new Error("Invalid question format received.");
+      throw new Error("Invalid question format received from AI.");
     }
 
     // Process & assign IDs
@@ -1308,6 +1302,130 @@ async function callGeminiWithAutoModel(apiKey, promptText) {
   }
 
   throw lastError || new Error("Failed to generate content with available Gemini models.");
+}
+
+/**
+ * Robust JSON parser that handles markdown ticks, unescaped newlines/tabs, and control characters
+ */
+function safeParseGeminiJson(rawText) {
+  if (!rawText) throw new Error("Empty response received from AI");
+  let text = rawText.trim();
+
+  // 1. Remove markdown code fences
+  if (text.startsWith("```json")) {
+    text = text.replace(/^```json/i, '').replace(/```$/, '').trim();
+  } else if (text.startsWith("```")) {
+    text = text.replace(/^```/i, '').replace(/```$/, '').trim();
+  }
+
+  // 2. Extract JSON array between [ and ]
+  const firstBracket = text.indexOf('[');
+  const lastBracket = text.lastIndexOf(']');
+  if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+    text = text.substring(firstBracket, lastBracket + 1);
+  }
+
+  // 3. Remove trailing commas before } or ]
+  text = text.replace(/,\s*([\]}])/g, '$1');
+
+  // 4. Sanitize unescaped control characters inside string literals (e.g., literal newlines, tabs)
+  text = sanitizeJsonString(text);
+
+  // 5. Attempt JSON parse
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.warn("Standard JSON parse failed, executing regex fallback...", err);
+    return extractQuestionsFallback(rawText);
+  }
+}
+
+/**
+ * Escapes raw control characters (ASCII < 32 like newlines and tabs) ONLY inside JSON string literals
+ */
+function sanitizeJsonString(raw) {
+  let inString = false;
+  let isEscaped = false;
+  let result = '';
+
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw[i];
+    const code = raw.charCodeAt(i);
+
+    if (inString) {
+      if (isEscaped) {
+        isEscaped = false;
+        result += char;
+      } else if (char === '\\') {
+        isEscaped = true;
+        result += char;
+      } else if (char === '"') {
+        inString = false;
+        result += char;
+      } else if (code < 32) {
+        if (char === '\n') result += '\\n';
+        else if (char === '\r') result += '\\r';
+        else if (char === '\t') result += '\\t';
+        else result += '\\u' + ('000' + code.toString(16)).slice(-4);
+      } else {
+        result += char;
+      }
+    } else {
+      if (char === '"') inString = true;
+      result += char;
+    }
+  }
+  return result;
+}
+
+/**
+ * Regex-based fallback question extractor if JSON is severely malformed
+ */
+function extractQuestionsFallback(rawText) {
+  const regex = /\{[\s\S]*?"question"[\s\S]*?\}/g;
+  const matches = rawText.match(regex);
+  if (!matches || matches.length === 0) {
+    throw new Error("Could not parse AI response into questions. Please try again.");
+  }
+
+  const results = [];
+  for (const block of matches) {
+    try {
+      const sanitized = sanitizeJsonString(block.replace(/,\s*}/g, '}'));
+      const obj = JSON.parse(sanitized);
+      if (obj.question && obj.option_a) {
+        results.push(obj);
+        continue;
+      }
+    } catch (e) {}
+
+    // Field-by-field regex extraction
+    const getField = (name) => {
+      const m = block.match(new RegExp(`"${name}"\\s*:\\s*"([\\s\\S]*?)"(?=\\s*,|\\s*})`));
+      return m ? m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').trim() : "";
+    };
+
+    const q = getField("question");
+    const a = getField("option_a");
+    if (q && a) {
+      results.push({
+        question: q,
+        option_a: a,
+        option_b: getField("option_b"),
+        option_c: getField("option_c"),
+        option_d: getField("option_d"),
+        correct_answer: (getField("correct_answer") || "A").toUpperCase(),
+        explanation: getField("explanation") || "",
+        sheetName: getField("sheetName") || "",
+        subtopic: getField("subtopic") || ""
+      });
+    }
+  }
+
+  if (results.length === 0) {
+    throw new Error("Failed to extract valid questions from AI response.");
+  }
+  return results;
 }
 
 // ============================================================================

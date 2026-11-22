@@ -1750,7 +1750,7 @@ JSON SCHEMA:
           } else if (rawText.startsWith("```")) {
             rawText = rawText.replace(/^```/, '').replace(/```$/, '').trim();
           }
-          return JSON.parse(rawText);
+          return safeParseGeminiJson(rawText);
         }
       } else {
         lastError = new Error(`HTTP ${code}: ` + response.getContentText());
@@ -1761,6 +1761,116 @@ JSON SCHEMA:
   }
 
   throw lastError || new Error("Failed to generate questions with available Gemini models.");
+}
+
+/**
+ * Robust JSON parser that handles markdown ticks, unescaped newlines/tabs, and control characters
+ */
+function safeParseGeminiJson(rawText) {
+  if (!rawText) throw new Error("Empty response received from AI");
+  let text = rawText.trim();
+
+  if (text.startsWith("```json")) {
+    text = text.replace(/^```json/i, '').replace(/```$/, '').trim();
+  } else if (text.startsWith("```")) {
+    text = text.replace(/^```/i, '').replace(/```$/, '').trim();
+  }
+
+  const firstBracket = text.indexOf('[');
+  const lastBracket = text.lastIndexOf(']');
+  if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+    text = text.substring(firstBracket, lastBracket + 1);
+  }
+
+  text = text.replace(/,\s*([\]}])/g, '$1');
+  text = sanitizeJsonString(text);
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    return extractQuestionsFallback(rawText);
+  }
+}
+
+function sanitizeJsonString(raw) {
+  let inString = false;
+  let isEscaped = false;
+  let result = '';
+
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw[i];
+    const code = raw.charCodeAt(i);
+
+    if (inString) {
+      if (isEscaped) {
+        isEscaped = false;
+        result += char;
+      } else if (char === '\\') {
+        isEscaped = true;
+        result += char;
+      } else if (char === '"') {
+        inString = false;
+        result += char;
+      } else if (code < 32) {
+        if (char === '\n') result += '\\n';
+        else if (char === '\r') result += '\\r';
+        else if (char === '\t') result += '\\t';
+        else result += '\\u' + ('000' + code.toString(16)).slice(-4);
+      } else {
+        result += char;
+      }
+    } else {
+      if (char === '"') inString = true;
+      result += char;
+    }
+  }
+  return result;
+}
+
+function extractQuestionsFallback(rawText) {
+  const regex = /\{[\s\S]*?"question"[\s\S]*?\}/g;
+  const matches = rawText.match(regex);
+  if (!matches || matches.length === 0) {
+    throw new Error("Could not parse AI response into questions.");
+  }
+
+  const results = [];
+  for (let i = 0; i < matches.length; i++) {
+    const block = matches[i];
+    try {
+      const sanitized = sanitizeJsonString(block.replace(/,\s*}/g, '}'));
+      const obj = JSON.parse(sanitized);
+      if (obj.question && obj.option_a) {
+        results.push(obj);
+        continue;
+      }
+    } catch (e) {}
+
+    const getField = (name) => {
+      const m = block.match(new RegExp(`"${name}"\\s*:\\s*"([\\s\\S]*?)"(?=\\s*,|\\s*})`));
+      return m ? m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').trim() : "";
+    };
+
+    const q = getField("question");
+    const a = getField("option_a");
+    if (q && a) {
+      results.push({
+        question: q,
+        option_a: a,
+        option_b: getField("option_b"),
+        option_c: getField("option_c"),
+        option_d: getField("option_d"),
+        correct_answer: (getField("correct_answer") || "A").toUpperCase(),
+        explanation: getField("explanation") || "",
+        sheetName: getField("sheetName") || "",
+        subtopic: getField("subtopic") || ""
+      });
+    }
+  }
+  if (results.length === 0) {
+    throw new Error("Failed to extract valid questions from AI response.");
+  }
+  return results;
 }
 
 /**

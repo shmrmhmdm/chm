@@ -245,3 +245,4 @@ const SYLLABUS_DATA = [
     ]
   }
 ];
+
