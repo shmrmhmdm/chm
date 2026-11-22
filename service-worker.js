@@ -6,6 +6,8 @@ const STATIC_ASSETS = [
   './index.html',
   './app.js',
   './sample_data.js',
+  './syllabus_data.js',
+  './revision_data.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'

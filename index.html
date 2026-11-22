@@ -75,6 +75,10 @@
           <i class="fa-solid fa-download"></i>
           <span>Install App</span>
         </button>
+        <button onclick="openSyllabusView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
+          <i class="fa-solid fa-book-open text-amber-300"></i>
+          <span class="hidden md:inline">Syllabus</span>
+        </button>
         <button onclick="openRevisionView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
           <i class="fa-solid fa-bolt"></i>
           <span class="hidden sm:inline">Quick Revision</span>
@@ -113,13 +117,17 @@
             ഓരോ മൊഡ്യൂളും ആഴത്തിൽ പഠിച്ച് തെറ്റിയ ചോദ്യങ്ങൾ വീണ്ടും പരിശീലിക്കൂ. ഗൂഗിൾ ഷീറ്റിൽ ചോദ്യങ്ങൾ ആഡ് ചെയ്യുന്ന മുറയ്ക്ക് തത്സമയം വെബ് ആപ്പിൽ ലഭ്യമാകും.
           </p>
           <div class="flex flex-wrap gap-3">
-            <button onclick="openRevisionView()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
-              <i class="fa-solid fa-bolt"></i>
-              Quick Revision & Flashcards
+            <button onclick="openSyllabusView()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
+              <i class="fa-solid fa-book-open"></i>
+              Official Syllabus & AI Topics
+            </button>
+            <button onclick="openRevisionView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/20">
+              <i class="fa-solid fa-bolt text-amber-300"></i>
+              Quick Revision (Flashcards)
             </button>
             <button onclick="startFullMockExam()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 border border-indigo-400/40">
               <i class="fa-solid fa-play"></i>
-              PSC 100Q Full Mock Test (75 Min)
+              PSC 100Q Full Mock Test
             </button>
             <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
               <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
@@ -127,7 +135,7 @@
             </button>
             <button onclick="openMistakeNotebook()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/10">
               <i class="fa-solid fa-book-bookmark text-amber-300"></i>
-              Mistake Notebook (<span id="home-mistakes-count">0</span>)
+              Mistakes (<span id="home-mistakes-count">0</span>)
             </button>
           </div>
         </div>
@@ -470,6 +478,57 @@
       </div>
     </section>
 
+    <!-- VIEW 6: DETAILED SYLLABUS & AI REFERENCE DIRECTORY -->
+    <section id="view-syllabus" class="hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200 space-y-5">
+        <!-- Header -->
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition">
+              <i class="fa-solid fa-arrow-left text-lg"></i>
+            </button>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 bg-amber-400/20 text-amber-900 border border-amber-300 text-xs font-black rounded-md">Official PSC Syllabus</span>
+                <h3 class="font-bold text-slate-900 text-xl leading-tight">Detailed Syllabus & AI Reference Directory</h3>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Kerala PSC Tradesman Computer Hardware Maintenance (Cat. No. 884/2025) • 100 Marks</p>
+            </div>
+          </div>
+
+          <!-- Syllabus Live Search -->
+          <div class="relative w-full sm:w-72">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="syllabus-search-input" oninput="filterSyllabusView()" placeholder="Search any topic (e.g. SMPS, KCL, RAID, GPT)..." 
+              class="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+          </div>
+        </div>
+
+        <!-- Instructions Banner -->
+        <div class="p-4 bg-gradient-to-r from-indigo-50 to-emerald-50 border border-indigo-100 rounded-2xl flex items-start gap-3.5 text-xs text-slate-700">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm flex-shrink-0 mt-0.5 shadow-sm">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          </div>
+          <div>
+            <span class="font-bold text-indigo-950 text-sm">സിലബസ് ടോപിക്കുകൾ AI-ലേക്ക് നൽകാൻ:</span>
+            <p class="mt-0.5 leading-relaxed text-slate-600">
+              താഴെ തന്നിരിക്കുന്ന ഓരോ ടോപിക്കിനും നേരെയുള്ള <strong><span class="text-emerald-700 font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generator</span></strong> ബട്ടൺ ക്ലിക്ക് ചെയ്താൽ ആ ടോപിക് തനിയെ AI ക്വസ്റ്റ്യൻ ജനറേറ്ററിൽ Reference ആയി വരികയും ചോദ്യങ്ങൾ ആ സിലബസ് പോയിന്റിൽ മാത്രമായി തയ്യാറാകുകയും ചെയ്യും. അല്ലെങ്കിൽ <strong><span class="text-slate-800 font-bold"><i class="fa-regular fa-copy"></i> Copy Topic</span></strong> വഴി കോപ്പി ചെയ്ത് ഉപയോഗിക്കാം.
+            </p>
+          </div>
+        </div>
+
+        <!-- Module Filter Tabs -->
+        <div id="syllabus-module-filter-buttons" class="flex items-center gap-1.5 overflow-x-auto pb-2 custom-scrollbar text-xs font-bold">
+          <!-- Populated in JS -->
+        </div>
+
+        <!-- Syllabus Modules List Container -->
+        <div id="syllabus-container" class="space-y-6 pt-1">
+          <!-- Populated dynamically from SYLLABUS_DATA -->
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Google Sheet Sync Settings Modal -->
@@ -579,11 +638,21 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 text-xs mb-1.5">
-            Reference / NotebookLM Focus (Optional):
-          </label>
-          <textarea id="gen-custom-notes" rows="2" placeholder="ഉദാ: SMPS pinout voltages, Laser printer fuser drum, Linux ext4 commands, or paste notes..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"></textarea>
-          <p class="text-[11px] text-slate-500 mt-1">നിങ്ങളുടെ NotebookLM-ൽ നിന്നോ പ്രീവിയസ് ചോദ്യങ്ങളിൽ നിന്നോ ഉള്ള പോയിന്റുകൾ ഇവിടെ നൽകിയാൽ അവയിൽ ഊന്നൽ നൽകി ചോദ്യങ്ങൾ വരും.</p>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block font-bold text-slate-700 text-xs">
+              Reference / Syllabus Topic Focus:
+            </label>
+            <button type="button" onclick="clearAiReferenceNotes()" class="text-[11px] text-slate-400 hover:text-rose-600 font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-eraser"></i>
+              <span>Clear Reference</span>
+            </button>
+          </div>
+          <!-- Quick syllabus topic pills -->
+          <div id="ai-quick-topic-pills" class="flex flex-wrap gap-1.5 mb-2 max-h-24 overflow-y-auto custom-scrollbar p-1.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <!-- Populated dynamically based on selected module -->
+          </div>
+          <textarea id="gen-custom-notes" rows="3" placeholder="സിലബസ് ടോപിക്കോ അല്ലെങ്കിൽ നിങ്ങളുടെ സ്വന്തം നോട്ടുകളോ ഇവിടെ നൽകാം..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs font-mono"></textarea>
+          <p class="text-[11px] text-slate-500 mt-1">മുകളിലുള്ള ടോപിക് ടാഗുകളിൽ ക്ലിക്ക് ചെയ്താലോ അല്ലെങ്കിൽ 'Syllabus' ടാബിൽ നിന്ന് നൽകിയാലോ ചോദ്യങ്ങൾ ആ വിഷയത്തിൽ മാത്രമായി നിർമ്മിക്കപ്പെടും.</p>
         </div>
 
         <!-- Progress / Status Box -->
@@ -603,6 +672,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="syllabus_data.js"></script>
   <script src="revision_data.js"></script>
   <script src="sample_data.js"></script>
   <script src="app.js"></script>

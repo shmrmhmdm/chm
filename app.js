@@ -51,7 +51,7 @@ function loadQuestions() {
 
 // Navigation Router
 function navigate(viewName) {
-  ['home', 'quiz', 'results', 'mistakes', 'revision'].forEach(v => {
+  ['home', 'quiz', 'results', 'mistakes', 'revision', 'syllabus'].forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
   });
@@ -64,6 +64,9 @@ function navigate(viewName) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (viewName === 'revision') {
     renderRevisionContent();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (viewName === 'syllabus') {
+    renderSyllabusView();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
@@ -108,14 +111,17 @@ function renderDashboard() {
         <h4 class="font-bold text-slate-800 text-base mb-1">${mod.name}</h4>
         <p class="text-xs text-slate-500 mb-4">Syllabus weightage: ${mod.marks}% of total exam</p>
       </div>
-      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
-        <button onclick="startModulePractice('${mod.id}')" class="flex-1 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5">
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
+        <button onclick="startModulePractice('${mod.id}')" class="flex-1 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-xs py-2 px-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-book-open"></i> Practice
+        </button>
+        <button onclick="openSyllabusView('${mod.id}')" class="bg-amber-50 hover:bg-amber-500 hover:text-slate-950 text-amber-800 font-bold text-xs py-2 px-2.5 rounded-xl transition border border-amber-200" title="View Detailed Syllabus Topics & Copy for AI">
+          <i class="fa-solid fa-list-check"></i> Topics
         </button>
         <button onclick="openAiGeneratorModal('${mod.id}')" class="bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold text-xs py-2 px-2.5 rounded-xl transition" title="Generate New AI Questions for this Module">
           <i class="fa-solid fa-wand-magic-sparkles"></i> AI
         </button>
-        <button onclick="startModuleExam('${mod.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-3 rounded-xl transition" title="Timed Test">
+        <button onclick="startModuleExam('${mod.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-2.5 rounded-xl transition" title="Timed Test">
           <i class="fa-solid fa-stopwatch"></i> Test
         </button>
       </div>
@@ -952,7 +958,12 @@ function openAiGeneratorModal(moduleId = null) {
 
   const select = document.getElementById('gen-module-select');
   if (select) {
-    select.value = moduleId || "ALL";
+    if (moduleId) {
+      select.value = moduleId;
+    }
+    // Update syllabus topic pills whenever module changes
+    select.onchange = () => updateAiTopicPills(select.value);
+    updateAiTopicPills(select.value);
   }
 
   const keyInput = document.getElementById('gen-api-key');
@@ -1571,6 +1582,268 @@ function renderRevisionContent() {
     });
     html += `</div>`;
     container.innerHTML = html;
+  }
+}
+
+// ============================================================================
+// 📚 DETAILED SYLLABUS & AI REFERENCE CONTROLLER
+// ============================================================================
+let activeSyllabusFilter = 'ALL';
+let syllabusSearchQuery = '';
+
+function openSyllabusView(filterModuleId = 'ALL') {
+  activeSyllabusFilter = filterModuleId || 'ALL';
+  navigate('syllabus');
+}
+
+function filterSyllabusView() {
+  const input = document.getElementById('syllabus-search-input');
+  if (input) {
+    syllabusSearchQuery = input.value.trim().toLowerCase();
+    renderSyllabusView();
+  }
+}
+
+function setSyllabusModuleFilter(modId) {
+  activeSyllabusFilter = modId;
+  renderSyllabusView();
+}
+
+function renderSyllabusView() {
+  const container = document.getElementById('syllabus-container');
+  const tabsContainer = document.getElementById('syllabus-module-filter-buttons');
+  if (!container || typeof SYLLABUS_DATA === 'undefined') return;
+
+  // Render Filter Tabs
+  if (tabsContainer) {
+    let tabsHtml = `
+      <button onclick="setSyllabusModuleFilter('ALL')" class="px-3.5 py-1.5 rounded-xl whitespace-nowrap transition ${activeSyllabusFilter === 'ALL' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+        All 10 Modules (100 Marks)
+      </button>
+    `;
+    SYLLABUS_DATA.forEach(mod => {
+      const isAct = activeSyllabusFilter === mod.moduleId;
+      const shortName = mod.moduleName.split(':')[0]; // e.g. "Module 1"
+      tabsHtml += `
+        <button onclick="setSyllabusModuleFilter('${mod.moduleId}')" class="px-3 py-1.5 rounded-xl whitespace-nowrap transition ${isAct ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+          ${shortName} (${mod.marks}M)
+        </button>
+      `;
+    });
+    tabsContainer.innerHTML = tabsHtml;
+  }
+
+  // Filter Modules
+  let modulesToRender = SYLLABUS_DATA;
+  if (activeSyllabusFilter !== 'ALL') {
+    modulesToRender = modulesToRender.filter(m => m.moduleId === activeSyllabusFilter);
+  }
+
+  const query = syllabusSearchQuery;
+  let html = '';
+
+  modulesToRender.forEach((mod, mIdx) => {
+    // Filter topics if search query is present
+    let topics = mod.topics;
+    if (query) {
+      topics = topics.filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        t.text.toLowerCase().includes(query) ||
+        mod.moduleName.toLowerCase().includes(query)
+      );
+      if (topics.length === 0) return; // Skip module if no matching topics
+    }
+
+    const globalModIdx = SYLLABUS_DATA.findIndex(m => m.moduleId === mod.moduleId);
+
+    html += `
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+        <!-- Module Header -->
+        <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+              <i class="fa-solid ${mod.icon || 'fa-book'}"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">${mod.moduleName}</h4>
+              <span class="text-xs text-slate-500">${topics.length} Sections / Subtopics</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-xl">
+              ${mod.marks} Marks
+            </span>
+            <button onclick="startModulePractice('${mod.moduleId}')" class="bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1.5">
+              <i class="fa-solid fa-play text-[10px]"></i> Practice
+            </button>
+          </div>
+        </div>
+
+        <!-- Topics Grid -->
+        <div class="space-y-3">
+    `;
+
+    topics.forEach((t, tIdx) => {
+      const globalTopicIdx = mod.topics.findIndex(x => x.title === t.title);
+
+      html += `
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-indigo-300 transition space-y-2.5">
+          <div class="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+            <div class="space-y-1 w-full">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-indigo-800 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-indigo-600 inline-block"></span>
+                  <span>${t.title}</span>
+                </span>
+                <span class="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200">
+                  Topic ${tIdx + 1}
+                </span>
+              </div>
+              <p class="text-xs text-slate-700 leading-relaxed font-mono bg-white p-3 rounded-xl border border-slate-100/90 shadow-sm">
+                ${t.text}
+              </p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/50">
+            <button onclick="copyTopicByIndex(${globalModIdx}, ${globalTopicIdx}, this)" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-3 py-1.5 rounded-lg border border-slate-200 text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95" title="Copy to clipboard">
+              <i class="fa-regular fa-copy text-slate-400"></i>
+              <span>Copy Topic</span>
+            </button>
+            <button onclick="useTopicByIndex(${globalModIdx}, ${globalTopicIdx})" class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 shadow-sm active:scale-95" title="Open AI Generator with this topic as reference">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+              <span>AI Generate MCQ</span>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  if (!html) {
+    container.innerHTML = `
+      <div class="p-12 text-center text-slate-400 space-y-2">
+        <i class="fa-solid fa-magnifying-glass text-3xl text-slate-300"></i>
+        <p class="text-sm">No syllabus topics found matching "${query}"</p>
+        <button onclick="document.getElementById('syllabus-search-input').value = ''; syllabusSearchQuery = ''; renderSyllabusView();" class="text-xs font-bold text-indigo-600 underline">Clear Search</button>
+      </div>
+    `;
+  } else {
+    container.innerHTML = html;
+  }
+}
+
+// Copy Helper
+function copyTopicByIndex(mIdx, tIdx, btn) {
+  if (typeof SYLLABUS_DATA === 'undefined') return;
+  const mod = SYLLABUS_DATA[mIdx];
+  if (!mod || !mod.topics[tIdx]) return;
+  copyTopicToClipboard(mod.topics[tIdx].text, btn);
+}
+
+function copyTopicToClipboard(text, btnElement) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showCopiedFeedback(btnElement);
+    }).catch(() => fallbackCopy(text, btnElement));
+  } else {
+    fallbackCopy(text, btnElement);
+  }
+}
+
+function showCopiedFeedback(btnElement) {
+  if (!btnElement) return;
+  const oldHtml = btnElement.innerHTML;
+  btnElement.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> <span class="text-emerald-700 font-bold">Copied!</span>`;
+  btnElement.classList.add('bg-emerald-50', 'border-emerald-300');
+  setTimeout(() => {
+    btnElement.innerHTML = oldHtml;
+    btnElement.classList.remove('bg-emerald-50', 'border-emerald-300');
+  }, 2000);
+}
+
+function fallbackCopy(text, btnElement) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showCopiedFeedback(btnElement);
+  } catch (e) {
+    prompt("Copy topic text:", text);
+  }
+  document.body.removeChild(ta);
+}
+
+// Use Topic in AI Generator
+function useTopicByIndex(mIdx, tIdx) {
+  if (typeof SYLLABUS_DATA === 'undefined') return;
+  const mod = SYLLABUS_DATA[mIdx];
+  if (!mod || !mod.topics[tIdx]) return;
+  useTopicInAiGenerator(mod.moduleId, mod.topics[tIdx].text);
+}
+
+function useTopicInAiGenerator(moduleId, topicText) {
+  openAiGeneratorModal(moduleId);
+  const notesEl = document.getElementById('gen-custom-notes');
+  if (notesEl) {
+    notesEl.value = topicText;
+    notesEl.focus();
+    notesEl.classList.add('ring-2', 'ring-emerald-500');
+    setTimeout(() => notesEl.classList.remove('ring-2', 'ring-emerald-500'), 1500);
+  }
+}
+
+// AI Generator Topic Pills
+function updateAiTopicPills(selectedModuleId) {
+  const container = document.getElementById('ai-quick-topic-pills');
+  if (!container || typeof SYLLABUS_DATA === 'undefined') return;
+
+  container.innerHTML = '';
+  
+  if (!selectedModuleId || selectedModuleId === 'ALL') {
+    container.innerHTML = `<span class="text-[11px] text-slate-400 p-1">ഒരു പ്രത്യേക മൊഡ്യൂൾ തിരഞ്ഞെടുത്താൽ അതിലെ ടോപിക്കുകൾ ഇവിടെ തനിയെ വരും.</span>`;
+    return;
+  }
+
+  const mod = SYLLABUS_DATA.find(m => m.moduleId === selectedModuleId);
+  if (!mod || !mod.topics || mod.topics.length === 0) {
+    container.innerHTML = `<span class="text-[11px] text-slate-400 p-1">ഈ മൊഡ്യൂളിൽ ടോപിക്കുകൾ കണ്ടെത്തിയില്ല.</span>`;
+    return;
+  }
+
+  mod.topics.forEach((t, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = "px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-[11px] font-semibold text-slate-700 transition flex items-center gap-1 active:scale-95";
+    btn.innerHTML = `<i class="fa-solid fa-plus text-emerald-600 text-[10px]"></i> <span>${t.title}</span>`;
+    btn.onclick = () => insertAiTopicNote(t.text);
+    container.appendChild(btn);
+  });
+}
+
+function insertAiTopicNote(text) {
+  const notesEl = document.getElementById('gen-custom-notes');
+  if (notesEl) {
+    notesEl.value = text;
+    notesEl.focus();
+    notesEl.classList.add('ring-2', 'ring-emerald-500');
+    setTimeout(() => notesEl.classList.remove('ring-2', 'ring-emerald-500'), 1200);
+  }
+}
+
+function clearAiReferenceNotes() {
+  const notesEl = document.getElementById('gen-custom-notes');
+  if (notesEl) {
+    notesEl.value = "";
+    notesEl.focus();
   }
 }
 
