@@ -1686,7 +1686,9 @@ REQUIREMENTS:
 3. Realistic options, with exactly one indisputably correct answer (A, B, C, or D).
 4. Detailed technical explanation justifying the correct answer in English, followed by a simple Malayalam explanation:
    Format the explanation field strictly as: "English explanation here.\n\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം."
-5. Return ONLY a valid raw JSON array of objects, with NO MARKDOWN formatting, NO \`\`\`json wrappers.
+5. Distribute questions specifically across the individual subtopics listed in the Topic description above.
+6. In the "subtopic" field, explicitly state the exact syllabus subtopic name.
+7. Return ONLY a valid raw JSON array of objects, with NO MARKDOWN formatting, NO \`\`\`json wrappers.
 
 JSON SCHEMA:
 [

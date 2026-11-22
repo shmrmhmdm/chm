@@ -782,8 +782,9 @@ async function runAiGenerationNow() {
     let defaultModule = "Module_1_Electronics";
 
     if (modSelect === "ALL") {
-      topicDescription = "A balanced mix across all 10 modules of Kerala PSC Tradesman Computer Hardware Maintenance: Electronics, CPU architecture, storage, OS installation, system troubleshooting, office tools, printers/monitors, networking, servers/protocols, IT Act/cyber security.";
-      defaultModule = "Module_2_Comp_Fundamentals";
+      topicDescription = "A balanced mix across all 10 modules of the official Kerala PSC Tradesman Computer Hardware Maintenance syllabus:\n\n" +
+        Object.values(MODULE_TOPIC_MAP).join("\n\n");
+      defaultModule = "Module_1_Electronics";
     } else {
       topicDescription = MODULE_TOPIC_MAP[modSelect] || modSelect;
       defaultModule = modSelect;
@@ -799,12 +800,14 @@ Please strictly align the concepts, technical terms, difficulty level, and quest
     }
 
     const promptText = `You are an expert Kerala PSC examiner creating authentic multiple choice questions for Kerala PSC Tradesman - Computer Hardware Maintenance (Cat. No. 884/2025).
-Topic Focus: ${topicDescription}
+Official Syllabus Topic & Subtopics:
+${topicDescription}
+
 Difficulty: ${difficulty}
 Target Question Count: ${count}
 ${notesContext}
 REQUIREMENTS:
-1. Each question must test practical and theoretical concepts according to Kerala PSC standard.
+1. Each question must test practical and theoretical concepts according to the Kerala PSC Tradesman syllabus.
 2. Provide exactly 4 options (option_a, option_b, option_c, option_d) in English.
 3. Provide the correct answer (A, B, C, or D).
 4. Provide a comprehensive explanation containing BOTH English and a clear, simple Malayalam explanation.
@@ -813,7 +816,9 @@ REQUIREMENTS:
 5. In the "sheetName" field, provide one of the following exact module IDs:
 ["Module_1_Electronics", "Module_2_Comp_Fundamentals", "Module_3_Adv_Hardware_Storage", "Module_4_OS_Deployment", "Module_5_System_Utilities", "Module_6_Office_Applications", "Module_7_IO_Devices", "Module_8_Networking", "Module_9_Protocols_Servers", "Module_10_Security_Cloud_Law"]
 (If a specific module was requested, set sheetName to "${defaultModule}").
-6. Output ONLY raw JSON array, with no Markdown ticks, no wrapper.
+6. Distribute questions specifically across the individual subtopics listed in the syllabus above (e.g., Color coding, SCR/TRIAC, Instruction Cycle, RAID, Linux commands, System32/PowerShell, Mail Merge, Laser printer fuser/drum, Cat6 wiring, DHCP/DNS, IT Act 2000 Section 66, etc.).
+7. In the "subtopic" field, explicitly state the exact syllabus subtopic name being tested.
+8. Output ONLY raw JSON array, with no Markdown ticks, no wrapper.
 
 JSON FORMAT:
 [
@@ -826,7 +831,7 @@ JSON FORMAT:
     "correct_answer": "A",
     "explanation": "Concise technical explanation in English.\n\n[മലയാളം]: ലളിതമായ മലയാളം വിശദീകരണം.",
     "sheetName": "${defaultModule}",
-    "subtopic": "Relevant subtopic name"
+    "subtopic": "Specific syllabus subtopic name"
   }
 ]`;
 
