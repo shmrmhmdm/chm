@@ -75,6 +75,10 @@
           <i class="fa-solid fa-download"></i>
           <span>Install App</span>
         </button>
+        <button onclick="startPscPreviousPractice()" class="flex items-center gap-1.5 bg-amber-500/90 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm border border-amber-300">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span class="hidden sm:inline">PSC Previous Exam</span>
+        </button>
         <button onclick="openSyllabusView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
           <i class="fa-solid fa-book-open text-amber-300"></i>
           <span class="hidden md:inline">Syllabus</span>
@@ -205,6 +209,41 @@
         </div>
         <div id="module-analytics-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
           <!-- Dynamically populated module performance bars -->
+        </div>
+      </div>
+
+      <!-- PSC Previous Exam Special Card -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-amber-400/30 relative overflow-hidden">
+        <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div class="space-y-2.5 max-w-2xl">
+            <div class="flex items-center flex-wrap gap-2">
+              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                <i class="fa-solid fa-certificate"></i> Official PSC Paper
+              </span>
+              <span class="bg-indigo-800 text-indigo-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-indigo-700">
+                Question Code: 147/2023
+              </span>
+              <span class="text-xs text-indigo-300">
+                Cat. No: 745/2021 • Exam Date: 11/08/2023
+              </span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+              Junior Instructor (COPA) - യഥാർത്ഥ മുൻകാല ചോദ്യങ്ങൾ (100 Qs)
+            </h3>
+            <p class="text-sm text-indigo-200 leading-relaxed">
+              കേരള പി.എസ്.സി നടത്തിയ യഥാർത്ഥ പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ ആൻസർ കീയും മലയാളം വിശദീകരണങ്ങളും സഹിതം. ട്രേഡ്സ്മാൻ കമ്പ്യൂട്ടർ ഹാർഡ്‌വെയർ പരീക്ഷയ്ക്കുള്ള ഏറ്റവും മികച്ച മുൻകാല ചോദ്യ പരിശീലനം!
+            </p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
+            <button onclick="startPscPreviousPractice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-emerald-400/40">
+              <i class="fa-solid fa-book-open-reader text-amber-300"></i>
+              <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
+            </button>
+            <button onclick="startPscPreviousExam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
+              <i class="fa-solid fa-stopwatch"></i>
+              <span>100Q Exam (75 Min)</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -675,6 +714,7 @@
   <script src="syllabus_data.js"></script>
   <script src="revision_data.js"></script>
   <script src="sample_data.js"></script>
+  <script src="psc_previous_data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

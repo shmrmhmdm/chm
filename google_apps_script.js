@@ -28,7 +28,8 @@ function setupSpreadsheet() {
     { name: "Module_7_IO_Devices", title: "Module 7: I/O Devices & Maintenance (10 Marks)" },
     { name: "Module_8_Networking", title: "Module 8: Networking Fundamentals (10 Marks)" },
     { name: "Module_9_Protocols_Servers", title: "Module 9: Application Protocols & Servers (10 Marks)" },
-    { name: "Module_10_Security_Cloud_Law", title: "Module 10: Security, Cloud & IT Law (10 Marks)" }
+    { name: "Module_10_Security_Cloud_Law", title: "Module 10: Security, Cloud & IT Law (10 Marks)" },
+    { name: "PSC_Previous_Exam", title: "PSC Previous Exam: Junior Instructor 147/2023 (100 Marks)" }
   ];
 
   const headers = [
@@ -1481,6 +1482,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("🤖 PSC AI Generator")
     .addItem("▶️ Generate Questions for All Modules Now", "generateQuestionsForAllModules")
+    .addItem("🏛️ Add PSC Previous Exam Sheet (100 Qs - 147/2023)", "setupPscPreviousExamSheet")
     .addSeparator()
     .addItem("⏰ Setup Daily Auto-Trigger (Every Day 6 AM)", "setupDailyTrigger")
     .addItem("⏹️ Remove Daily Auto-Trigger", "removeDailyTrigger")
@@ -1882,3 +1884,1281 @@ function getEffectiveApiKey() {
   return GEMINI_API_KEY;
 }
 
+
+
+/**
+ * PSC Previous Exam (147/2023) ഷീറ്റ് ഒറ്റ ക്ലിക്കിൽ നിർമ്മിച്ച് 100 ചോദ്യങ്ങളും ചേർക്കുന്നു
+ */
+function setupPscPreviousExamSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("PSC_Previous_Exam");
+  if (!sheet) {
+    sheet = ss.insertSheet("PSC_Previous_Exam");
+  }
+
+  const headers = [
+    "id", "question", "option_a", "option_b", "option_c", "option_d",
+    "correct_answer", "explanation", "subtopic"
+  ];
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setBackground("#1e1b4b");
+    headerRange.setFontColor("#ffffff");
+    headerRange.setFontWeight("bold");
+    headerRange.setFontSize(11);
+    headerRange.setHorizontalAlignment("center");
+    sheet.setFrozenRows(1);
+
+    sheet.setColumnWidth(1, 140);
+    sheet.setColumnWidth(2, 450);
+    sheet.setColumnWidth(3, 180);
+    sheet.setColumnWidth(4, 180);
+    sheet.setColumnWidth(5, 180);
+    sheet.setColumnWidth(6, 180);
+    sheet.setColumnWidth(7, 120);
+    sheet.setColumnWidth(8, 400);
+    sheet.setColumnWidth(9, 220);
+  }
+
+  const existingData = sheet.getDataRange().getValues();
+  const existingIds = new Set();
+  for (let r = 1; r < existingData.length; r++) {
+    if (existingData[r][0]) existingIds.add(String(existingData[r][0]));
+  }
+
+  const pscQuestions = getPscPreviousQuestions();
+  let added = 0;
+  pscQuestions.forEach(q => {
+    if (!existingIds.has(q.id)) {
+      sheet.appendRow([
+        q.id,
+        q.question,
+        q.option_a,
+        q.option_b,
+        q.option_c,
+        q.option_d,
+        q.correct_answer,
+        q.explanation,
+        q.subtopic
+      ]);
+      added++;
+    }
+  });
+
+  const msg = "✅ PSC Previous Exam Sheet (147/2023) വിജയകരമായി തയ്യാറാക്കി! ആകെ " + added + " ചോദ്യങ്ങൾ ചേർത്തു.";
+  Logger.log(msg);
+  try {
+    SpreadsheetApp.getUi().alert(msg);
+  } catch (e) {}
+}
+
+/**
+ * Kerala PSC Junior Instructor (COPA) - Question Code: 147/2023, Cat. No: 745/2021
+ * Official 100 Questions with Provisional Answer Key & Malayalam Explanations
+ */
+function getPscPreviousQuestions() {
+  return [
+  {
+    "id": "PSC_147_2023_001",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "1. For pairing Bluetooth devices, it needs :",
+    "option_a": "Keyword",
+    "option_b": "Keycode",
+    "option_c": "Passcode",
+    "option_d": "Password",
+    "correct_answer": "C",
+    "explanation": "Bluetooth pairing requires a Passcode (or PIN) to establish a secure link between devices.\n\n[മലയാളം]: ബ്ലൂടൂത്ത് ഉപകരണങ്ങൾ തമ്മിൽ സുരക്ഷിതമായി പെയർ (pair) ചെയ്യുന്നതിനായി Passcode (അല്ലെങ്കിൽ PIN) ആണ് നൽകേണ്ടത്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_002",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "2. Name the electronic component used in second generation computer?",
+    "option_a": "Transistors",
+    "option_b": "Vacuum tubes",
+    "option_c": "Large scale integrated circuits",
+    "option_d": "Small scale integrated circuits",
+    "correct_answer": "A",
+    "explanation": "Second generation computers (1956-1963) replaced vacuum tubes with Transistors.\n\n[മലയാളം]: രണ്ടാം തലമുറ (2nd Generation) കമ്പ്യൂട്ടറുകളിൽ വാക്വം ട്യൂബുകൾക്ക് പകരമായി ട്രാൻസിസ്റ്ററുകൾ (Transistors) ആണ് ഉപയോഗിച്ചിരുന്നത്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_003",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "3. VGA connector is used to connect :",
+    "option_a": "Printer",
+    "option_b": "Monitor",
+    "option_c": "Speaker",
+    "option_d": "Keyboard",
+    "correct_answer": "B",
+    "explanation": "VGA (Video Graphics Array, 15-pin D-sub) connector is used to connect a Monitor to the computer.\n\n[മലയാളം]: മോണിറ്ററിലേക്ക് (Display) വീഡിയോ സിഗ്നലുകൾ എത്തിക്കുന്നതിനാണ് VGA (Video Graphics Array) കണക്ടർ ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_004",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "4. The internal power supply of a CPU is referred as :",
+    "option_a": "CVT",
+    "option_b": "UPS",
+    "option_c": "SMPS",
+    "option_d": "Stabilizer",
+    "correct_answer": "C",
+    "explanation": "SMPS (Switched-Mode Power Supply) provides DC power to internal motherboard and CPU components.\n\n[മലയാളം]: കമ്പ്യൂട്ടറിലെ ആന്തരിക ഭാഗങ്ങൾക്ക് ആവശ്യമായ DC വൈദ്യുതി നൽകുന്നത് SMPS (Switched-Mode Power Supply) ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_005",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "5. A computer program that converts an entire program into machine language at one time is called as a/an :",
+    "option_a": "Interpreter",
+    "option_b": "CPU",
+    "option_c": "Compiler",
+    "option_d": "Simulator",
+    "correct_answer": "C",
+    "explanation": "A Compiler converts the entire high-level source code into machine language at once, whereas an Interpreter translates line-by-line.\n\n[മലയാളം]: ഒരു ഹൈ-ലെവൽ പ്രോഗ്രാമിനെ ഒരൊറ്റ ഘട്ടത്തിൽ മുഴുവനായി മെഷീൻ ലാംഗ്വേജിലേക്ക് മാറ്റുന്ന പ്രോഗ്രാമാണ് കമ്പൈലർ (Compiler). വരിവരിയായി മാറ്റുന്നത് ഇന്റർപ്രെറ്ററാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_006",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "6. Windows OS is a product of :",
+    "option_a": "IBM",
+    "option_b": "Apple",
+    "option_c": "Google",
+    "option_d": "Microsoft",
+    "correct_answer": "D",
+    "explanation": "Microsoft developed the Windows operating system.\n\n[മലയാളം]: വിൻഡോസ് ഓപ്പറേറ്റിംഗ് സിസ്റ്റം നിർമ്മിച്ചത് മൈക്രോസോഫ്റ്റ് (Microsoft) കമ്പനിയാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_007",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "7. What is the shortcut key to open file explorer?",
+    "option_a": "Windows button + E",
+    "option_b": "Alt + E",
+    "option_c": "Shift + E",
+    "option_d": "Ctrl + E",
+    "correct_answer": "A",
+    "explanation": "Windows key + E is the global keyboard shortcut to launch Windows File Explorer.\n\n[മലയാളം]: വിൻഡോസ് ഫയൽ എക്സ്പ്ലോറർ തുറക്കാനുള്ള കീബോർഡ് ഷോർട്ട്കട്ട് Windows Key + E ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_008",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "8. Which combination of key is used to switch between all running apps?",
+    "option_a": "Shift + Tab",
+    "option_b": "Alt + Tab",
+    "option_c": "Ctrl + Tab",
+    "option_d": "Tab",
+    "correct_answer": "B",
+    "explanation": "Alt + Tab is used to quickly switch between open/running applications in Windows.\n\n[മലയാളം]: തുറന്നിരിക്കുന്ന ആപ്ലിക്കേഷനുകൾക്കിടയിൽ വേഗത്തിൽ മാറുവാൻ Alt + Tab കീ ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_009",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "9. Which process determines the amount of memory present, the date/time, and which communications ports and display adapters are installed in a micro computer?",
+    "option_a": "Start-up utility test",
+    "option_b": "Power on self test",
+    "option_c": "Power up boot process",
+    "option_d": "Power on startup process",
+    "correct_answer": "B",
+    "explanation": "POST (Power-On Self-Test) executed by the BIOS checks and verifies RAM, ports, display adapters, and critical hardware upon boot.\n\n[മലയാളം]: കമ്പ്യൂട്ടർ ഓൺ ചെയ്യുമ്പോൾ മെമ്മറി, പോർട്ടുകൾ, ഡിസ്പ്ലേ തുടങ്ങിയ ഹാർഡ്‌വെയറുകൾ പരിശോധിച്ച് ഉറപ്പുവരുത്തുന്നത് POST (Power-On Self-Test) ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_010",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "10. Which printer uses dry ink toner?",
+    "option_a": "Laser",
+    "option_b": "Drum",
+    "option_c": "Inkjet",
+    "option_d": "Dot matrix",
+    "correct_answer": "A",
+    "explanation": "Laser printers use fine dry powder toner to print text and images on paper via electrostatic drum.\n\n[മലയാളം]: ഡ്രൈ ഇങ്ക് ടോണർ (Dry Ink Toner) പൗഡർ ഉപയോഗിച്ച് പ്രിന്റ് ചെയ്യുന്നത് ലേസർ പ്രിന്ററുകളാണ് (Laser Printers).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_011",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "11. What are the functions of MODEM?\n(i) Analog Signal to Digital Signal\n(ii) Digital Signal to Analog Signal\n(iii) Analog Signal to Analog Signal\n(iv) Digital Signal to Digital Signal",
+    "option_a": "Both (i) and (ii)",
+    "option_b": "(i) only",
+    "option_c": "(iii) only",
+    "option_d": "Both (iv) and (iii)",
+    "correct_answer": "A",
+    "explanation": "MODEM (Modulator-Demodulator) modulates Digital to Analog signals and demodulates Analog to Digital signals.\n\n[മലയാളം]: മോഡം (MODEM) ഡിജിറ്റൽ സിഗ്നലുകളെ അനലോഗായും (Modulation), അനലോഗ് സിഗ്നലുകളെ തിരികെ ഡിജിറ്റലായും (Demodulation) മാറ്റുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_012",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "12. Basic working principle of Fiber Optics :",
+    "option_a": "Reflection",
+    "option_b": "Total internal reflection",
+    "option_c": "Refraction",
+    "option_d": "Resistance",
+    "correct_answer": "B",
+    "explanation": "Optical fiber cables transmit light signals using the principle of Total Internal Reflection (TIR).\n\n[മലയാളം]: ഒപ്റ്റിക്കൽ ഫൈബർ കേബിളുകൾ പ്രകാശ സിഗ്നലുകൾ കടത്തിവിടുന്നത് പൂർണ്ണാന്തര പ്രതിഫലനം (Total Internal Reflection) എന്ന തത്വം വഴിയാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_013",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "13. What is the explanation of SNMP?",
+    "option_a": "Simplex Network Management Protocol",
+    "option_b": "Simple Network Management Protocol",
+    "option_c": "Simple Network Messaging Protocol",
+    "option_d": "Simple Network Mailing Protocol",
+    "correct_answer": "B",
+    "explanation": "SNMP stands for Simple Network Management Protocol (used to monitor network devices, port 161).\n\n[മലയാളം]: SNMP-യുടെ പൂർണ്ണരൂപം Simple Network Management Protocol എന്നാണ് (നെറ്റ്‌വർക്ക് ഉപകരണങ്ങൾ നിരീക്ഷിക്കാൻ ഉപയോഗിക്കുന്നു).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_014",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "14. Choose the true statement/statements about IPv6 :\n(i) IPv6 address have a size of 128 bits\n(ii) Helps in routing the data packets\n(iii) Helps in Unicasting\n(iv) Helps to convert analog to digital",
+    "option_a": "(i) and (iv) only",
+    "option_b": "(ii) and (iii) only",
+    "option_c": "(i), (ii) and (iii) only",
+    "option_d": "All of the above",
+    "correct_answer": "C",
+    "explanation": "IPv6 uses 128-bit addresses, supports unicast/anycast/multicast routing of packets. It does not perform analog to digital conversion.\n\n[മലയാളം]: IPv6 അഡ്രസ്സ് 128 ബിറ്റ് വലിപ്പമുള്ളതാണ്, പാക്കറ്റ് റൂട്ടിംഗിനും യൂണികാസ്റ്റിംഗിനും സഹായിക്കുന്നു. അനലോഗ്-ഡിജിറ്റൽ കൺവേർഷൻ ചെയ്യില്ല.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_015",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "15. Maximum number of devices connected to Bluetooth :",
+    "option_a": "8",
+    "option_b": "4",
+    "option_c": "2",
+    "option_d": "3",
+    "correct_answer": "A",
+    "explanation": "A standard Bluetooth piconet can connect a maximum of 8 devices (1 master and 7 active slaves).\n\n[മലയാളം]: ഒരു ബ്ലൂടൂത്ത് പൈക്കോനെറ്റിൽ (Piconet) പരമാവധി 8 ഉപകരണങ്ങൾ കണക്ട് ചെയ്യാം (1 മാസ്റ്ററും 7 സ്ലേവുകളും).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_016",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "16. Number of pins in RJ45 :",
+    "option_a": "6",
+    "option_b": "3",
+    "option_c": "8",
+    "option_d": "1",
+    "correct_answer": "C",
+    "explanation": "An RJ45 modular connector used for Ethernet cables has 8 pins (8P8C).\n\n[മലയാളം]: ഇതർനെറ്റ് നെറ്റ്വർക്കിംഗിനായി ഉപയോഗിക്കുന്ന RJ45 കണക്ടറിൽ 8 പിന്നുകൾ (8 Pins) ഉണ്ട്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_017",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "17. The first network to implement the TCP/IP :",
+    "option_a": "Arpanet",
+    "option_b": "Ethernet",
+    "option_c": "Wi-fi",
+    "option_d": "Infrared",
+    "correct_answer": "A",
+    "explanation": "ARPANET officially adopted the TCP/IP protocol suite on January 1, 1983.\n\n[മലയാളം]: ആദ്യമായി TCP/IP പ്രോട്ടോക്കോൾ നടപ്പിലാക്കിയ നെറ്റ്‌വർക്ക് ARPANET ആണ് (1983 ജനുവരി 1).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_018",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "18. Network device to translate one protocol into the other protocol is :",
+    "option_a": "Gateway",
+    "option_b": "Modem",
+    "option_c": "Switch",
+    "option_d": "Repeater",
+    "correct_answer": "A",
+    "explanation": "A Gateway is a network node that joins two networks using different transmission protocols.\n\n[മലയാളം]: വ്യത്യസ്ത പ്രോട്ടോക്കോളുകൾ ഉപയോഗിക്കുന്ന നെറ്റ്‌വർക്കുകൾ തമ്മിൽ പരസ്പരം വിവർത്തനം ചെയ്ത് ബന്ധിപ്പിക്കുന്ന ഉപകരണം ഗേറ്റ്‌വേ (Gateway) ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_019",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "19. Harmful software which can have unauthorized access to systems or cause damage?",
+    "option_a": "Phishing",
+    "option_b": "Snooping",
+    "option_c": "Denial of Service",
+    "option_d": "Malware",
+    "correct_answer": "D",
+    "explanation": "Malware (Malicious Software) includes viruses, worms, trojans, ransomware designed to damage or gain unauthorized access to computer systems.\n\n[മലയാളം]: കമ്പ്യൂട്ടറുകളിൽ അനധികൃതമായി കടന്നുകൂടി നാശനഷ്ടം വരുത്തുന്ന പ്രോഗ്രാമുകളെ പൊതുവായി മാൽവെയർ (Malware) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_020",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "20. POP stands for :",
+    "option_a": "Post Open Protocol",
+    "option_b": "Post Office Program",
+    "option_c": "Post Organized Protocol",
+    "option_d": "Post Office Protocol",
+    "correct_answer": "D",
+    "explanation": "POP stands for Post Office Protocol (commonly POP3, port 110), used for retrieving incoming emails from a mail server.\n\n[മലയാളം]: ഇമെയിൽ സെർവറിൽ നിന്ന് മെയിലുകൾ ഡൗൺലോഡ് ചെയ്ത് വായിക്കാൻ ഉപയോഗിക്കുന്ന POP-യുടെ പൂർണ്ണരൂപം Post Office Protocol എന്നാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_021",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "21. Which of the following is the correct format to add multiline comment in python?",
+    "option_a": "“comment”",
+    "option_b": "“”comment””",
+    "option_c": "“””comment”””",
+    "option_d": "#comment#",
+    "correct_answer": "C",
+    "explanation": "In Python, multiline comments or docstrings are enclosed in triple quotes (''' or \"\"\").\n\n[മലയാളം]: പൈത്തണിൽ ഒന്നിലധികം വരികളുള്ള കമന്റുകൾ (Multiline comments) നൽകാൻ ട്രിപ്പിൾ കൊട്ടേഷൻ (\"\"\" അല്ലെങ്കിൽ ''') ആണ് ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_022",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "22. Which is the exponent operator in python?",
+    "option_a": "*",
+    "option_b": "**",
+    "option_c": "∧",
+    "option_d": "%",
+    "correct_answer": "B",
+    "explanation": "In Python, ** is the power/exponent operator (e.g. 2 ** 3 = 8).\n\n[മലയാളം]: പൈത്തണിൽ എക്സ്പോണന്റ് (പവർ - ഘാതം) കണക്കാക്കാനുള്ള ഓപ്പറേറ്റർ ** ആണ് (ഉദാ: 2 ** 3 = 8).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_023",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "23. Which of the following is a python tuple?",
+    "option_a": "{ }",
+    "option_b": "{10, 11, 12}",
+    "option_c": "[10, 11, 12]",
+    "option_d": "(10, 11, 12)",
+    "correct_answer": "D",
+    "explanation": "In Python, Tuples are enclosed in parentheses (), lists in [], sets/dicts in {}.\n\n[മലയാളം]: പൈത്തണിൽ ട്യൂപ്പിൾ (Tuple) പരാൻതീസിസിൽ (10, 11, 12) ആണ് സൂചിപ്പിക്കുന്നത്. സ്ക്വയർ ബ്രാക്കറ്റ് ലിസ്റ്റും, കർലി ബ്രാക്കറ്റ് സെറ്റും ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_024",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "24. Which of the following statement is/are correct?\n(i) a, b, c = ”apple”, ”berry”, ”grapes”\n(ii) a = b = c = ”apple”\n(iii) a = ”apple”\n(iv) a = b = c = ’apple’",
+    "option_a": "Only (i) and (ii)",
+    "option_b": "Only (ii) and (iii)",
+    "option_c": "(i), (ii), (iii) and (iv)",
+    "option_d": "Only (i)",
+    "correct_answer": "C",
+    "explanation": "In Python, multiple assignment, chained assignment, single quotes, and double quotes are all valid syntax.\n\n[മലയാളം]: പൈത്തണിൽ മൾട്ടിപ്പിൾ അസൈൻമെന്റും സിംഗിൾ/ഡബിൾ കൊട്ടേഷനുകളും എല്ലാം അനുവദനീയമായ ശരിയായ സ്റ്റേറ്റ്മെന്റുകളാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_025",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "25. What is the output of following code snippet?\nPrint ((eval(“ ‘py’ * 5”))",
+    "option_a": "py py py py py",
+    "option_b": "py5",
+    "option_c": "5py",
+    "option_d": "py*5",
+    "correct_answer": "A",
+    "explanation": "String replication replicates the string 5 times (PSC key confirmed A).\n\n[മലയാളം]: 'py' * 5 എന്നത് സ്ട്രിംഗിനെ 5 തവണ ആവർത്തിക്കുന്നു (PSC ഉത്തരസൂചിക പ്രകാരം Option A).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_026",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "26. ——————— method searches for a specified string and splits the string into a tuple containing three elements.",
+    "option_a": "Partition",
+    "option_b": "Rpartition",
+    "option_c": "Lpartition",
+    "option_d": "Split",
+    "correct_answer": "A",
+    "explanation": "In Python, partition() splits a string at the first occurrence of separator into a 3-element tuple (head, sep, tail).\n\n[മലയാളം]: പൈത്തണിലെ partition() മെത്തേഡ് ഒരു സ്ട്രിംഗിനെ വേർതിരിച്ച് 3 എലമെന്റുകളുള്ള ഒരു ട്യൂപ്പിൾ ആയി മാറ്റുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_027",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "27. Which of the following is a user defined data type in python?",
+    "option_a": "List",
+    "option_b": "Tuples",
+    "option_c": "Dictionary",
+    "option_d": "Class",
+    "correct_answer": "D",
+    "explanation": "In object-oriented Python, a 'Class' is a user-defined prototype / data type.\n\n[മലയാളം]: പൈത്തണിൽ ഉപയോക്താവ് നിർമ്മിക്കുന്ന ഡാറ്റാ ടൈപ്പ് (User Defined Data Type) ആണ് ക്ലാസ് (Class).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_028",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "28. Which of the following is used to create an empty set in python?",
+    "option_a": "set( )",
+    "option_b": "set{ }",
+    "option_c": "set[ ]",
+    "option_d": "( )",
+    "correct_answer": "A",
+    "explanation": "In Python, an empty set is created using set(), because {} creates an empty dictionary.\n\n[മലയാളം]: പൈത്തണിൽ എംപ്റ്റി സെറ്റ് (Empty Set) നിർമ്മിക്കാൻ set() ആണ് ഉപയോഗിക്കുന്നത്. കാരണം {} എന്നത് എംപ്റ്റി ഡിക്ഷണറി ആയി മാറും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_029",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "29. What will be the output of following python code?\na = 2\nb = 5\nprint (a, b)\na, b = b, a\nprint (a, b)",
+    "option_a": "25 52",
+    "option_b": "25 25",
+    "option_c": "52 52",
+    "option_d": "52 25",
+    "correct_answer": "A",
+    "explanation": "Initially a=2, b=5 (output 2 5). Then a,b = b,a swaps them to a=5, b=2 (output 5 2).\n\n[മലയാളം]: ആദ്യം 2 5 എന്ന് പ്രിന്റ് ചെയ്യുന്നു, സ്വാപ്പിംഗിന് ശേഷം a=5, b=2 ആയി മാറുന്നതിനാൽ 5 2 എന്നും പ്രിന്റ് ചെയ്യുന്നു (25 52).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_030",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "30. What do we use to define a block of code in python?",
+    "option_a": "Key",
+    "option_b": "Brackets",
+    "option_c": "Block",
+    "option_d": "Indentation",
+    "correct_answer": "D",
+    "explanation": "Python uses Indentation (whitespace/tabs) instead of curly brackets {} to delimit blocks of code.\n\n[മലയാളം]: മറ്റു പ്രോഗ്രാമിംഗ് ഭാഷകളിലെ പോലെ ബ്രാക്കറ്റുകൾക്ക് പകരമായി പൈത്തണിൽ കോഡ് ബ്ലോക്കുകൾ നിർണ്ണയിക്കുന്നത് ഇൻഡെന്റേഷൻ (Indentation) വഴിയാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_031",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "31. DCL stands for :",
+    "option_a": "Data Consistency Language",
+    "option_b": "Data Configuration Language",
+    "option_c": "Data Control Language",
+    "option_d": "Database Control Language",
+    "correct_answer": "C",
+    "explanation": "DCL stands for Data Control Language (includes GRANT and REVOKE commands for managing permissions).\n\n[മലയാളം]: SQL-ൽ ഡാറ്റാബേസ് അനുമതികൾ നിയന്ത്രിക്കുന്ന DCL-ന്റെ പൂർണ്ണരൂപം Data Control Language (GRANT, REVOKE) എന്നാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_032",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "32. In relational model tables are also known as :",
+    "option_a": "Tuples",
+    "option_b": "Relations",
+    "option_c": "Schema",
+    "option_d": "Structures",
+    "correct_answer": "B",
+    "explanation": "In relational database theory (RDBMS), a table is formally called a Relation, rows are Tuples, columns are Attributes.\n\n[മലയാളം]: റിലേഷണൽ മോഡലിൽ ടേബിളുകൾക്ക് (Tables) നൽകിയിരിക്കുന്ന പേര് റിലേഷൻസ് (Relations) എന്നാണ്. വരികളെ ട്യൂപ്പിൾസ് (Tuples) എന്നും കോളങ്ങളെ ആട്രിബ്യൂട്ട്സ് (Attributes) എന്നും വിളിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_033",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "33. ——————— property of transaction ensures that multiple transactions can occur independently without interference.",
+    "option_a": "Consistency",
+    "option_b": "Isolation",
+    "option_c": "Durability",
+    "option_d": "Atomicity",
+    "correct_answer": "B",
+    "explanation": "In ACID properties, 'Isolation' ensures that concurrent transactions execute independently without interfering with each other.\n\n[മലയാളം]: ഡാറ്റാബേസ് ട്രാൻസാക്ഷനിലെ ACID തത്വങ്ങളിൽ ഒന്നിലധികം ഇടപാടുകൾ പരസ്പരം തടസ്സമില്ലാതെ സ്വതന്ത്രമായി നടക്കാൻ സഹായിക്കുന്നത് ഐസൊലേഷൻ (Isolation) ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_034",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "34. Which of the following statement is/are correct about keys in MySql?\n(i) A foreign key is a field (or collection of fields) in one table that refers to the primary key in another table\n(ii) There will be more than one primary key in one table.\n(iii) A table can have multiple foreign keys\n(iv) A table can have multiple candidate keys, but can only have one primary key.",
+    "option_a": "(i) and (ii)",
+    "option_b": "Only (i), (iii) and (iv)",
+    "option_c": "Only (i) and (iv)",
+    "option_d": "All of above (i), (ii), (iii) and (iv)",
+    "correct_answer": "B",
+    "explanation": "Statement (ii) is false because a table can have only one Primary Key. Statements (i), (iii), and (iv) are correct.\n\n[മലയാളം]: ഒരു ടേബിളിൽ ഒരു പ്രൈമറി കീ മാത്രമേ ഉണ്ടാകൂ, എന്നാൽ ഒന്നിലധികം ഫോറിൻ കീകളും കാൻഡിഡേറ്റ് കീകളും ഉണ്ടാകാം. അതിനാൽ (i), (iii), (iv) എന്നിവ ശരിയാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_035",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "35. Which is the correct syntax to create a stored procedure?",
+    "option_a": "CREATE PROCEDURE procedure_name AS sql_statement GO;",
+    "option_b": "CREATE STOREDPROCEDURE procedure_name AS sql_statement GO;",
+    "option_c": "CREATE PROCEDURE procedure_name AS sql_statement START;",
+    "option_d": "CREATE PROCEDURE procedure_name sql_statement GO;",
+    "correct_answer": "A",
+    "explanation": "The standard SQL syntax for creating a stored procedure is 'CREATE PROCEDURE procedure_name AS sql_statement GO;'.\n\n[മലയാളം]: സ്റ്റോർഡ് പ്രൊസീജിയർ ഉണ്ടാക്കുന്നതിനുള്ള ശരിയായ സിന്റാക്സ് CREATE PROCEDURE procedure_name AS sql_statement GO; എന്നാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_036",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "36. A ——————— is basically a program which gets automatically executed in response to some events such as modification in the database.",
+    "option_a": "Cursor",
+    "option_b": "Method",
+    "option_c": "Trigger",
+    "option_d": "Action",
+    "correct_answer": "C",
+    "explanation": "A database Trigger automatically executes in response to certain events (INSERT, UPDATE, DELETE) on a specified table.\n\n[മലയാളം]: ഡാറ്റാബേസിൽ ഡാറ്റ മാറ്റപ്പെടുമ്പോൾ (INSERT, UPDATE, DELETE) തനിയെ എക്സിക്യൂട്ട് ആകുന്ന സ്പെഷ്യൽ പ്രോഗ്രാമാണ് ട്രിഗർ (Trigger).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_037",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "37. A table that displays data redundancies yields ——————— anomalies.",
+    "option_a": "Insertion",
+    "option_b": "Deletion",
+    "option_c": "Update",
+    "option_d": "All of the above",
+    "correct_answer": "A",
+    "explanation": "Data redundancy causes update, insertion, and deletion anomalies (Official PSC answer key gives A).\n\n[മലയാളം]: ഡാറ്റാബേസിൽ വിവരങ്ങൾ അനാവശ്യമായി ആവർത്തിക്കുമ്പോൾ (Redundancy) ഉണ്ടാകുന്ന തകരാറുകളാണ് അനോമലികൾ (PSC ഉത്തരസൂചിക പ്രകാരം Option A).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_038",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "38. Which of the following statements creates a new table ‘skilledworker’ that has the same schema as ‘worker’?",
+    "option_a": "create table skilledworker;",
+    "option_b": "Create table skilledworker like worker;",
+    "option_c": "Create Table skilledworker as worker;",
+    "option_d": "Create table like skilledworker;",
+    "correct_answer": "B",
+    "explanation": "The SQL syntax 'CREATE TABLE new_table LIKE original_table;' copies the schema without data.\n\n[മലയാളം]: ഒരു ടേബിളിന്റെ അതേ സ്ട്രക്ചറിൽ പുതിയൊരു ടേബിൾ നിർമ്മിക്കാൻ 'CREATE TABLE skilledworker LIKE worker;' എന്ന് നൽകുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_039",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "39. Which is right statement to insert multiple records?",
+    "option_a": "INSERT INTO TABLENAME VALUES (‘col1’, ‘col2’), (‘col1’, ‘col2’),...",
+    "option_b": "INSERT INTO TABLENAME VALUES (‘col1’, ‘col2’), VALUES (‘col1’, ‘col2’),...",
+    "option_c": "INSERT INTO VALUES OF TABLENAME (‘col1’, ‘col2’), (‘col1’, ‘col2’),...",
+    "option_d": "INSERT INTO TABLENAME VALUES (‘col1’, ‘col2’), TABLENAME VALUES (‘col1’, ‘col2’),...",
+    "correct_answer": "A",
+    "explanation": "Multiple rows are inserted using comma-separated value tuples: INSERT INTO table VALUES (...), (...);\n\n[മലയാളം]: ഒന്നിലധികം റെക്കോർഡുകൾ ഒന്നിച്ച് ചേർക്കാൻ INSERT INTO TABLENAME VALUES ('col1', 'col2'), ('col1', 'col2')... എന്ന രീതി ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_040",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "40. Which join is to be used between two tables A and B when the resultant table needs rows from A and B that matches the condition and rows from A that does not match the condition?",
+    "option_a": "Inner Join",
+    "option_b": "Cross Join",
+    "option_c": "Outer Join",
+    "option_d": "None of the above",
+    "correct_answer": "C",
+    "explanation": "A Left Outer Join returns all matched rows plus unmatched rows from table A.\n\n[മലയാളം]: ടേബിൾ A-യിലെ മുഴുവൻ വരികളും ഒപ്പം ടേബിൾ B-യിലെ മാച്ച് ആകുന്ന വരികളും മാത്രം ലഭിക്കാൻ ലെഫ്റ്റ് ഔട്ടർ ജോയിൻ (Outer Join) ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_041",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "41. Which interface is used to declare core methods in java?",
+    "option_a": "Comparator",
+    "option_b": "Event listener",
+    "option_c": "Set",
+    "option_d": "Collection",
+    "correct_answer": "D",
+    "explanation": "The Collection interface is the root interface in the collection hierarchy defining core collection methods.\n\n[മലയാളം]: ജാവയിലെ കളക്ഷൻ ഫ്രെയിംവർക്കിൽ പ്രധാന മെത്തേഡുകൾ ഡിക്ലയർ ചെയ്തിരിക്കുന്ന റൂട്ട് ഇന്റർഫേസ് Collection ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_042",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "42. What is the output of following code?\nClass main{\nPublic static void main(String[ ] args){\nboolean flag;\nSystem.out.println(flag);\n}\n}",
+    "option_a": "True",
+    "option_b": "False",
+    "option_c": "It will display an error message",
+    "option_d": "1",
+    "correct_answer": "C",
+    "explanation": "Local variables in Java are not initialized with default values, so attempting to use an uninitialized local variable causes a compile error.\n\n[മലയാളം]: ജാവയിൽ മെത്തേഡിനുള്ളിലെ ലോക്കൽ വേരിയബിളുകൾക്ക് ഡിഫോൾട്ട് വാല്യൂ ലഭിക്കില്ല; ഇനിഷ്യലൈസ് ചെയ്യാതെ പ്രിന്റ് ചെയ്യാൻ ശ്രമിച്ചാൽ കമ്പൈൽ എറർ വരും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_043",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "43. What will be the output of following code?\nClass Main {\npublic static void main(String[ ] args) {\nSystem.out.println(9.0/2);\nSystem.out.println(9/2);\nSystem.out.println(9.0/2.0);\nSystem.out.println(9/2.0);\n}\n}",
+    "option_a": "4.5\n4\n4.5\n4.5",
+    "option_b": "4\n5\n4.5\n4.5",
+    "option_c": "4.5\n4.5\n4.5\n4.5",
+    "option_d": "4\n4\n4.5\n4",
+    "correct_answer": "A",
+    "explanation": "9.0/2 = 4.5 (floating division), 9/2 = 4 (integer truncation), 9.0/2.0 = 4.5, 9/2.0 = 4.5.\n\n[മലയാളം]: പൂർണ്ണസംഖ്യകൾ തമ്മിൽ ഹരിക്കുമ്പോൾ (9/2) ദശാംശം ഇല്ലാതെ 4 ലഭിക്കും, എന്നാൽ ഫ്ലോട്ടിംഗ് പോയിന്റ് ഹരണത്തിൽ 4.5 ലഭിക്കും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_044",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "44. A thread is said to ——————— when it is prevented from entering into the runnable state and subsequently the running state.",
+    "option_a": "Dead",
+    "option_b": "Blocked",
+    "option_c": "Runnable",
+    "option_d": "Stopped",
+    "correct_answer": "B",
+    "explanation": "A thread in Java is in the Blocked/Waiting state when it is waiting for a monitor lock or I/O operation.\n\n[മലയാളം]: ജാവയിൽ ഒരു ത്രെഡിന് റണ്ണബിൾ സ്റ്റേറ്റിലേക്ക് കടക്കാൻ കഴിയാതെ തടസ്സപ്പെടുന്ന അവസ്ഥയെ ബ്ലോക്ക്ഡ് (Blocked) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_045",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "45. Which exception is thrown when Java is out of memory?",
+    "option_a": "Memory Error",
+    "option_b": "Out Of Memory Error",
+    "option_c": "Memory out Of Bounds Exception",
+    "option_d": "Memory Full Exception",
+    "correct_answer": "B",
+    "explanation": "java.lang.OutOfMemoryError is thrown when JVM cannot allocate an object due to insufficient heap memory.\n\n[മലയാളം]: JVM-ൽ ആവശ്യമായ ഹീപ്പ് മെമ്മറി ഇല്ലാതെ വരുമ്പോൾ ഉണ്ടാകുന്ന എററാണ് Out Of Memory Error (java.lang.OutOfMemoryError).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_046",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "46. What will be the output of following code?\nPublic Class Solution\n{\nPublic static void main(String[ ] args){\nShort x = 10;\nx = x * 10;\nSystem.out.print(x);\n}\n}",
+    "option_a": "50",
+    "option_b": "Compile error",
+    "option_c": "Exception",
+    "option_d": "10",
+    "correct_answer": "B",
+    "explanation": "In Java, arithmetic expressions on byte and short are automatically promoted to int; assigning int to Short requires explicit cast, otherwise causes a compile error.\n\n[മലയാളം]: ജാവയിൽ short വേരിയബിളുകൾ ഗുണിക്കുമ്പോൾ ഫലം int ആയി മാറും; ഇതിനെ തിരികെ short-ലേക്ക് കാസ്റ്റ് ചെയ്യാതെ അസൈൻ ചെയ്യുന്നത് കമ്പൈൽ എററിന് കാരണമാകും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_047",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "47. Automatic type conversion is possible in which of the possible cases?",
+    "option_a": "Int to long",
+    "option_b": "Long to int",
+    "option_c": "Byte to int",
+    "option_d": "Short to int",
+    "correct_answer": "A",
+    "explanation": "Widening primitive conversion (e.g. 32-bit int to 64-bit long) is performed automatically without cast (PSC key confirms A).\n\n[മലയാളം]: വലുപ്പം കുറഞ്ഞ ടൈപ്പിൽ നിന്ന് കൂടുതൽ വലുപ്പമുള്ള ടൈപ്പിലേക്ക് മാറ്റുന്ന Widening കൺവേർഷൻ (int to long) ഓട്ടോമാറ്റിക്കായി നടക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_048",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "48. Which of the following is true about the keyword super?\n(i) Super may only be used within a subclass constructor method.\n(ii) The call to superclass constructor must appear as the first statement within the subclass constructor\n(iii) The parameters in the super call must match the order and type of the instance variable declared in the superclass.\n(iv) The keyword sup can be used instead of the keyword super.",
+    "option_a": "Only (i), (ii) and (iv)",
+    "option_b": "Only (i) and (ii)",
+    "option_c": "Only (i), (ii) and (iii)",
+    "option_d": "All of above",
+    "correct_answer": "C",
+    "explanation": "Statements (i), (ii), and (iii) describe super() constructor behavior (Official PSC answer key gives C).\n\n[മലയാളം]: സൂപ്പർക്ലാസ് കൺസ്ട്രക്ടറെ വിളിക്കാൻ ഉപയോഗിക്കുന്ന super() സബ്ക്ലാസ് കൺസ്ട്രക്ടറിന്റെ ആദ്യത്തെ വരിയായിരിക്കണം.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_049",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "49. What will be the output of following code in case of x = 20, x = 40, x = 70?\nsalary = (x ! = 40)?((x<40)?(4*x + 100) : (4.5 *x +100)) : 300;",
+    "option_a": "180.0, 300.0, 415.0",
+    "option_b": "300.0, 415.0, 180.0",
+    "option_c": "300.0, 180.0, 415.0",
+    "option_d": "180, 300, 415",
+    "correct_answer": "A",
+    "explanation": "For x=20: 4(20)+100 = 180.0; For x=40: condition is false, returns 300.0; For x=70: 4.5(70)+100 = 415.0.\n\n[മലയാളം]: x=20 ആകുമ്പോൾ 180.0, x=40 ആകുമ്പോൾ 300.0, x=70 ആകുമ്പോൾ 415.0 എന്ന് ലഭിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_050",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "50. Which of the following statements is/are true about method overriding?\n(i) Implements “run time polymorphism”.\n(ii) Implements “compile time polymorphism”.\n(iii) Occurs between superclass and subclass.\n(iv) On error it can be caught at compile time.",
+    "option_a": "Only (i) and (iii)",
+    "option_b": "Only (ii) and (iii)",
+    "option_c": "Only (i), (iii) and (iv)",
+    "option_d": "None of above",
+    "correct_answer": "A",
+    "explanation": "Method overriding implements runtime (dynamic) polymorphism and occurs between a superclass and its subclass.\n\n[മലയാളം]: മെത്തേഡ് ഓവർറൈഡിംഗ് (Method Overriding) റൺടൈം പോളിമോർഫിസം സാധ്യമാക്കുന്നു, ഇത് സൂപ്പർക്ലാസും സബ്ക്ലാസും തമ്മിലാണ് നടക്കുന്നത്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_051",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "51. Which among the following are valid operators in JavaScript?\n(i) & =\n(ii) ! = =\n(iii) = = =\n(iv) ??=",
+    "option_a": "(i) only",
+    "option_b": "(i) and (iii) only",
+    "option_c": "(i), (ii) and (iii) only",
+    "option_d": "All of the above",
+    "correct_answer": "D",
+    "explanation": "In modern JavaScript, &= (bitwise AND assignment), !== (strict inequality), === (strict equality), and ??= (nullish coalescing assignment) are all valid operators.\n\n[മലയാളം]: ജാവാസ്ക്രിപ്റ്റിൽ &=, !==, ===, ??= എന്നിവയെല്ലാം സാധുവായ ഓപ്പറേറ്ററുകളാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_052",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "52. Which among the following are valid popup boxes in JavaScript?\n(i) alert ( )\n(ii) prompt ( )\n(iii) msgbox ( )\n(iv) confirm ( )",
+    "option_a": "(i) and (ii) only",
+    "option_b": "(i) and (iii) only",
+    "option_c": "(i), (ii) and (iv) only",
+    "option_d": "All of the above",
+    "correct_answer": "C",
+    "explanation": "JavaScript has three popup boxes: alert(), prompt(), and confirm(). 'msgbox' belongs to VBScript.\n\n[മലയാളം]: ജാവാസ്ക്രിപ്റ്റിലെ പോപ്പ്-അപ്പ് ബോക്സുകൾ alert(), prompt(), confirm() എന്നിവയാണ്. msgbox വിബിസ്ക്രിപ്റ്റിലേതാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_053",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "53. With the document object model, JavaScript can\n(i) Remove existing HTML\n(ii) Add new HTML elements and attributes\n(iii) React to all existing HTML events in the page\n(iv) Change all CSS styles in the page",
+    "option_a": "(ii) and (iv) only",
+    "option_b": "(i) and (iv) only",
+    "option_c": "(ii), (iii) and (iv) only",
+    "option_d": "All of the above",
+    "correct_answer": "D",
+    "explanation": "The DOM allows JavaScript full dynamic access to add, remove, and modify HTML elements, attributes, CSS styles, and event listeners.\n\n[മലയാളം]: DOM (Document Object Model) ഉപയോഗിച്ച് ജാവാസ്ക്രിപ്റ്റിന് HTML എലമെന്റുകൾ മാറ്റാനും ചേർക്കാനും ഇവന്റുകൾ നിയന്ത്രിക്കാനും CSS മാറ്റാനും കഴിയും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_054",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "54. Which among the following is not a JavaScript keyword?",
+    "option_a": "this",
+    "option_b": "buffer",
+    "option_c": "enum",
+    "option_d": "export",
+    "correct_answer": "B",
+    "explanation": "'buffer' is a Node.js global class / API, not a reserved language keyword in JavaScript.\n\n[മലയാളം]: 'buffer' എന്നത് ജാവാസ്ക്രിപ്റ്റിലെ റിസർവ്ഡ് കീവേഡ് അല്ല (Node.js-ലെ ഗ്ലോബൽ ക്ലാസ്സ് ആണ്).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_055",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "55. Which of the following are valid array methods in JavaScript?\n(i) join( )\n(ii) push( )\n(iii) pop( )\n(iv) shift( )",
+    "option_a": "(ii) and (iii) only",
+    "option_b": "(i) and (iv) only",
+    "option_c": "All of the above",
+    "option_d": "None of the above",
+    "correct_answer": "C",
+    "explanation": "join(), push(), pop(), and shift() are all built-in JavaScript Array prototype methods.\n\n[മലയാളം]: join(), push(), pop(), shift() എന്നിവയെല്ലാം ജാവാസ്ക്രിപ്റ്റിലെ അറേ മെത്തേഡുകളാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_056",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "56. Which error indicates that the value is outside the range of expected type?",
+    "option_a": "Type Error",
+    "option_b": "Range Error",
+    "option_c": "Syntax Error",
+    "option_d": "Eval Error",
+    "correct_answer": "A",
+    "explanation": "TypeError occurs when an operation is performed on an unexpected or wrong data type (Official key gives A).\n\n[മലയാളം]: പ്രതീക്ഷിക്കുന്ന ഡാറ്റാ ടൈപ്പിൽ അല്ലാതെ വരുന്ന വാല്യൂ മൂലമുണ്ടാകുന്ന തകരാറാണ് TypeError (PSC ഉത്തരസൂചിക പ്രകാരം Option A).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_057",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "57. Which is the correct syntax for referring to an external script called “abc.js”?",
+    "option_a": "<script href = “abc.js”",
+    "option_b": "<script src = “abc.js”",
+    "option_c": "<script name = “abc.js”",
+    "option_d": "<script type = “abc.js”",
+    "correct_answer": "B",
+    "explanation": "External JavaScript files are linked via the 'src' attribute: <script src=\"abc.js\"></script>.\n\n[മലയാളം]: എക്സ്റ്റേണൽ ജാവാസ്ക്രിപ്റ്റ് ഫയൽ ലിങ്ക് ചെയ്യാൻ 'src' ആട്രിബ്യൂട്ട് ആണ് ഉപയോഗിക്കുന്നത്: <script src=\"abc.js\"></script>.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_058",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "58. When we execute the following JavaScript code segment, what will be the output?\nvar sname;\nalert(sname)",
+    "option_a": "NaN",
+    "option_b": "sname",
+    "option_c": "undefined",
+    "option_d": "error",
+    "correct_answer": "C",
+    "explanation": "A declared JavaScript variable that has not been assigned a value defaults to 'undefined'.\n\n[മലയാളം]: ജാവാസ്ക്രിപ്റ്റിൽ വേരിയബിൾ ഡിക്ലയർ ചെയ്ത ശേഷം മൂല്യം (value) നൽകിയിട്ടില്ലെങ്കിൽ അതിന്റെ ഔട്ട്പുട്ട് 'undefined' ആയിരിക്കും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_059",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "59. Which of the following methods can be used to display data in some form using JavaScript?",
+    "option_a": "document.write( )",
+    "option_b": "console.log( )",
+    "option_c": "window.alert( )",
+    "option_d": "all of the above",
+    "correct_answer": "D",
+    "explanation": "JavaScript can output data using document.write(), console.log(), window.alert(), and innerHTML.\n\n[മലയാളം]: ജാവാസ്ക്രിപ്റ്റിൽ വിവരങ്ങൾ കാണിക്കാൻ document.write(), console.log(), window.alert() എന്നിവയെല്ലാം ഉപയോഗിക്കാം.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_060",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "60. In JavaScript, which method removes the last element from an array?",
+    "option_a": "remove( )",
+    "option_b": "push( )",
+    "option_c": "pop( )",
+    "option_d": "delete( )",
+    "correct_answer": "C",
+    "explanation": "The pop() method removes the last element from an array and returns that element.\n\n[മലയാളം]: ജാവാസ്ക്രിപ്റ്റിൽ അറേയുടെ ഏറ്റവും അവസാനത്തെ എലമെന്റിനെ ഒഴിവാക്കാൻ pop() മെത്തേഡ് ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_061",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "61. In MS word, which technique is used to select the whole paragraph :",
+    "option_a": "Ctrl + A",
+    "option_b": "Single click within the paragraph",
+    "option_c": "Double click within the paragraph",
+    "option_d": "Triple click within the paragraph",
+    "correct_answer": "D",
+    "explanation": "Triple-clicking anywhere within a paragraph selects the entire paragraph in MS Word.\n\n[മലയാളം]: എം.എസ് വേർഡിൽ ഒരു പാരഗ്രാഫ് മുഴുവനായി സെലക്ട് ചെയ്യാൻ പാരഗ്രാഫിൽ ട്രിപ്പിൾ ക്ലിക്ക് (Triple Click) ചെയ്താൽ മതിയാകും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_062",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "62. Which is the shortcut key to insert a hyperlink in MS Word?",
+    "option_a": "Ctrl + K",
+    "option_b": "Ctrl + L",
+    "option_c": "Ctrl + H",
+    "option_d": "Ctrl + S",
+    "correct_answer": "A",
+    "explanation": "Ctrl + K is the universal shortcut key to insert a Hyperlink in Microsoft Office applications.\n\n[മലയാളം]: എം.എസ് വേർഡിൽ ഹൈപ്പർലിങ്ക് (Hyperlink) ചേർക്കാനുള്ള കീബോർഡ് ഷോർട്ട്കട്ട് Ctrl + K ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_063",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "63. Which of the following are valid minimum and maximum zoom sizes in MS Word?",
+    "option_a": "10, 100",
+    "option_b": "10, 500",
+    "option_c": "20, 200",
+    "option_d": "20, 500",
+    "correct_answer": "B",
+    "explanation": "In Microsoft Word, the minimum zoom is 10% and the maximum zoom is 500%.\n\n[മലയാളം]: എം.എസ് വേർഡിലെ ഏറ്റവും കുറഞ്ഞ സൂം 10% ഉം, ഏറ്റവും കൂടിയ സൂം 500% ഉം ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_064",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "64. Which of the following is not true regarding conditional formatting?",
+    "option_a": "You can add more than one condition to check",
+    "option_b": "You can set condition to look for Bold and apply Italics on them",
+    "option_c": "You can apply Font, Border and pattern formats that meets the specified conditions",
+    "option_d": "You can delete any condition from Conditional Formatting Dialog Box if it is not required",
+    "correct_answer": "B",
+    "explanation": "Conditional formatting evaluates cell values or formulas, not formatting attributes like existing bold to apply italics.\n\n[മലയാളം]: സെല്ലുകളിലെ മൂല്യങ്ങൾ (values) അടിസ്ഥാനമാക്കിയാണ് കണ്ടീഷണൽ ഫോർമാറ്റിംഗ് പ്രവർത്തിക്കുന്നത്; ഫോർമാറ്റ് നോക്കി ഫോർമാറ്റ് മാറ്റാൻ കഴിയില്ല.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_065",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "65. Which dialog box allows you to change a field name in a PivotTable?",
+    "option_a": "Field Options",
+    "option_b": "Field Pane",
+    "option_c": "Field Settings",
+    "option_d": "Field Structure",
+    "correct_answer": "C",
+    "explanation": "Value Field Settings / Field Settings dialog box in Excel allows renaming and customizing PivotTable fields.\n\n[മലയാളം]: പിവറ്റ് ടേബിളിലെ ഫീൽഡ് നാമം മാറ്റാൻ Field Settings ഡയലോഗ് ബോക്സ് ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_066",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "66. Which of the following is invalid regarding the protection in Excel?",
+    "option_a": "Protect Worksheet",
+    "option_b": "Protect Workbook",
+    "option_c": "Protect Workspace",
+    "option_d": "All of the above are valid",
+    "correct_answer": "C",
+    "explanation": "Excel supports Protect Sheet and Protect Workbook structure/windows, but there is no 'Protect Workspace'.\n\n[മലയാളം]: എക്സലിൽ Protect Worksheet, Protect Workbook എന്നിവയുണ്ട്; എന്നാൽ 'Protect Workspace' എന്നൊരു സൗകര്യമില്ല.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_067",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "67. In which ribbon/tab does the macro group appear?",
+    "option_a": "Data",
+    "option_b": "View",
+    "option_c": "Review",
+    "option_d": "Formulas",
+    "correct_answer": "B",
+    "explanation": "In Microsoft Word and Excel, the Macros command group appears on the 'View' tab (and also on Developer tab).\n\n[മലയാളം]: എം.എസ് ഓഫീസ് പ്രോഗ്രാമുകളിൽ മാക്രോ (Macro) ഗ്രൂപ്പ് കാണപ്പെടുന്നത് View ടാബിലാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_068",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "68. The default view of an Excel Worksheet is :",
+    "option_a": "Normal View",
+    "option_b": "Page Layout View",
+    "option_c": "Page Break View",
+    "option_d": "Print Layout View",
+    "correct_answer": "A",
+    "explanation": "Normal View is the default worksheet viewing mode in Microsoft Excel.\n\n[മലയാളം]: എക്സൽ വർക്ക്ഷീറ്റിന്റെ ഡിഫോൾട്ട് വ്യൂ 'Normal View' ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_069",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "69. Which button is used to add instant animation to the presentation and helps interactive presentation?",
+    "option_a": "Add Button",
+    "option_b": "Start Button",
+    "option_c": "Insert Button",
+    "option_d": "Action Button",
+    "correct_answer": "D",
+    "explanation": "Action Buttons in PowerPoint allow user interaction by jumping to slides, playing sounds, or running programs.\n\n[മലയാളം]: പവർപോയിന്റിൽ സംവേദനാത്മകത (interactive presentation) നൽകാൻ Action Button ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_070",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "70. Which among the following is not an Entrance Animation effect?",
+    "option_a": "Flash Once",
+    "option_b": "Spinner",
+    "option_c": "Dissolve Out",
+    "option_d": "Bounce",
+    "correct_answer": "C",
+    "explanation": "'Dissolve Out' is an Exit animation effect, not an Entrance animation.\n\n[മലയാളം]: 'Dissolve Out' എന്നത് എക്സിറ്റ് ആനിമേഷൻ (Exit effect) ആണ്; എൻട്രൻസ് ആനിമേഷൻ അല്ല.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_071",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "71. A CSS property that specifies an element’s transparency is :",
+    "option_a": "Hover",
+    "option_b": "Opacity",
+    "option_c": "Clearfix",
+    "option_d": "Overlay",
+    "correct_answer": "B",
+    "explanation": "The 'opacity' property in CSS sets the transparency level of an element (0.0 to 1.0).\n\n[മലയാളം]: ഒരു എലമെന്റിന്റെ സുതാര്യത (transparency) നിശ്ചയിക്കുന്ന CSS പ്രോപ്പർട്ടി 'opacity' ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_072",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "72. Which of these browsers supports server – side events?",
+    "option_a": "Mozilla Firefox",
+    "option_b": "Google Chrome",
+    "option_c": "Opera",
+    "option_d": "All of these",
+    "correct_answer": "D",
+    "explanation": "Server-Sent Events (SSE) / EventSource API is supported across all modern browsers: Chrome, Firefox, Opera, Safari, Edge.\n\n[മലയാളം]: സെർവർ-സൈഡ് ഇവന്റുകൾ (Server-Sent Events) മോസില്ല ഫയർഫോക്സ്, ക്രോം, ഓപ്പറ തുടങ്ങിയ എല്ലാ ആധുനിക ബ്രൗസറുകളും സപ്പോർട്ട് ചെയ്യുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_073",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "73. Which attribute specifies that the audio file will start over again, every time when it is completed?",
+    "option_a": "src",
+    "option_b": "loop",
+    "option_c": "preload",
+    "option_d": "autoplay",
+    "correct_answer": "B",
+    "explanation": "The HTML5 <audio loop> attribute causes the audio track to replay automatically upon completion.\n\n[മലയാളം]: ഓഡിയോ ഫയൽ തീരുന്ന മുറയ്ക്ക് വീണ്ടും ആദ്യമേ തനിയെ പ്ലേ ചെയ്യാൻ HTML-ൽ 'loop' ആട്രിബ്യൂട്ട് ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_074",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "74. Which log file does Apache HTTP server maintain?",
+    "option_a": "Apache/logs/access.log",
+    "option_b": "Apache/access/file.log",
+    "option_c": "Apache/logs/error.log",
+    "option_d": "Both (A) and (C)",
+    "correct_answer": "D",
+    "explanation": "Apache HTTP Server maintains both access.log (client request logs) and error.log (server diagnostic logs).\n\n[മലയാളം]: അപ്പാച്ചെ വെബ് സെർവർ access.log, error.log എന്നീ രണ്ട് ലോഗ് ഫയലുകളും സൂക്ഷിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_075",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "75. Which HTML element is used to define a multi-line input field?",
+    "option_a": "<text>",
+    "option_b": "<blocktext>",
+    "option_c": "<textfield>",
+    "option_d": "<textarea>",
+    "correct_answer": "D",
+    "explanation": "The <textarea> tag defines a multi-line text input control in HTML forms.\n\n[മലയാളം]: HTML-ൽ ഒന്നിലധികം വരികൾ ടൈപ്പ് ചെയ്യാനുള്ള മൾട്ടി-ലൈൻ ഇൻപുട്ട് ഫീൽഡിനായി <textarea> എലമെന്റ് ഉപയോഗിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_076",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "76. Link URL in HTML is specified using ——————— attribute.",
+    "option_a": "url",
+    "option_b": "link",
+    "option_c": "href",
+    "option_d": "rel",
+    "correct_answer": "C",
+    "explanation": "The 'href' (hypertext reference) attribute specifies the target URL in an <a> tag.\n\n[മലയാളം]: HTML ലിങ്കുകളിൽ ടാർഗറ്റ് വെബ് വിലാസം നൽകുന്നത് 'href' (Hypertext Reference) ആട്രിബ്യൂട്ട് വഴിയാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_077",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "77. Which of the following are automatically loaded and operates as a part of browser?",
+    "option_a": "Plug-ins",
+    "option_b": "Utilities",
+    "option_c": "Add-ons",
+    "option_d": "Widgets",
+    "correct_answer": "A",
+    "explanation": "Browser plug-ins are programs loaded into the browser to extend media capabilities (e.g. Flash, PDF viewer).\n\n[മലയാളം]: ബ്രൗസറിന്റെ ഭാഗമായി പ്രവർത്തിക്കുന്ന പ്രോഗ്രാമുകളാണ് പ്ലഗ്-ഇന്നുകൾ (Plug-ins).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_078",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "78. The attribute which is used to set the white space between the cell edge and the cell content is :",
+    "option_a": "Cellspacing",
+    "option_b": "Colspan",
+    "option_c": "Rowspan",
+    "option_d": "Cellpadding",
+    "correct_answer": "D",
+    "explanation": "In HTML tables, 'cellpadding' controls the space between cell wall borders and content, while 'cellspacing' sets space between adjacent cells.\n\n[മലയാളം]: ടേബിൾ സെല്ലിന്റെ ബോർഡറും അതിനുള്ളിലെ ഉള്ളടക്കവും തമ്മിലുള്ള അകലം നിശ്ചയിക്കുന്നത് 'cellpadding' ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_079",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "79. What is the use of iframe in HTML?",
+    "option_a": "To display a webpage in a new tab",
+    "option_b": "To display a webpage within a webpage",
+    "option_c": "To display a webpage without browser",
+    "option_d": "To display a webpage with animation effect",
+    "correct_answer": "B",
+    "explanation": "An <iframe> (inline frame) embeds another separate HTML document/webpage inside the current webpage.\n\n[മലയാളം]: ഒരു വെബ് പേജിനുള്ളിൽ മറ്റൊരു വെബ് പേജ് ഉൾക്കൊള്ളിച്ച് കാണിക്കാനാണ് <iframe> (Inline Frame) ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_080",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "80. If the background image of a web page is smaller than the screen what will happen?",
+    "option_a": "It will be stretched",
+    "option_b": "It will leave a blank space at the bottom of the page",
+    "option_c": "It will leave a blank space at the Top of the page",
+    "option_d": "It will be repeated",
+    "correct_answer": "D",
+    "explanation": "By default, CSS background images repeat horizontally and vertically (tile) if smaller than the viewport.\n\n[മലയാളം]: ഡിഫോൾട്ടായി ബാക്ക്ഗ്രൗണ്ട് ഇമേജ് സ്ക്രീനിനേക്കാൾ ചെറുതാണെങ്കിൽ അത് സ്ക്രീൻ മുഴുവനാകുന്ന രീതിയിൽ ടൈൽ പോലെ ആവർത്തിച്ചു (repeated) വരും.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_081",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "81. Which of these is not included as a type of cloud computing?",
+    "option_a": "Public Cloud",
+    "option_b": "Private Cloud",
+    "option_c": "Hybrid Cloud",
+    "option_d": "Digital Cloud",
+    "correct_answer": "D",
+    "explanation": "Standard cloud deployment models are Public, Private, Hybrid, and Community Cloud. 'Digital Cloud' is not a recognized model.\n\n[മലയാളം]: ക്ലൗഡ് കമ്പ്യൂട്ടിംഗ് മോഡലുകളിൽ പബ്ലിക്, പ്രൈവറ്റ്, ഹൈബ്രിഡ് എന്നിവയുണ്ട്; എന്നാൽ 'Digital Cloud' എന്നൊരു വിഭാഗമില്ല.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_082",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "82. When two persons claim for the same domain name, it is known as?",
+    "option_a": "Cyber Trafficking",
+    "option_b": "Cyber Warfare",
+    "option_c": "Cyber Squatting",
+    "option_d": "Cyber Terrorism",
+    "correct_answer": "C",
+    "explanation": "Cybersquatting is registering, selling or using a domain name with bad-faith intent to profit from the goodwill of someone else's trademark.\n\n[മലയാളം]: മറ്റൊരാളുടെ വ്യാപാരമുദ്രയുള്ള ഡൊമെയ്ൻ നാമം ലാഭേച്ഛയോടെ രജിസ്റ്റർ ചെയ്യുകയോ ക്ലെയിം ചെയ്യുകയോ ചെയ്യുന്ന കുറ്റകൃത്യമാണ് സൈബർ സ്ക്വാറ്റിംഗ് (Cybersquatting).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_083",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "83. Example for IaaS provider :",
+    "option_a": "Salesforce.com",
+    "option_b": "Digital Ocean",
+    "option_c": "Microsoft Azure",
+    "option_d": "Dropbox",
+    "correct_answer": "B",
+    "explanation": "DigitalOcean is a prominent Infrastructure-as-a-Service (IaaS) cloud provider (PSC answer key gives B).\n\n[മലയാളം]: ഇൻഫ്രാസ്ട്രക്ചർ ആസ് എ സർവീസ് (IaaS) പ്രൊവൈഡർക്ക് ഉദാഹരണമാണ് Digital Ocean (PSC ഉത്തരസൂചിക പ്രകാരം B).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_084",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "84. Pillars of Information Assurance are :\n(i) Integrity\n(ii) Confidentiality\n(iii) Authentication\n(iv) Availability",
+    "option_a": "(i),(ii) and (iv)",
+    "option_b": "(i) and (ii)",
+    "option_c": "(i), (ii), (iii) and (iv)",
+    "option_d": "(iii) only",
+    "correct_answer": "C",
+    "explanation": "The five pillars of Information Assurance (IA) include Confidentiality, Integrity, Availability, Authentication, and Non-repudiation.\n\n[മലയാളം]: ഇൻഫർമേഷൻ അഷ്വറൻസിന്റെ പ്രധാന സ്തംഭങ്ങളാണ് രഹസ്യസ്വഭാവം (Confidentiality), കൃത്യത (Integrity), ആധികാരികത (Authentication), ലഭ്യത (Availability) എന്നിവ.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_085",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "85. What are the advantages of cloud computing?\n(i) Cost saving\n(ii) Scalability\n(iii) Mobility\n(iv) Downtime",
+    "option_a": "(i), (ii), (iii) and (iv)",
+    "option_b": "(i), (ii) and (iii)",
+    "option_c": "(i) and (ii)",
+    "option_d": "(i) only",
+    "correct_answer": "B",
+    "explanation": "Cost saving, scalability, and mobility are advantages. Downtime is a risk/disadvantage.\n\n[മലയാളം]: ചിലവ് കുറയ്ക്കൽ (Cost saving), വ്യാപ്തി കൂട്ടാനുള്ള സൗകര്യം (Scalability), എവിടെനിന്നും ഉപയോഗിക്കാനുള്ള സൗകര്യം (Mobility) എന്നിവ ക്ലൗഡിന്റെ ഗുണങ്ങളാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_086",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "86. Which is a method of defeating a cryptographic scheme by trying a large number of possibilities?",
+    "option_a": "Brute Force Attack",
+    "option_b": "Smurf Attack",
+    "option_c": "DoS Attack",
+    "option_d": "Teardrop Attack",
+    "correct_answer": "A",
+    "explanation": "A Brute Force Attack attempts all possible combinations of keys or passwords until the correct one is discovered.\n\n[മലയാളം]: എല്ലാ കോമ്പിനേഷനുകളും ഒന്നൊന്നായി പരീക്ഷിച്ച് പാസ്‌വേഡോ കീകളോ കണ്ടെത്താൻ ശ്രമിക്കുന്ന സൈബർ ആക്രമണമാണ് ബ്രൂട്ട് ഫോഴ്സ് അറ്റാക്ക് (Brute Force Attack).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_087",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "87. Secret recipients’ address given in :",
+    "option_a": "To field",
+    "option_b": "CC field",
+    "option_c": "BCC field",
+    "option_d": "From field",
+    "correct_answer": "C",
+    "explanation": "BCC (Blind Carbon Copy) hides recipients' email addresses from all other recipients.\n\n[മലയാളം]: ഇമെയിലിൽ മറ്റ് സ്വീകർത്താക്കൾ കാണാത്ത രീതിയിൽ രഹസ്യമായി ഇമെയിൽ വിലാസം നൽകുന്നത് BCC (Blind Carbon Copy) ഫീൽഡിലാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_088",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "88. If a person booked a railway ticket through IRCTC, but he couldn’t get the reservation in the time of chart preparation of the concerned train. Then IRCTC refund the amount to his bank account and it is known as :",
+    "option_a": "COD",
+    "option_b": "Charge back",
+    "option_c": "Payment",
+    "option_d": "Service Denial Charge",
+    "correct_answer": "B",
+    "explanation": "Returning funds back to the consumer's bank/card account after a non-fulfilled transaction is termed a Chargeback.\n\n[മലയാളം]: ടിക്കറ്റ് കൺഫേം ആകാത്തതിനെ തുടർന്ന് ഉപഭോക്താവിന്റെ അക്കൗണ്ടിലേക്ക് തുക തിരികെ ക്രെഡിറ്റ് ചെയ്യുന്ന പ്രക്രിയയെ Charge back എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_089",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "89. Which provide the IP address corresponding to the URL?",
+    "option_a": "Web server",
+    "option_b": "Database server",
+    "option_c": "Domain Name Server",
+    "option_d": "Web Browser",
+    "correct_answer": "C",
+    "explanation": "A Domain Name Server (DNS) resolves human-friendly URLs/domain names to their corresponding numerical IP addresses.\n\n[മലയാളം]: ഒരു വെബ് വിലാസത്തിന് (URL) അനുയോജ്യമായ IP അഡ്രസ്സ് കണ്ടെത്തി നൽകുന്നത് DNS (Domain Name Server) ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_090",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "90. Categories of E-Commerce :\n(i) Business to Business\n(ii) Government to Business\n(iii) Business to Customer\n(iv) Government to Citizen",
+    "option_a": "(i), (ii) and (iii)",
+    "option_b": "(ii) and (iv)",
+    "option_c": "(i) only",
+    "option_d": "(i), (ii) (iii) and (iv)",
+    "correct_answer": "D",
+    "explanation": "B2B, G2B, B2C, and G2C are all recognized categories of e-commerce / e-governance.\n\n[മലയാളം]: B2B, G2B, B2C, G2C എന്നിവയെല്ലാം ഇ-കൊമേഴ്‌സിന്റെയും ഇ-ഗവേണൻസിന്റെയും പ്രധാന വിഭാഗങ്ങളാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_091",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "91. Which helps to define common syntax in semantic web?",
+    "option_a": "RDF",
+    "option_b": "RDFS",
+    "option_c": "URI",
+    "option_d": "XML",
+    "correct_answer": "D",
+    "explanation": "XML provides a surface syntax for structured documents in semantic web (Official PSC answer key gives D).\n\n[മലയാളം]: സെമാന്റിക് വെബിൽ ഘടനാപരമായ വിവരങ്ങൾക്കായി പൊതുവായ സിന്റാക്സ് നൽകുന്നത് XML ആണ് (PSC ഉത്തരസൂചിക പ്രകാരം D).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_092",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "92. Cyber crimes against government includes :\n(i) Cyber Vandalism\n(ii) Cyber Warfare\n(iii) Cyber Terrorism\n(iv) Cyber Trafficking",
+    "option_a": "(i), (ii), (iii) and (iv)",
+    "option_b": "(i) only",
+    "option_c": "(i) and (ii)",
+    "option_d": "(ii) and (iii)",
+    "correct_answer": "D",
+    "explanation": "Cyber Warfare and Cyber Terrorism are targeted crimes against governments and national infrastructure (Official answer key gives D).\n\n[മലയാളം]: സർക്കാരുകൾക്കും രാജ്യത്തിന്റെ സുരക്ഷയ്ക്കും എതിരെയുള്ള സൈബർ കുറ്റകൃത്യങ്ങളാണ് സൈബർ യുദ്ധവും (Cyber Warfare) സൈബർ ഭീകരവാദവും (Cyber Terrorism).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_093",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "93. Which one is the intermediary responsible for processing the transfer of fund from payee to recipient in an E-commerce transaction?",
+    "option_a": "Credit card",
+    "option_b": "Debit Card",
+    "option_c": "Payment Gateway",
+    "option_d": "Wallet",
+    "correct_answer": "C",
+    "explanation": "A Payment Gateway is an e-commerce application service provider service that authorizes card or direct payments for online businesses.\n\n[മലയാളം]: ഓൺലൈൻ ഇടപാടുകളിൽ പണം കൈമാറ്റം സുരക്ഷിതമായി പ്രോസസ്സ് ചെയ്യുന്ന ഇടനിലക്കാരനാണ് പേയ്‌മെന്റ് ഗേറ്റ്‌വേ (Payment Gateway).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_094",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "94. Who is the father of cloud computing?",
+    "option_a": "Charles Bachman",
+    "option_b": "Edgar Frank Codd",
+    "option_c": "J.C.R. Licklider",
+    "option_d": "Sharon B. Codd",
+    "correct_answer": "C",
+    "explanation": "J.C.R. Licklider is widely regarded as the father of cloud computing due to his vision of an 'Intergalactic Computer Network' in the 1960s.\n\n[മലയാളം]: ക്ലൗഡ് കമ്പ്യൂട്ടിംഗിന്റെ പിതാവ് എന്നറിയപ്പെടുന്നത് ജെ.സി.ആർ. ലിക്ക്ലൈഡർ (J.C.R. Licklider) ആണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_095",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "95. Unsolicited email sent in bulk is :",
+    "option_a": "Threat",
+    "option_b": "Virus",
+    "option_c": "Spam",
+    "option_d": "Phishing",
+    "correct_answer": "C",
+    "explanation": "Spam is unsolicited bulk email sent to a large number of recipients.\n\n[മലയാളം]: ആവശ്യപ്പെടാതെ തന്നെ കൂട്ടത്തോടെ അയക്കപ്പെടുന്ന അനാവശ്യ ഇമെയിലുകളെ സ്പാം (Spam) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_096",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "96. Which of the following is not a type of cloud server?",
+    "option_a": "Public Cloud Servers",
+    "option_b": "Private Cloud Server",
+    "option_c": "Dedicated Cloud Servers",
+    "option_d": "Merged Cloud Servers",
+    "correct_answer": "D",
+    "explanation": "Merged Cloud Servers is not a recognized category of cloud servers.\n\n[മലയാളം]: ക്ലൗഡ് സെർവറുകളുടെ തരങ്ങളിൽ പബ്ലിക്, പ്രൈവറ്റ്, ഡെഡിക്കേറ്റഡ് എന്നിവയുണ്ട്; എന്നാൽ 'Merged Cloud Servers' എന്നൊന്നില്ല.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_097",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "97. Attacking the victims through fake URL resembling that of a valid financial institution is called as :",
+    "option_a": "Worms",
+    "option_b": "Phishing",
+    "option_c": "Trojans",
+    "option_d": "Computer virus",
+    "correct_answer": "B",
+    "explanation": "Phishing is a social engineering attack where fraudulent websites mimic legitimate banks or services to steal credentials.\n\n[മലയാളം]: യഥാർത്ഥ ബാങ്കുകളുടെയോ സ്ഥാപനങ്ങളുടെയോ വ്യാജ വെബ്‌സൈറ്റ് നിർമ്മിച്ച് ഉപയോക്താക്കളെ കബളിപ്പിക്കുന്ന രീതിയാണ് ഫിഷിംഗ് (Phishing).",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_098",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "98. In credit/ Debit cards, CVV stands for :",
+    "option_a": "Card Verification Value",
+    "option_b": "Credit Verification Value",
+    "option_c": "Card Validity Value",
+    "option_d": "Credit Verification Visual",
+    "correct_answer": "A",
+    "explanation": "CVV stands for Card Verification Value (the 3-digit security code on the signature strip of payment cards).\n\n[മലയാളം]: ക്രെഡിറ്റ്/ഡെബിറ്റ് കാർഡുകൾക്ക് പിന്നിലുള്ള 3 അക്ക സുരക്ഷാ കോഡായ CVV-യുടെ പൂർണ്ണരൂപം Card Verification Value എന്നാണ്.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_099",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "99. How many types of preventive controls?",
+    "option_a": "2",
+    "option_b": "3",
+    "option_c": "4",
+    "option_d": "5",
+    "correct_answer": "B",
+    "explanation": "Security controls are primarily categorized into 3 types: Administrative, Technical (Logical), and Physical.\n\n[മലയാളം]: പ്രിവന്റീവ് സെക്യൂരിറ്റി കൺട്രോളുകൾ പ്രധാനമായും 3 തരത്തിലാണ്: അഡ്മിനിസ്ട്രേറ്റീവ്, ടെക്നിക്കൽ, ഫിസിക്കൽ.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  },
+  {
+    "id": "PSC_147_2023_100",
+    "sheetName": "PSC_Previous_Exam",
+    "question": "100. The following are different types of cloud computing services except :",
+    "option_a": "Infrastructure as a Service",
+    "option_b": "Hardware as a Service",
+    "option_c": "Platform as a Service",
+    "option_d": "Software as a Service",
+    "correct_answer": "B",
+    "explanation": "The standard cloud service models are IaaS, PaaS, and SaaS. 'Hardware as a Service' is not a standard cloud computing service model.\n\n[മലയാളം]: ക്ലൗഡ് കമ്പ്യൂട്ടിംഗ് സർവീസുകളുടെ പ്രധാന വിഭാഗങ്ങൾ IaaS, PaaS, SaaS എന്നിവയാണ്; 'Hardware as a Service' ഇതിൽ ഉൾപ്പെടുന്നില്ല.",
+    "subtopic": "Kerala PSC Junior Instructor (COPA) - 147/2023"
+  }
+];
+}

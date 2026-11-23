@@ -29,7 +29,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-const CURRENT_DATA_VERSION = "2026_11_22_100Q_ML_V2";
+const CURRENT_DATA_VERSION = "2026_11_23_PSC_147_2023_V1";
+
+function getAllBuiltinQuestions() {
+  const list = (typeof SAMPLE_QUESTIONS !== 'undefined' && Array.isArray(SAMPLE_QUESTIONS)) ? [...SAMPLE_QUESTIONS] : [];
+  if (typeof PSC_PREVIOUS_QUESTIONS !== 'undefined' && Array.isArray(PSC_PREVIOUS_QUESTIONS)) {
+    const existingIds = new Set(list.map(q => q.id));
+    PSC_PREVIOUS_QUESTIONS.forEach(q => {
+      if (!existingIds.has(q.id)) {
+        list.push(q);
+      }
+    });
+  }
+  return list;
+}
 
 // Load Questions from LocalStorage or Fallback to Sample Data
 function loadQuestions() {
@@ -37,14 +50,28 @@ function loadQuestions() {
   const cached = localStorage.getItem('chm_cached_questions');
 
   if (version !== CURRENT_DATA_VERSION || !cached) {
-    state.questions = SAMPLE_QUESTIONS;
-    localStorage.setItem('chm_cached_questions', JSON.stringify(SAMPLE_QUESTIONS));
+    state.questions = getAllBuiltinQuestions();
+    localStorage.setItem('chm_cached_questions', JSON.stringify(state.questions));
     localStorage.setItem('chm_data_version', CURRENT_DATA_VERSION);
   } else {
     try {
       state.questions = JSON.parse(cached);
+      // Ensure PSC previous questions are included
+      if (typeof PSC_PREVIOUS_QUESTIONS !== 'undefined' && Array.isArray(PSC_PREVIOUS_QUESTIONS)) {
+        const existingIds = new Set(state.questions.map(q => q.id));
+        let addedNew = false;
+        PSC_PREVIOUS_QUESTIONS.forEach(q => {
+          if (!existingIds.has(q.id)) {
+            state.questions.push(q);
+            addedNew = true;
+          }
+        });
+        if (addedNew) {
+          localStorage.setItem('chm_cached_questions', JSON.stringify(state.questions));
+        }
+      }
     } catch (e) {
-      state.questions = SAMPLE_QUESTIONS;
+      state.questions = getAllBuiltinQuestions();
     }
   }
 }
@@ -258,6 +285,55 @@ function startFullMockExam() {
 
   initQuizUI();
   startExamTimer();
+}
+
+// Start PSC Previous Exam (100 Questions, 75 Minutes, -0.33 negative marking)
+function startPscPreviousExam() {
+  const pscQuestions = (typeof PSC_PREVIOUS_QUESTIONS !== 'undefined' && PSC_PREVIOUS_QUESTIONS.length > 0)
+    ? PSC_PREVIOUS_QUESTIONS
+    : state.questions.filter(q => q.sheetName === "PSC_Previous_Exam");
+
+  if (!pscQuestions || pscQuestions.length === 0) {
+    alert("PSC Previous Exam questions not found! Please check psc_previous_data.js or sync with Google Sheets.");
+    return;
+  }
+
+  state.activeSession = {
+    mode: 'exam',
+    title: 'PSC Previous Exam: Junior Instructor COPA (147/2023)',
+    questions: [...pscQuestions],
+    currentIndex: 0,
+    userAnswers: {},
+    timeRemaining: 75 * 60, // 75 minutes in seconds
+    timerInterval: null,
+    isSubmitted: false
+  };
+
+  initQuizUI();
+  startExamTimer();
+}
+
+// Start PSC Previous Exam Practice Mode (Instant answers, Malayalam explanations, jump palette)
+function startPscPreviousPractice() {
+  const pscQuestions = (typeof PSC_PREVIOUS_QUESTIONS !== 'undefined' && PSC_PREVIOUS_QUESTIONS.length > 0)
+    ? PSC_PREVIOUS_QUESTIONS
+    : state.questions.filter(q => q.sheetName === "PSC_Previous_Exam");
+
+  if (!pscQuestions || pscQuestions.length === 0) {
+    alert("PSC Previous Exam questions not found! Please check psc_previous_data.js or sync with Google Sheets.");
+    return;
+  }
+
+  state.activeSession = {
+    mode: 'practice',
+    title: 'PSC Previous Exam (147/2023) - Practice Mode',
+    questions: [...pscQuestions],
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+
+  initQuizUI();
 }
 
 // Start Timed Test for a Specific Module
@@ -835,15 +911,21 @@ async function syncWithGoogleSheet(isAutoSync = false) {
     const data = await res.json();
 
     if (data.status === "success" && data.questions) {
-      state.questions = data.questions;
+      let merged = [...data.questions];
+      // If the synced sheet doesn't have PSC_Previous_Exam yet, keep built-in previous questions
+      const hasPscSheetInSync = merged.some(q => q.sheetName === "PSC_Previous_Exam");
+      if (!hasPscSheetInSync && typeof PSC_PREVIOUS_QUESTIONS !== 'undefined') {
+        merged = merged.concat(PSC_PREVIOUS_QUESTIONS);
+      }
+      state.questions = merged;
       state.apiUrl = urlInput;
-      localStorage.setItem('chm_cached_questions', JSON.stringify(data.questions));
+      localStorage.setItem('chm_cached_questions', JSON.stringify(merged));
       localStorage.setItem('chm_api_url', urlInput);
       localStorage.setItem('chm_last_synced', new Date().toISOString());
 
       if (statusEl) {
         statusEl.className = "p-3 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-800 block";
-        statusEl.innerText = `Success! Fetched ${data.questions.length} questions across your Google Sheet modules.`;
+        statusEl.innerText = `Success! Fetched ${merged.length} questions across your Google Sheet modules.`;
       }
       renderDashboard();
       if (!isAutoSync) {
@@ -864,9 +946,9 @@ async function syncWithGoogleSheet(isAutoSync = false) {
 
 function resetToSampleQuestions() {
   localStorage.removeItem('chm_cached_questions');
-  state.questions = SAMPLE_QUESTIONS;
+  state.questions = getAllBuiltinQuestions();
   renderDashboard();
-  alert("Reset to built-in sample questions.");
+  alert("Reset to built-in sample and PSC previous exam questions.");
   closeSettingsModal();
 }
 
