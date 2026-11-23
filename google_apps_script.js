@@ -30,7 +30,8 @@ function setupSpreadsheet() {
     { name: "Module_9_Protocols_Servers", title: "Module 9: Application Protocols & Servers (10 Marks)" },
     { name: "Module_10_Security_Cloud_Law", title: "Module 10: Security, Cloud & IT Law (10 Marks)" },
     { name: "PSC_Previous_Exam", title: "PSC Previous Exam: Junior Instructor 147/2023 (100 Marks)" },
-    { name: "PSC_Tradesman_191_2015", title: "PSC Tradesman CHM: 191/2015 (83 Marks)" }
+    { name: "PSC_Tradesman_191_2015", title: "PSC Tradesman CHM: 191/2015 (83 Marks)" },
+    { name: "PSC_Tradesman_170_2014", title: "PSC Tradesman CHM: 170/2014 (100 Marks)" }
   ];
 
   const headers = [
@@ -1485,6 +1486,7 @@ function onOpen() {
     .addItem("▶️ Generate Questions for All Modules Now", "generateQuestionsForAllModules")
     .addItem("🏛️ Add COPA Previous Exam Sheet (100 Qs - 147/2023)", "setupPscPreviousExamSheet")
     .addItem("🛠️ Add Tradesman CHM 191/2015 Sheet (83 Qs)", "setupPscTradesman191_2015Sheet")
+    .addItem("🛠️ Add Tradesman CHM 170/2014 Sheet (100 Qs)", "setupPscTradesman170_2014Sheet")
     .addSeparator()
     .addItem("⏰ Setup Daily Auto-Trigger (Every Day 6 AM)", "setupDailyTrigger")
     .addItem("⏹️ Remove Daily Auto-Trigger", "removeDailyTrigger")
@@ -4235,6 +4237,1284 @@ function getPscTradesman191Questions() {
     "correct_answer": "D",
     "explanation": "Vaikunda Swamikal founded 'Samathwa Samajam' in 1836, which is regarded as the first socio-religious reform movement in Kerala.\n\n[മലയാളം]: 1836-ൽ 'സമത്വ സമാജം' സ്ഥാപിച്ചത് വൈകുണ്ഠ സ്വാമികൾ (Vaikunda Swamikal) ആണ്.",
     "subtopic": "Kerala Renaissance Movements"
+  }
+];
+}
+
+
+/**
+ * Tradesman (Computer Hardware Maintenance) 170/2014 ഷീറ്റ് നിർമ്മിച്ച് 100 ചോദ്യങ്ങളും ചേർക്കുന്നു
+ */
+function setupPscTradesman170_2014Sheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("PSC_Tradesman_170_2014");
+  if (!sheet) {
+    sheet = ss.insertSheet("PSC_Tradesman_170_2014");
+  }
+
+  const headers = [
+    "id", "question", "option_a", "option_b", "option_c", "option_d",
+    "correct_answer", "explanation", "subtopic"
+  ];
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setBackground("#1e3a8a"); // Blue-900 background
+    headerRange.setFontColor("#ffffff");
+    headerRange.setFontWeight("bold");
+    headerRange.setFontSize(11);
+    headerRange.setHorizontalAlignment("center");
+    sheet.setFrozenRows(1);
+
+    sheet.setColumnWidth(1, 140);
+    sheet.setColumnWidth(2, 450);
+    sheet.setColumnWidth(3, 180);
+    sheet.setColumnWidth(4, 180);
+    sheet.setColumnWidth(5, 180);
+    sheet.setColumnWidth(6, 180);
+    sheet.setColumnWidth(7, 120);
+    sheet.setColumnWidth(8, 400);
+    sheet.setColumnWidth(9, 220);
+  }
+
+  const existingData = sheet.getDataRange().getValues();
+  const existingIds = new Set();
+  for (let r = 1; r < existingData.length; r++) {
+    if (existingData[r][0]) existingIds.add(String(existingData[r][0]));
+  }
+
+  const questions = getPscTradesman170Questions();
+  let added = 0;
+  questions.forEach(q => {
+    if (!existingIds.has(q.id)) {
+      sheet.appendRow([
+        q.id,
+        q.question,
+        q.option_a,
+        q.option_b,
+        q.option_c,
+        q.option_d,
+        q.correct_answer,
+        q.explanation,
+        q.subtopic
+      ]);
+      added++;
+    }
+  });
+
+  const msg = "✅ Tradesman CHM (170/2014) ഷീറ്റ് വിജയകരമായി തയ്യാറാക്കി! ആകെ " + added + " ചോദ്യങ്ങൾ ചേർത്തു.";
+  Logger.log(msg);
+  try {
+    SpreadsheetApp.getUi().alert(msg);
+  } catch (e) {}
+}
+
+/**
+ * Kerala PSC Tradesman (Computer Hardware Maintenance) - Question Code: 170/2014
+ * Complete 100 Official Questions with Final Answer Key & Malayalam Explanations
+ */
+function getPscTradesman170Questions() {
+  return [
+  {
+    "id": "PSC_170_2014_001",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "1. Which of the following is an impact printer?",
+    "option_a": "Inkjet Printer",
+    "option_b": "Dot Matrix Printer",
+    "option_c": "Laser Printer",
+    "option_d": "Thermal Printer",
+    "correct_answer": "B",
+    "explanation": "Dot Matrix Printers are impact printers that print by physically striking pins against an ink ribbon onto paper. Inkjet, Laser, and Thermal printers are non-impact.\n\n[മലയാളം]: ഡോട്ട് മാട്രിക്സ് പ്രിന്റർ (Dot Matrix Printer) ഒരു ഇംപാക്ട് പ്രിന്ററാണ് (Impact Printer). ഇതിൽ പിന്നുകൾ റിബണിൽ തട്ടിയാണ് അക്ഷരങ്ങൾ പതിപ്പിക്കുന്നത്.",
+    "subtopic": "Printers: Impact vs Non-Impact"
+  },
+  {
+    "id": "PSC_170_2014_002",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "2. The data transfer rate of a 48x CDROM is :",
+    "option_a": "7200 KB/sec",
+    "option_b": "7200 MB/sec",
+    "option_c": "720 KB/sec",
+    "option_d": "720 MB/sec",
+    "correct_answer": "A",
+    "explanation": "The base data transfer rate of 1x CD-ROM is 150 KB/sec. Therefore, a 48x drive achieves 48 × 150 KB/sec = 7200 KB/sec.\n\n[മലയാളം]: അടിസ്ഥാന 1x സിഡി റോമിന്റെ വേഗത 150 KB/s ആണ്. അതിനാൽ 48x സിഡി റോമിന്റെ ഡാറ്റാ ട്രാൻസ്ഫർ റേറ്റ് 48 × 150 = 7200 KB/sec ആണ്.",
+    "subtopic": "Optical Storage Devices"
+  },
+  {
+    "id": "PSC_170_2014_003",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "3. The smallest individually addressable unit of information stored on a hard disk is :",
+    "option_a": "Track",
+    "option_b": "Platter",
+    "option_c": "Sector",
+    "option_d": "Cylinder",
+    "correct_answer": "C",
+    "explanation": "A sector (traditionally 512 bytes) is the smallest individually addressable physical storage block on a hard disk drive platter.\n\n[മലയാളം]: ഹാർഡ് ഡിസ്കിൽ സ്വതന്ത്രമായി ഡാറ്റ അഡ്രസ് ചെയ്യാൻ സാധിക്കുന്ന ഏറ്റവും ചെറിയ യൂണിറ്റാണ് സെക്ടർ (Sector - 512 Bytes).",
+    "subtopic": "Hard Disk Architecture & Geometry"
+  },
+  {
+    "id": "PSC_170_2014_004",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "4. Which of the following is not a motherboard component?",
+    "option_a": "Hard Disk",
+    "option_b": "BIOS ROM",
+    "option_c": "CMOS Battery",
+    "option_d": "Processor",
+    "correct_answer": "A",
+    "explanation": "The Hard Disk is an internal/external storage peripheral connected via cables to the motherboard, not an onboard motherboard component.\n\n[മലയാളം]: ഹാർഡ് ഡിസ്ക് (Hard Disk) ഒരു പെരിഫറൽ സ്റ്റോറേജ് ഉപകരണമാണ്; അത് മദർബോർഡിലെ ഒരു ഘടകമല്ല (BIOS, CMOS ബാറ്ററി, പ്രോസസ്സർ എന്നിവ മദർബോർഡിൽ ഘടിപ്പിച്ചിട്ടുള്ളവയാണ്).",
+    "subtopic": "Motherboard Components"
+  },
+  {
+    "id": "PSC_170_2014_005",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "5. SMPS is used to :",
+    "option_a": "Control speed of processor",
+    "option_b": "Manage Data transfer",
+    "option_c": "Convert ac voltage to dc",
+    "option_d": "Control I/O devices",
+    "correct_answer": "C",
+    "explanation": "SMPS (Switched-Mode Power Supply) converts 230V AC mains electrical voltage into stable, regulated low-voltage DC outputs (+12V, +5V, +3.3V, -12V) required by computer components.\n\n[മലയാളം]: മെയിൻസ് സപ്ലൈയിൽ നിന്നുള്ള ഉയർന്ന AC വോൾട്ടേജിനെ കമ്പ്യൂട്ടറിന് ആവശ്യമായ സുരക്ഷിതമായ വിവിധ DC വോൾട്ടേജുകളാക്കി മാറ്റാനാണ് SMPS ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Power Supplies & SMPS"
+  },
+  {
+    "id": "PSC_170_2014_006",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "6. If the number of gates in an IC is between 100 and 5000, then the integration level is :",
+    "option_a": "SSI",
+    "option_b": "MSI",
+    "option_c": "LSI",
+    "option_d": "VLSI",
+    "correct_answer": "C",
+    "explanation": "Integration scale classifications: SSI (<10 to 12 gates), MSI (12 to 100 gates), LSI (100 to 5,000 gates), VLSI (5,000 to 100,000+ gates).\n\n[മലയാളം]: ഒരു ഇന്റഗ്രേറ്റഡ് സർക്യൂട്ടിൽ (IC) ലോജിക് ഗേറ്റുകളുടെ എണ്ണം 100 മുതൽ 5000 വരെയാണെങ്കിൽ അതിനെ LSI (Large Scale Integration) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Digital Electronics & IC Levels"
+  },
+  {
+    "id": "PSC_170_2014_007",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "7. Linux is :",
+    "option_a": "An operating system",
+    "option_b": "A free software",
+    "option_c": "A system software",
+    "option_d": "All the above",
+    "correct_answer": "D",
+    "explanation": "Linux is a free and open-source operating system kernel and comprehensive system software under the GNU GPL.\n\n[മലയാളം]: ലിനക്സ് (Linux) ഒരു ഓപ്പറേറ്റിംഗ് സിസ്റ്റവും, സിസ്റ്റം സോഫ്റ്റ്‌വെയറും, ഒപ്പം ഒരു സൗജന്യ സോഫ്റ്റ്‌വെയറുമാണ് (All the above).",
+    "subtopic": "Operating Systems & Linux"
+  },
+  {
+    "id": "PSC_170_2014_008",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "8. Which of the following is a gaming device?",
+    "option_a": "Mouse",
+    "option_b": "Joystick",
+    "option_c": "Web cam",
+    "option_d": "Track Ball",
+    "correct_answer": "B",
+    "explanation": "A Joystick is a handheld lever input controller specifically designed for controlling video games and flight simulators.\n\n[മലയാളം]: വീഡിയോ ഗെയിമുകൾ കളിക്കുന്നതിനായി പ്രത്യേകമായി ഉപയോഗിക്കുന്ന ഇൻപുട്ട് ഉപകരണമാണ് ജോയ്‌സ്റ്റിക് (Joystick).",
+    "subtopic": "I/O Devices & Peripherals"
+  },
+  {
+    "id": "PSC_170_2014_009",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "9. The device that connect computers by means of telephone line :",
+    "option_a": "NIC",
+    "option_b": "Bus",
+    "option_c": "Cable",
+    "option_d": "Modem",
+    "correct_answer": "D",
+    "explanation": "A Modem (Modulator-Demodulator) modulates digital computer signals to analog audio for transmission over telephone lines and demodulates incoming signals.\n\n[മലയാളം]: ടെലിഫോൺ ലൈൻ വഴി കമ്പ്യൂട്ടറുകളെ ഇന്റർനെറ്റിലേക്ക് ബന്ധിപ്പിക്കാൻ ഉപയോഗിക്കുന്ന ഉപകരണമാണ് മോഡം (Modem).",
+    "subtopic": "Networking Devices & Modems"
+  },
+  {
+    "id": "PSC_170_2014_010",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "10. POST means :",
+    "option_a": "Power On System Test",
+    "option_b": "Power On Self Test",
+    "option_c": "Power Out System Test",
+    "option_d": "Power Out Self Test",
+    "correct_answer": "B",
+    "explanation": "POST stands for Power-On Self-Test, the diagnostic testing sequence executed by the BIOS firmware immediately after powering on a computer.\n\n[മലയാളം]: POST-ന്റെ പൂർണ്ണരൂപം 'Power On Self Test' എന്നാണ്. കമ്പ്യൂട്ടർ ഓൺ ചെയ്യുമ്പോൾ ഹാർഡ്‌വെയറുകളുടെ പ്രവർത്തനം പരിശോധിക്കുന്ന പ്രക്രിയയാണിത്.",
+    "subtopic": "BIOS & POST Diagnostics"
+  },
+  {
+    "id": "PSC_170_2014_011",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "11. The Principles of Structured programming forbid the use of :",
+    "option_a": "switch",
+    "option_b": "if",
+    "option_c": "for",
+    "option_d": "goto",
+    "correct_answer": "D",
+    "explanation": "Structured programming principles (championed by Edsger Dijkstra) strictly discourage or forbid unconditional branching statements like 'goto' to avoid spaghetti code.\n\n[മലയാളം]: സ്ട്രക്ചേർഡ് പ്രോഗ്രാമിംഗിൽ (Structured programming) അനിയന്ത്രിതമായ ജമ്പിംഗ് ഒഴിവാക്കാനായി 'goto' സ്റ്റേറ്റ്‌മെന്റിന്റെ ഉപയോഗം കർശനമായി വിലക്കിയിരിക്കുന്നു.",
+    "subtopic": "Software Concepts & Programming"
+  },
+  {
+    "id": "PSC_170_2014_012",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "12. A microcontroller contains :",
+    "option_a": "CPU and ROM",
+    "option_b": "CPU, RAM and I/O ports",
+    "option_c": "CPU and RAM",
+    "option_d": "All the above",
+    "correct_answer": "D",
+    "explanation": "A microcontroller is a compact computer-on-a-chip that integrates the CPU, RAM memory, ROM/Flash memory, and I/O ports all within a single integrated circuit.\n\n[മലയാളം]: ഒരു മൈക്രോകൺട്രോളറിനുള്ളിൽ CPU, RAM, ROM, I/O ports എന്നിവയെല്ലാം ഒരൊറ്റ ചിപ്പിൽ സംയോജിപ്പിച്ചിരിക്കുന്നു (All the above).",
+    "subtopic": "Microprocessor vs Microcontroller"
+  },
+  {
+    "id": "PSC_170_2014_013",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "13. Which is the term not related with Database?",
+    "option_a": "TTL",
+    "option_b": "SQL",
+    "option_c": "DML",
+    "option_d": "DDL",
+    "correct_answer": "A",
+    "explanation": "SQL (Structured Query Language), DDL (Data Definition Language), and DML (Data Manipulation Language) are fundamental database terms. TTL is Transistor-Transistor Logic or Time To Live.\n\n[മലയാളം]: ഡാറ്റാബേസുമായി ബന്ധമില്ലാത്ത പദമാണ് TTL (Transistor-Transistor Logic). SQL, DML, DDL എന്നിവ ഡാറ്റാബേസ് പദങ്ങളാണ്.",
+    "subtopic": "Databases & Basic Electronics"
+  },
+  {
+    "id": "PSC_170_2014_014",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "14. Overclocking a CPU results in :",
+    "option_a": "Increased performance",
+    "option_b": "Increased heat",
+    "option_c": "Increased bus speed",
+    "option_d": "All the above",
+    "correct_answer": "D",
+    "explanation": "Overclocking increases the clock multiplier or front-side bus frequency beyond manufacturer ratings, resulting in higher processing performance, higher bus speed, and substantially increased heat dissipation.\n\n[മലയാളം]: ഒരു സിപിയു ഓവർക്ലോക്ക് (Overclocking) ചെയ്യുമ്പോൾ പെർഫോമൻസ് കൂടുന്നു, ഒപ്പം ഹീറ്റും ബസ് സ്പീഡും വർദ്ധിക്കുന്നു (All the above).",
+    "subtopic": "CPU Technology & Overclocking"
+  },
+  {
+    "id": "PSC_170_2014_015",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "15. The errors detected by compiler are :",
+    "option_a": "Syntax errors",
+    "option_b": "Semantic errors",
+    "option_c": "Logical errors",
+    "option_d": "Internal errors",
+    "correct_answer": "A",
+    "explanation": "Compilers check the source code against the grammatical rules of the programming language and flag Syntax Errors during translation.\n\n[മലയാളം]: പ്രോഗ്രാം കമ്പൈൽ ചെയ്യുമ്പോൾ കമ്പൈലർ കണ്ടെത്തുന്ന വ്യാകരണപരമായ തെറ്റുകളെ സിന്റാക്സ് എററുകൾ (Syntax errors) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "System Software & Compilers"
+  },
+  {
+    "id": "PSC_170_2014_016",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "16. USB stands for :",
+    "option_a": "Universal Synchronous Bus",
+    "option_b": "Universal Serial Bus",
+    "option_c": "Uniform Standard Bus",
+    "option_d": "Uniform Serial Bus",
+    "correct_answer": "B",
+    "explanation": "USB stands for Universal Serial Bus, an industry standard establishing specifications for cables, connectors, and protocols for connection and power supply between computers and peripherals.\n\n[മലയാളം]: USB-യുടെ പൂർണ്ണരൂപം 'Universal Serial Bus' എന്നാണ്.",
+    "subtopic": "Bus Standards: USB"
+  },
+  {
+    "id": "PSC_170_2014_017",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "17. Cache memory is used to :",
+    "option_a": "Increase capacity of memory",
+    "option_b": "Store permanent data",
+    "option_c": "Store permanent code",
+    "option_d": "Increase processing speed",
+    "correct_answer": "D",
+    "explanation": "High-speed SRAM Cache memory buffers frequently accessed instructions and data close to the CPU core to reduce latency and dramatically increase overall processing speed.\n\n[മലയാളം]: സിപിയുവിന് ഇടയ്ക്കിടെ ആവശ്യമുള്ള വിവരങ്ങൾ അതിവേഗത്തിൽ നൽകി പ്രോസസ്സിംഗ് വേഗത വർദ്ധിപ്പിക്കാനാണ് (Increase processing speed) കാഷ് മെമ്മറി ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Cache Memory & CPU Architecture"
+  },
+  {
+    "id": "PSC_170_2014_018",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "18. The functioning of a microprocessor is controlled by :",
+    "option_a": "Central Processing Unit",
+    "option_b": "Arithmetic Logic Unit",
+    "option_c": "Control Unit",
+    "option_d": "All the above",
+    "correct_answer": "C",
+    "explanation": "The Control Unit (CU) coordinates and directs all operations within the microprocessor, directing data transfer, timing, and instruction decoding.\n\n[മലയാളം]: പ്രോസസ്സറിലെ എല്ലാ ഘടകങ്ങളുടെയും പ്രവർത്തനങ്ങളെ നിയന്ത്രിക്കുകയും ഏകോപിപ്പിക്കുകയും ചെയ്യുന്നത് കൺട്രോൾ യൂണിറ്റാണ് (Control Unit).",
+    "subtopic": "Control Unit & CPU Functional Blocks"
+  },
+  {
+    "id": "PSC_170_2014_019",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "19. A nibble is a group of :",
+    "option_a": "2 bits",
+    "option_b": "4 bits",
+    "option_c": "8 bits",
+    "option_d": "16 bits",
+    "correct_answer": "B",
+    "explanation": "A nibble is a unit of digital data comprising 4 bits (half a byte). An 8-bit byte equals 2 nibbles.\n\n[മലയാളം]: 4 ബിറ്റുകൾ (4 bits) ചേരുന്ന ഡിജിറ്റൽ മെമ്മറി യൂണിറ്റാണ് നിബിൾ (Nibble).",
+    "subtopic": "Memory Units & Number Systems"
+  },
+  {
+    "id": "PSC_170_2014_020",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "20. North Bridge chip is responsible for interfacing with :",
+    "option_a": "CPU and I/O",
+    "option_b": "Memory and I/O",
+    "option_c": "CPU and memory",
+    "option_d": "All the above",
+    "correct_answer": "C",
+    "explanation": "In traditional PC motherboard chipset architecture, the Northbridge connects the CPU directly to high-speed system memory (RAM) and AGP/PCIe graphics.\n\n[മലയാളം]: മദർബോർഡിൽ സിപിയുവിനെയും മെമ്മറിയെയും (RAM) പരസ്പരം ബന്ധിപ്പിക്കുന്നത് നോർത്ത് ബ്രിഡ്ജ് ചിപ്പ് (North Bridge) ആണ്.",
+    "subtopic": "Chipset Architecture: Northbridge & Southbridge"
+  },
+  {
+    "id": "PSC_170_2014_021",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "21. The contents are determined by metal masks during chip fabrication in :",
+    "option_a": "ROM",
+    "option_b": "PROM",
+    "option_c": "EPROM",
+    "option_d": "EEPROM",
+    "correct_answer": "A",
+    "explanation": "Masked ROM (MROM) has its binary contents hardwired permanently during chip manufacturing using photolithographic metal masks.\n\n[മലയാളം]: ചിപ്പ് നിർമ്മാണ വേളയിൽ തന്നെ മെറ്റൽ മാസ്കുകൾ (Metal masks) ഉപയോഗിച്ച് ഡാറ്റ സ്ഥിരമായി രേഖപ്പെടുത്തുന്ന മെമ്മറിയാണ് മാസ്ക് റോം (Mask ROM).",
+    "subtopic": "ROM Types: Mask ROM, PROM, EPROM"
+  },
+  {
+    "id": "PSC_170_2014_022",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "22. BIOS is typically placed in :",
+    "option_a": "CPU",
+    "option_b": "ROM Chip",
+    "option_c": "RAM",
+    "option_d": "Cache memory",
+    "correct_answer": "B",
+    "explanation": "The BIOS firmware is non-volatile and permanently stored on a motherboard ROM/Flash EEPROM chip so it is preserved when power is turned off.\n\n[മലയാളം]: കമ്പ്യൂട്ടറിലെ BIOS ഫേംവെയർ സൂക്ഷിച്ചിരിക്കുന്നത് മദർബോർഡിലെ റോം ചിപ്പിലാണ് (ROM/Flash ROM Chip).",
+    "subtopic": "BIOS & Motherboard Architecture"
+  },
+  {
+    "id": "PSC_170_2014_023",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "23. Which of the following is a magnetic storage?",
+    "option_a": "Hard Disk",
+    "option_b": "Compact disc",
+    "option_c": "Flash memory",
+    "option_d": "Blu-ray Disc",
+    "correct_answer": "A",
+    "explanation": "A Hard Disk uses magnetic platters to record data. CDs and Blu-ray discs use optical pits/lands, while Flash memory uses solid-state floating-gate transistors.\n\n[മലയാളം]: കാന്തിക തരംഗങ്ങൾ (Magnetic field) ഉപയോഗിച്ച് ഡാറ്റ സൂക്ഷിക്കുന്ന സ്റ്റോറേജ് ഉപകരണമാണ് ഹാർഡ് ഡിസ്ക് (Hard Disk).",
+    "subtopic": "Storage Devices: Magnetic vs Optical"
+  },
+  {
+    "id": "PSC_170_2014_024",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "24. A 5 pin DIN connector is used to connect :",
+    "option_a": "Mouse",
+    "option_b": "Keyboard",
+    "option_c": "Monitor",
+    "option_d": "Power to hard disk",
+    "correct_answer": "B",
+    "explanation": "The circular 5-pin DIN connector was the standard keyboard interface used on original IBM PC/XT and AT motherboards (predecessor to 6-pin PS/2).\n\n[മലയാളം]: പഴയ തലമുറയിലെ IBM PC/AT കമ്പ്യൂട്ടറുകളിൽ കീബോർഡ് (Keyboard) കണക്ട് ചെയ്യാനാണ് വലിയ വൃത്താകൃതിയിലുള്ള 5-പിൻ DIN കണക്ടർ ഉപയോഗിച്ചിരുന്നത്.",
+    "subtopic": "Connectors & Peripheral Ports"
+  },
+  {
+    "id": "PSC_170_2014_025",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "25. To remove or replace jumpers on circuit board, we use :",
+    "option_a": "Screw driver",
+    "option_b": "Wire snips",
+    "option_c": "Needle-Nose plier",
+    "option_d": "Tweezers",
+    "correct_answer": "C",
+    "explanation": "Needle-nose pliers (or tweezers) provide the fine grip required to remove or insert small configuration jumpers on motherboards and drive pins.\n\n[മലയാളം]: സർക്യൂട്ട് ബോർഡിലെ ചെറിയ ജമ്പറുകൾ (Jumpers) ഇളക്കിമാറ്റാനും ഘടിപ്പിക്കാനും നീഡിൽ-നോസ് പ്ലെയർ (Needle-Nose plier) ആണ് ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Hardware Tools & Maintenance"
+  },
+  {
+    "id": "PSC_170_2014_026",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "26. In Dynamic RAM, data is stored using :",
+    "option_a": "Flip-flop",
+    "option_b": "Magnetic field",
+    "option_c": "Capacitor",
+    "option_d": "None of the above",
+    "correct_answer": "C",
+    "explanation": "DRAM memory cells store each bit of binary data as an electrical charge inside a microscopic capacitor paired with an access transistor.\n\n[മലയാളം]: ഡൈനാമിക് റാമിൽ (DRAM) ഓരോ ബിറ്റ് ഡാറ്റയും സൂക്ഷിച്ചുവെക്കുന്നത് കപ്പാസിറ്ററുകളിലെ (Capacitor) ഇലക്ട്രിക്കൽ ചാർജ്ജ് ആയിട്ടാണ്.",
+    "subtopic": "RAM Architecture: DRAM vs SRAM"
+  },
+  {
+    "id": "PSC_170_2014_027",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "27. The time required for the read/write head of hard disk to position on the correct track is :",
+    "option_a": "Seek time",
+    "option_b": "Latency",
+    "option_c": "Access time",
+    "option_d": "Tracking time",
+    "correct_answer": "A",
+    "explanation": "Seek Time is the duration taken by the actuator arm to mechanically move the read/write heads to the target track/cylinder on a hard disk platter.\n\n[മലയാളം]: ഹാർഡ് ഡിസ്കിലെ റീഡ്/റൈറ്റ് ഹെഡിന് ആവശ്യമുള്ള ട്രാക്കിന് മുകളിലേക്ക് എത്തിച്ചേരാൻ എടുക്കുന്ന സമയത്തെ സീക്ക് ടൈം (Seek time) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Hard Disk Performance Metrics"
+  },
+  {
+    "id": "PSC_170_2014_028",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "28. Communication network over global area is called :",
+    "option_a": "LAN",
+    "option_b": "MAN",
+    "option_c": "WAN",
+    "option_d": "VAN",
+    "correct_answer": "C",
+    "explanation": "A Wide Area Network (WAN) spans broad geographical areas, connecting cities, countries, or the entire globe (e.g., the Internet).\n\n[മലയാളം]: ഭൂമിശാസ്ത്രപരമായി ആഗോളതലത്തിൽ അല്ലെങ്കിൽ വലിയ പ്രദേശങ്ങളിലായി വ്യാപിച്ച് കിടക്കുന്ന നെറ്റ്‌വർക്കുകളെ WAN (Wide Area Network) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Network Topologies & Types (LAN/MAN/WAN)"
+  },
+  {
+    "id": "PSC_170_2014_029",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "29. Central Processing Unit consists of :",
+    "option_a": "Control Unit and Memory Unit",
+    "option_b": "ALU and Memory Unit",
+    "option_c": "ALU and Registers",
+    "option_d": "ALU and Control Unit",
+    "correct_answer": "D",
+    "explanation": "At its core architectural definition, the CPU consists of the Arithmetic Logic Unit (ALU) and the Control Unit (CU), along with internal registers.\n\n[മലയാളം]: സിപിയുവിന്റെ (CPU) പ്രധാനപ്പെട്ട രണ്ട് അടിസ്ഥാന വിഭാഗങ്ങളാണ് ALU-വും കൺട്രോൾ യൂണിറ്റും (ALU and Control Unit).",
+    "subtopic": "CPU Architecture & Functional Blocks"
+  },
+  {
+    "id": "PSC_170_2014_030",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "30. If a microprocessor can access 64 K memory, then its address bus will be :",
+    "option_a": "8 bits",
+    "option_b": "16 bits",
+    "option_c": "32 bits",
+    "option_d": "64 bits",
+    "correct_answer": "B",
+    "explanation": "Addressable memory equals 2^n bytes, where n is the address bus width. For 64 KB (65,536 bytes): 2^16 = 65,536, requiring a 16-bit address bus.\n\n[മലയാളം]: 64 KB മെമ്മറി ആക്സസ്സ് ചെയ്യണമെങ്കിൽ 2^16 = 65536 ആയതിനാൽ അഡ്രസ് ബസ്സിന് 16 ബിറ്റ് (16 bits) നീളം വേണം (ഉദാ: 8085 പ്രോസസ്സർ).",
+    "subtopic": "Address Bus & Memory Addressing"
+  },
+  {
+    "id": "PSC_170_2014_031",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "31. The decimal number 17 can be represented in hexadecimal as :",
+    "option_a": "11",
+    "option_b": "17",
+    "option_c": "23",
+    "option_d": "1 F",
+    "correct_answer": "A",
+    "explanation": "In hexadecimal conversion: 17 divided by 16 = 1 with a remainder of 1. Therefore, decimal 17 equals (11) in hexadecimal.\n\n[മലയാളം]: ഡെസിമൽ സംഖ്യയായ 17-നെ ഹെക്സാഡെസിമലിലേക്ക് മാറ്റുമ്പോൾ 16 × 1 + 1 = (11)₁₆ എന്ന് ലഭിക്കുന്നു.",
+    "subtopic": "Number Systems & Conversion"
+  },
+  {
+    "id": "PSC_170_2014_032",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "32. From a Stack structure, data can be accessed :",
+    "option_a": "In any order",
+    "option_b": "First in First out order",
+    "option_c": "Last in First out order",
+    "option_d": "Based on Priority only",
+    "correct_answer": "C",
+    "explanation": "A Stack is a Last-In, First-Out (LIFO) data structure where elements are pushed and popped strictly from the top.\n\n[മലയാളം]: സ്റ്റാക്ക് (Stack) ഡാറ്റാ സ്ട്രക്ചറിൽ നിന്നും ഡാറ്റ എടുക്കുന്നത് LIFO അഥവാ Last in First out (അവസാനം വെച്ചത് ആദ്യം) എന്ന ക്രമത്തിലാണ്.",
+    "subtopic": "Data Structures & Stack Operation"
+  },
+  {
+    "id": "PSC_170_2014_033",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "33. Which of the following IC is used for Keyboard/Display interfacing?",
+    "option_a": "8279",
+    "option_b": "8255",
+    "option_c": "8257",
+    "option_d": "8259",
+    "correct_answer": "A",
+    "explanation": "Intel 8279 is a general-purpose programmable keyboard and display I/O interface IC designed for use with microprocessors.\n\n[മലയാളം]: പ്രോസസ്സറുമായി കീബോർഡും ഡിസ്പ്ലേയും ഇന്റർഫേസ് ചെയ്യാൻ ഉപയോഗിക്കുന്ന സ്പെഷ്യലൈസ്ഡ് ഐ.സിയാണ് Intel 8279.",
+    "subtopic": "Peripheral Interface ICs (8279, 8255)"
+  },
+  {
+    "id": "PSC_170_2014_034",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "34. Post script Language is used for :",
+    "option_a": "Website creation",
+    "option_b": "Printers",
+    "option_c": "Modems",
+    "option_d": "Graphics",
+    "correct_answer": "B",
+    "explanation": "PostScript is a page description programming language developed by Adobe, used primarily in electronic and desktop publishing to communicate page layouts to laser printers.\n\n[മലയാളം]: അഡോബ് വികസിപ്പിച്ച പോസ്റ്റ് സ്ക്രിപ്റ്റ് (PostScript) പേജ് ഡിസ്ക്രിപ്ഷൻ ഭാഷ പ്രിന്ററുകളിലേക്ക് പ്രിന്റ് ലേഔട്ടുകൾ കൈമാറാനാണ് ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Printers & Page Description Languages"
+  },
+  {
+    "id": "PSC_170_2014_035",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "35. Movement of a mouse is detected using LED in :",
+    "option_a": "Optical Mouse",
+    "option_b": "Opto-mechanical Mouse",
+    "option_c": "Mechanical Mouse",
+    "option_d": "USB Mouse",
+    "correct_answer": "A",
+    "explanation": "An Optical Mouse uses a light-emitting diode (LED) and an optoelectronic sensor to detect movement by tracking surface texture reflections.\n\n[മലയാളം]: ചുവപ്പ് LED ലൈറ്റും ഒപ്റ്റിക്കൽ സെൻസറും ഉപയോഗിച്ച് ചലനം രേഖപ്പെടുത്തുന്ന മൗസാണ് ഒപ്റ്റിക്കൽ മൗസ് (Optical Mouse).",
+    "subtopic": "Mouse Technologies: Mechanical vs Optical"
+  },
+  {
+    "id": "PSC_170_2014_036",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "36. Resolution of computer monitors is measured in :",
+    "option_a": "Hz",
+    "option_b": "mm",
+    "option_c": "Pitch",
+    "option_d": "Pixel",
+    "correct_answer": "D",
+    "explanation": "Screen display resolution is measured by the number of horizontal and vertical distinct picture elements called Pixels (e.g., 1920 × 1080 pixels).\n\n[മലയാളം]: മോണിറ്ററിന്റെ സ്ക്രീൻ റെസല്യൂഷൻ അളക്കുന്നത് പിക്സലുകളുടെ (Pixel) എണ്ണത്തിലാണ്.",
+    "subtopic": "Display Technologies & Resolution"
+  },
+  {
+    "id": "PSC_170_2014_037",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "37. CD-RW permits data to :",
+    "option_a": "Write once",
+    "option_b": "Write many times",
+    "option_c": "Write once and read many",
+    "option_d": "Read only",
+    "correct_answer": "B",
+    "explanation": "CD-RW (Compact Disc ReWritable) uses a phase-change recording layer that permits data to be written, erased, and rewritten many times (typically up to 1,000 times).\n\n[മലയാളം]: CD-RW (ReWritable) ഡിസ്കുകളിൽ പലതവണ വിവരങ്ങൾ മായ്ച്ച് വീണ്ടും പുതിയ ഡാറ്റ എഴുതാൻ സാധിക്കും (Write many times).",
+    "subtopic": "Optical Storage Devices (CD-RW)"
+  },
+  {
+    "id": "PSC_170_2014_038",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "38. Zoned recording in hard disk increases available disk spaces by having more sectors in :",
+    "option_a": "All tracks",
+    "option_b": "Inner tracks",
+    "option_c": "Middle tracks",
+    "option_d": "Outer tracks",
+    "correct_answer": "D",
+    "explanation": "Zone Bit Recording (ZBR) takes advantage of the larger circumference of outer tracks by packing more physical sectors on outer tracks compared to shorter inner tracks.\n\n[മലയാളം]: ഹാർഡ് ഡിസ്കിലെ Zoned Recording സാങ്കേതികവിദ്യ വലിയ ചുറ്റളവുള്ള പുറം ട്രാക്കുകളിൽ (Outer tracks) കൂടുതൽ സെക്ടറുകൾ ഉൾപ്പെടുത്തി സ്റ്റോറേജ് വർദ്ധിപ്പിക്കുന്നു.",
+    "subtopic": "Hard Disk Geometry: Zone Bit Recording"
+  },
+  {
+    "id": "PSC_170_2014_039",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "39. Formatting a hard disk means, reallocating :",
+    "option_a": "Tracks",
+    "option_b": "Sectors",
+    "option_c": "File system",
+    "option_d": "All the above",
+    "correct_answer": "D",
+    "explanation": "High-level and low-level formatting initializes tracks and sectors, maps bad sectors, and creates the file system structures and root directory on the disk.\n\n[മലയാളം]: ഹാർഡ് ഡിസ്ക് ഫോർമാറ്റ് ചെയ്യുമ്പോൾ ട്രാക്കുകൾ, സെക്ടറുകൾ, ഫയൽ സിസ്റ്റം എന്നിവയെല്ലാം പുനഃക്രമീകരിക്കപ്പെടുന്നു (All the above).",
+    "subtopic": "Disk Formatting & File Systems"
+  },
+  {
+    "id": "PSC_170_2014_040",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "40. Which of the following is not a microprocessor component?",
+    "option_a": "Decode unit",
+    "option_b": "Program Counter",
+    "option_c": "Arithmetic Logic Unit",
+    "option_d": "Heat sink",
+    "correct_answer": "D",
+    "explanation": "The Decode unit, Program Counter (PC), and ALU are internal on-chip microprocessor components. The heat sink is an external passive cooling hardware accessory.\n\n[മലയാളം]: ഹീറ്റ് സിങ്ക് (Heat sink) പ്രോസസ്സറിന് പുറത്ത് ഘടിപ്പിക്കുന്ന കൂളിംഗ് ഉപകരണമാണ്; അത് മൈക്രോപ്രോസസ്സറിന്റെ ആന്തരിക ഭാഗമല്ല.",
+    "subtopic": "CPU Architecture & Cooling"
+  },
+  {
+    "id": "PSC_170_2014_041",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "41. Hyper Threading technology enables a single CPU to :",
+    "option_a": "Act like multiple CPU",
+    "option_b": "Use cache memory",
+    "option_c": "Process floating point operations",
+    "option_d": "Display high resolution graphics",
+    "correct_answer": "A",
+    "explanation": "Intel Hyper-Threading Technology (HTT) duplicates architectural state on a single physical core, allowing the operating system to address it as two logical/virtual processors.\n\n[മലയാളം]: ഹൈപ്പർ ത്രെഡിംഗ് (Hyper Threading) സാങ്കേതികവിദ്യ വഴി ഒരൊറ്റ ഫിസിക്കൽ സിപിയുവിന് ഒരേസമയം ഒന്നിലധികം സിപിയു ആയി (Act like multiple CPU) പ്രവർത്തിക്കാൻ സാധിക്കുന്നു.",
+    "subtopic": "CPU Technology: Hyper-Threading"
+  },
+  {
+    "id": "PSC_170_2014_042",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "42. The number of bits processed by a microprocessor at a time is its :",
+    "option_a": "Data size",
+    "option_b": "Word size",
+    "option_c": "Code size",
+    "option_d": "None of the above",
+    "correct_answer": "B",
+    "explanation": "The word size (e.g., 8-bit, 16-bit, 32-bit, or 64-bit) defines the native bit-width of data that the CPU's internal ALU registers can process in a single instruction cycle.\n\n[മലയാളം]: ഒരു മൈക്രോപ്രോസസ്സറിന് ഒരൊറ്റ സൈക്കിളിൽ പ്രോസസ്സ് ചെയ്യാൻ സാധിക്കുന്ന ബിറ്റുകളുടെ എണ്ണത്തെ അതിന്റെ വേഡ് സൈസ് (Word size) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "CPU Architecture & Word Size"
+  },
+  {
+    "id": "PSC_170_2014_043",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "43. The system bus (FSB) is placed between :",
+    "option_a": "CPU and I/O device",
+    "option_b": "CPU and Cache memory",
+    "option_c": "CPU and memory",
+    "option_d": "Memory and I/O device",
+    "correct_answer": "C",
+    "explanation": "The Front-Side Bus (FSB) or system bus is the primary bi-directional data conduit connecting the CPU to main system memory through the Northbridge.\n\n[മലയാളം]: പ്രോസസ്സറിനെയും പ്രധാന സിസ്റ്റം മെമ്മറിയെയും പരസ്പരം ബന്ധിപ്പിക്കുന്നത് സിസ്റ്റം ബസ് (FSB) ആണ്.",
+    "subtopic": "Bus Architecture & FSB"
+  },
+  {
+    "id": "PSC_170_2014_044",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "44. Pin Grid Array packaging is used for :",
+    "option_a": "Memory",
+    "option_b": "DMA Controller",
+    "option_c": "Microprocessor",
+    "option_d": "AGP",
+    "correct_answer": "C",
+    "explanation": "PGA (Pin Grid Array) is a classic integrated circuit chip packaging style featuring an array of pins on the bottom, predominantly used for desktop microprocessors (e.g., AMD AM4, Intel Socket 478).\n\n[മലയാളം]: പ്രോസസ്സറുകൾ (Microprocessors) സോക്കറ്റിൽ ഘടിപ്പിക്കാൻ ഉപയോഗിക്കുന്ന ചിപ്പ് പാക്കേജിംഗ് രീതിയാണ് PGA (Pin Grid Array).",
+    "subtopic": "Processor Sockets & Chip Packaging"
+  },
+  {
+    "id": "PSC_170_2014_045",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "45. The form factor of a motherboard determines its :",
+    "option_a": "Physical shape and size",
+    "option_b": "Type of processor supported",
+    "option_c": "Capacity of RAM supported",
+    "option_d": "All the above",
+    "correct_answer": "A",
+    "explanation": "Motherboard form factor strictly defines physical dimensions, mounting hole locations, and power supply layout (e.g., ATX, Micro-ATX, Mini-ITX).\n\n[മലയാളം]: മദർബോർഡിന്റെ ഫോം ഫാക്ടർ (Form factor) എന്നത് അതിന്റെ ഭൗതിക വലിപ്പവും ആകൃതിയും (Physical shape and size) മൗണ്ടിംഗ് സ്ക്രൂ പോയിന്റുകളുമാണ് വ്യക്തമാക്കുന്നത്.",
+    "subtopic": "Motherboard Form Factors"
+  },
+  {
+    "id": "PSC_170_2014_046",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "46. Operating system lies between :",
+    "option_a": "Hardware and software",
+    "option_b": "Hardware and firmware",
+    "option_c": "Hardware and user",
+    "option_d": "Software and user",
+    "correct_answer": "C",
+    "explanation": "An operating system acts as the fundamental intermediate interface between the underlying computer hardware and the human user / user applications.\n\n[മലയാളം]: കമ്പ്യൂട്ടർ ഹാർഡ്‌വെയറിനും ഉപയോക്താവിനും (Hardware and user) ഇടയിലുള്ള പ്രധാന ഇന്റർഫേസായി പ്രവർത്തിക്കുന്നത് ഓപ്പറേറ്റിംഗ് സിസ്റ്റമാണ്.",
+    "subtopic": "OS Fundamentals & Architecture"
+  },
+  {
+    "id": "PSC_170_2014_047",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "47. Source programs are converted to object programs using :",
+    "option_a": "Compiler",
+    "option_b": "Interpreter",
+    "option_c": "Assembler",
+    "option_d": "All the above",
+    "correct_answer": "D",
+    "explanation": "Language translators (Compilers, Assemblers, and Interpreters) translate human-readable source code instructions into machine/object code representations.\n\n[മലയാളം]: പ്രോഗ്രാമർ എഴുതുന്ന സോഴ്സ് പ്രോഗ്രാമുകളെ മെഷീന് മനസ്സിലാകുന്ന ഒബ്ജക്റ്റ് കോഡാക്കി മാറ്റാൻ കമ്പൈലർ, ഇന്റർപ്രെറ്റർ, അസംബ്ലർ എന്നിവ ഉപയോഗിക്കുന്നു (All the above).",
+    "subtopic": "Translators & System Software"
+  },
+  {
+    "id": "PSC_170_2014_048",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "48. The dimension of a ATX motherboard in inches is :",
+    "option_a": "12 x 9.6",
+    "option_b": "9.6 x 9.6",
+    "option_c": "9 x 10",
+    "option_d": "12 x 12",
+    "correct_answer": "A",
+    "explanation": "Standard ATX form factor specifications define dimensions of 12 inches wide by 9.6 inches deep (305 mm × 244 mm).\n\n[മലയാളം]: സ്റ്റാൻഡേർഡ് ATX മദർബോർഡിന്റെ അളവുകൾ 12 × 9.6 ഇഞ്ച് (305 × 244 mm) ആണ്.",
+    "subtopic": "Motherboard Form Factors: ATX Dimensions"
+  },
+  {
+    "id": "PSC_170_2014_049",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "49. Which of the following is not a networking device?",
+    "option_a": "Switch",
+    "option_b": "Repeater",
+    "option_c": "Bridge",
+    "option_d": "LAN",
+    "correct_answer": "D",
+    "explanation": "LAN (Local Area Network) is a network type/classification, whereas Switch, Repeater, and Bridge are physical networking hardware devices.\n\n[മലയാളം]: സ്വിച്ച്, റിപ്പീറ്റർ, ബ്രിഡ്ജ് എന്നിവ നെറ്റ്വർക്കിംഗ് ഉപകരണങ്ങളാണ്; എന്നാൽ LAN എന്നത് നെറ്റ്വർക്കിന്റെ ഒരു വിഭാഗമാണ്, ഉപകരണമല്ല.",
+    "subtopic": "Networking Devices & Hardware"
+  },
+  {
+    "id": "PSC_170_2014_050",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "50. 4 pin Molex is a :",
+    "option_a": "Data connector",
+    "option_b": "Power Connector",
+    "option_c": "Peripheral Connector",
+    "option_d": "None of the above",
+    "correct_answer": "B",
+    "explanation": "The 4-pin Molex (AMP 1-480424-0) is an internal DC power connector delivering +12V and +5V from the power supply unit to PATA hard drives and optical drives.\n\n[മലയാളം]: കമ്പ്യൂട്ടറിലെ ഹാർഡ് ഡിസ്കുകൾക്കും ഒപ്റ്റിക്കൽ ഡ്രൈവുകൾക്കും പവർ നൽകാൻ ഉപയോഗിക്കുന്ന പവർ കണക്ടറാണ് 4-പിൻ മോലെക്സ് (Molex Power Connector).",
+    "subtopic": "Power Supplies & Connectors"
+  },
+  {
+    "id": "PSC_170_2014_051",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "51. The size of MAC address is :",
+    "option_a": "24 bits",
+    "option_b": "48 bits",
+    "option_c": "24 bytes",
+    "option_d": "48 bytes",
+    "correct_answer": "B",
+    "explanation": "A MAC (Media Access Control) physical address is 48 bits (6 bytes) long, represented as 12 hexadecimal digits (e.g., 00:1A:2B:3C:4D:5E).\n\n[മലയാളം]: നെറ്റ്‌വർക്ക് ഇന്റർഫേസ് കാർഡുകളുടെ ഫിസിക്കൽ അഡ്രസ്സായ MAC അഡ്രസ്സിന്റെ വലിപ്പം 48 ബിറ്റുകളാണ് (48 bits / 6 bytes).",
+    "subtopic": "MAC Addressing & Data Link Layer"
+  },
+  {
+    "id": "PSC_170_2014_052",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "52. The OR gate has :",
+    "option_a": "One input and one output",
+    "option_b": "Two input and one output",
+    "option_c": "Many input and one output",
+    "option_d": "One input and many output",
+    "correct_answer": "C",
+    "explanation": "In Boolean digital electronics, an OR logic gate can have two or more (many) inputs and produces a single output that is HIGH if any input is HIGH.\n\n[മലയാളം]: ഒരു OR ലോജിക് ഗേറ്റിന് രണ്ടോ അതിലധികമോ ഇൻപുട്ടുകളും (Many inputs) ഒരൊറ്റ ഔട്ട്പുട്ടും (One output) ആണ് ഉണ്ടാകുക.",
+    "subtopic": "Digital Electronics: Logic Gates"
+  },
+  {
+    "id": "PSC_170_2014_053",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "53. A maximum of 127 devices can be connected using :",
+    "option_a": "Parallel port",
+    "option_b": "Serial Port",
+    "option_c": "USB port",
+    "option_d": "Game port",
+    "correct_answer": "C",
+    "explanation": "The Universal Serial Bus (USB) architecture supports a tiered star topology allowing up to 127 physical devices (including hubs) on a single USB host controller.\n\n[മലയാളം]: ഒരൊറ്റ കൺട്രോളറിൽ ഹബ്ബുകൾ വഴി പരമാവധി 127 ഉപകരണങ്ങൾ വരെ ബന്ധിപ്പിക്കാൻ സാധിക്കുന്ന ഇന്റർഫേസാണ് USB.",
+    "subtopic": "USB Architecture & Limits"
+  },
+  {
+    "id": "PSC_170_2014_054",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "54. The technology that enables devices to automatically install themselves is :",
+    "option_a": "Autorun",
+    "option_b": "Plug and Play",
+    "option_c": "PCI",
+    "option_d": "Auto load",
+    "correct_answer": "B",
+    "explanation": "Plug and Play (PnP) enables the operating system and BIOS to automatically detect, allocate system resources (IRQ, DMA, I/O ports), and configure device drivers without user intervention.\n\n[മലയാളം]: പുതിയ ഹാർഡ്‌വെയറുകൾ ഘടിപ്പിക്കുമ്പോൾ കമ്പ്യൂട്ടർ തനിയെ അവയെ തിരിച്ചറിഞ്ഞ് ഇൻസ്റ്റാൾ ചെയ്യുന്ന സാങ്കേതികവിദ്യയാണ് പ്ലഗ് ആൻഡ് പ്ലേ (Plug and Play).",
+    "subtopic": "Plug and Play & Device Configuration"
+  },
+  {
+    "id": "PSC_170_2014_055",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "55. Which of the following is a feature of USB?",
+    "option_a": "No device driver needed",
+    "option_b": "Hot-swappable",
+    "option_c": "No plug and play",
+    "option_d": "All the above",
+    "correct_answer": "B",
+    "explanation": "USB is hot-swappable (hot-pluggable), meaning devices can be attached or removed without restarting the PC. It does require drivers (often generic class drivers) and is fully plug-and-play.\n\n[മലയാളം]: കമ്പ്യൂട്ടർ പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുമ്പോൾ തന്നെ ഉപകരണങ്ങൾ ഘടിപ്പിക്കാനും മാറ്റാനും സാധിക്കുന്ന (Hot-swappable) സവിശേഷത USB-ക്കുണ്ട്.",
+    "subtopic": "USB Features: Hot Swapping"
+  },
+  {
+    "id": "PSC_170_2014_056",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "56. How many read/write heads is needed for a hard drive with 4 platters?",
+    "option_a": "16",
+    "option_b": "12",
+    "option_c": "8",
+    "option_d": "4",
+    "correct_answer": "C",
+    "explanation": "Each hard disk platter has two recordable surfaces (top and bottom). For 4 platters: 4 × 2 = 8 read/write heads are required.\n\n[മലയാളം]: ഒരു ഹാർഡ് ഡിസ്ക് പ്ലാറ്ററിന് രണ്ട് വശങ്ങളുള്ളതിനാൽ, 4 പ്ലാറ്ററുകളുള്ള ഒരു ഹാർഡ് ഡിസ്കിൽ 4 × 2 = 8 റീഡ്/റൈറ്റ് ഹെഡുകൾ (8 heads) ആവശ്യമാണ്.",
+    "subtopic": "Hard Disk Geometry: Platters and Heads"
+  },
+  {
+    "id": "PSC_170_2014_057",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "57. Internal CD-ROM drives are connected to the motherboard using :",
+    "option_a": "IDE",
+    "option_b": "USB",
+    "option_c": "Parallel port",
+    "option_d": "PCI",
+    "correct_answer": "A",
+    "explanation": "Legacy internal optical CD-ROM and DVD drives connected to the system motherboard via 40-pin IDE/ATAPI ribbon cable interfaces.\n\n[മലയാളം]: പരമ്പരാഗത ഇന്റേണൽ സിഡി റോം ഡ്രൈവുകൾ മദർബോർഡുമായി ബന്ധിപ്പിച്ചിരുന്നത് IDE (Integrated Drive Electronics) ഇന്റർഫേസ് വഴിയാണ്.",
+    "subtopic": "Storage Interfaces: IDE/ATAPI"
+  },
+  {
+    "id": "PSC_170_2014_058",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "58. Which of the following is a valid refresh rate of a CRT monitor?",
+    "option_a": "72 THz",
+    "option_b": "72 MHz",
+    "option_c": "72 KHz",
+    "option_d": "72 Hz",
+    "correct_answer": "D",
+    "explanation": "Vertical refresh rates of CRT monitors are measured in Hertz (Hz), commonly ranging between 60 Hz to 85 Hz to prevent visible screen flicker.\n\n[മലയാളം]: മോണിറ്ററുകളുടെ വെർട്ടിക്കൽ റീഫ്രഷ് റേറ്റ് അളക്കുന്നത് ഹെർട്സിലാണ് (Hz). സാധാരണയായി 72 Hz അല്ലെങ്കിൽ 60–85 Hz ആണ് CRT മോണിറ്ററുകളിൽ ഉണ്ടാകുക.",
+    "subtopic": "Monitors & Refresh Rates"
+  },
+  {
+    "id": "PSC_170_2014_059",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "59. An optical mouse works well on :",
+    "option_a": "Any smooth surface",
+    "option_b": "Transparent surface",
+    "option_c": "Non-transparent surface",
+    "option_d": "Conducting surface",
+    "correct_answer": "C",
+    "explanation": "An optical mouse requires a non-transparent, textured surface so its optical sensor can register changes in reflected light patterns (fails on clear glass/mirrors).\n\n[മലയാളം]: ഒപ്റ്റിക്കൽ മൗസ് കൃത്യമായി പ്രവർത്തിക്കാൻ പ്രകാശം ആഗിരണം ചെയ്യുകയോ പ്രതിഫലിപ്പിക്കുകയോ ചെയ്യുന്ന സുതാര്യമല്ലാത്ത പ്രതലങ്ങൾ (Non-transparent surface) വേണം (ഗ്ലാസ്സിൽ പ്രവർത്തിക്കില്ല).",
+    "subtopic": "Mouse Technologies"
+  },
+  {
+    "id": "PSC_170_2014_060",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "60. Inkjet printers contains :",
+    "option_a": "2 colours of ink",
+    "option_b": "4 colours of ink",
+    "option_c": "6 colours of ink",
+    "option_d": "8 colours of ink",
+    "correct_answer": "B",
+    "explanation": "Standard color inkjet printers utilize the 4 CMYK process primary ink colors: Cyan, Magenta, Yellow, and Key (Black).\n\n[മലയാളം]: സാധാരണ കളർ ഇങ്ക്ജെറ്റ് പ്രിന്ററുകളിൽ 4 പ്രധാന നിറങ്ങളിലുള്ള (CMYK: Cyan, Magenta, Yellow, Black) മഷിയാണ് ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "Printers & CMYK Ink Technology"
+  },
+  {
+    "id": "PSC_170_2014_061",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "61. Which is the protocol used by internet?",
+    "option_a": "IPX/SPX",
+    "option_b": "NetBEUI",
+    "option_c": "TCP/IP",
+    "option_d": "PPP",
+    "correct_answer": "C",
+    "explanation": "TCP/IP (Transmission Control Protocol / Internet Protocol) is the fundamental communications protocol suite that powers the global Internet.\n\n[മലയാളം]: ഇന്റർനെറ്റിലെ കമ്പ്യൂട്ടറുകൾ പരസ്പരം ആശയവിനിമയം നടത്താൻ ഉപയോഗിക്കുന്ന ആഗോള സ്റ്റാൻഡേർഡ് പ്രോട്ടോക്കോളാണ് TCP/IP.",
+    "subtopic": "TCP/IP Protocol Suite"
+  },
+  {
+    "id": "PSC_170_2014_062",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "62. The process of writing data to a CD is called :",
+    "option_a": "Loading",
+    "option_b": "Writing",
+    "option_c": "Backup",
+    "option_d": "Burning",
+    "correct_answer": "D",
+    "explanation": "Writing binary information to an optical disc (CD/DVD) using a laser to alter the organic dye layer is called 'Burning'.\n\n[മലയാളം]: സിഡിയിലേക്കോ ഡിവിഡിയിലേക്കോ ഡാറ്റ എഴുതുന്ന പ്രക്രിയയെ ബേണിംഗ് (Burning) എന്ന് വിളിക്കുന്നു.",
+    "subtopic": "Optical Storage Devices & Burning"
+  },
+  {
+    "id": "PSC_170_2014_063",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "63. Software the works with operating system to enable hardware devices is :",
+    "option_a": "Device driver",
+    "option_b": "Firmware",
+    "option_c": "Device Manager",
+    "option_d": "Debugger",
+    "correct_answer": "A",
+    "explanation": "A Device Driver is specialized system software that allows the operating system to communicate with and control specific hardware devices.\n\n[മലയാളം]: ഓപ്പറേറ്റിംഗ് സിസ്റ്റത്തിന് ഒരു പ്രത്യേക ഹാർഡ്‌വെയറിനെ തിരിച്ചറിഞ്ഞ് നിയന്ത്രിക്കാൻ സഹായിക്കുന്ന സോഫ്റ്റ്‌വെയറാണ് ഡിവൈസ് ഡ്രൈവർ (Device driver).",
+    "subtopic": "Device Drivers & OS Architecture"
+  },
+  {
+    "id": "PSC_170_2014_064",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "64. What is the reason to choose a laser printer over an inkjet printer?",
+    "option_a": "Speed",
+    "option_b": "Colour",
+    "option_c": "Cost",
+    "option_d": "Resolution",
+    "correct_answer": "A",
+    "explanation": "Laser printers offer significantly higher print speeds (pages per minute) and lower cost-per-page for high-volume text printing compared to inkjet printers.\n\n[മലയാളം]: ഇങ്ക്ജെറ്റ് പ്രിന്ററുകളെ അപേക്ഷിച്ച് കൂടുതൽ പേജുകൾ അതിവേഗത്തിൽ പ്രിന്റ് ചെയ്യാൻ സാധിക്കും (Speed) എന്നതാണ് ലേസർ പ്രിന്ററുകൾ തിരഞ്ഞെടുക്കാനുള്ള പ്രധാന കാരണം.",
+    "subtopic": "Printers: Laser vs Inkjet"
+  },
+  {
+    "id": "PSC_170_2014_065",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "65. Extented partition of a hard drive is :",
+    "option_a": "Optional",
+    "option_b": "Not bootable",
+    "option_c": "Divided into logical drives",
+    "option_d": "All the above",
+    "correct_answer": "D",
+    "explanation": "An extended partition is optional, cannot contain an active bootable operating system partition, and serves as a container sub-divided into multiple logical drives.\n\n[മലയാളം]: ഒരു ഹാർഡ് ഡിസ്കിലെ എക്സ്റ്റെൻഡഡ് പാർട്ടീഷൻ നിർബന്ധമില്ലാത്തതും (Optional), ബൂട്ട് ചെയ്യാൻ പറ്റാത്തതും (Not bootable), നിരവധി ലോജിക്കൽ ഡ്രൈവുകളായി തിരിക്കാവുന്നതുമാണ് (All the above).",
+    "subtopic": "Partition Schemes: Primary vs Extended"
+  },
+  {
+    "id": "PSC_170_2014_066",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "66. Which of the following is not a file system?",
+    "option_a": "FAT32",
+    "option_b": "NTFS",
+    "option_c": "FDISK",
+    "option_d": "EXT4",
+    "correct_answer": "C",
+    "explanation": "FDISK is a command-line disk partitioning utility program. FAT32, NTFS, and EXT4 are file systems.\n\n[മലയാളം]: FDISK എന്നത് ഒരു പാർട്ടീഷനിംഗ് യൂട്ടിലിറ്റിയാണ്; FAT32, NTFS, EXT4 എന്നിവ ഫയൽ സിസ്റ്റങ്ങളാണ് (File systems).",
+    "subtopic": "File Systems vs Disk Utilities"
+  },
+  {
+    "id": "PSC_170_2014_067",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "67. The port which is not normally associated with a mouse is :",
+    "option_a": "USB",
+    "option_b": "Parallel",
+    "option_c": "Serial",
+    "option_d": "PS/2",
+    "correct_answer": "B",
+    "explanation": "Mice historically connected via Serial (COM), PS/2, or USB ports. Parallel ports (DB-25) were used for printers, not mice.\n\n[മലയാളം]: പാരലൽ പോർട്ട് (Parallel port) പ്രിന്ററുകൾക്കായി ഉപയോഗിക്കുന്നതാണ്; മൗസ് സാധാരണയായി USB, PS/2 അല്ലെങ്കിൽ സീരിയൽ പോർട്ടുകളിലാണ് കണക്ട് ചെയ്യാറുള്ളത്.",
+    "subtopic": "I/O Ports & Mouse Connectivity"
+  },
+  {
+    "id": "PSC_170_2014_068",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "68. Zero Insertion Force (ZIF) is related with :",
+    "option_a": "CD",
+    "option_b": "CPU",
+    "option_c": "Memory",
+    "option_d": "USB",
+    "correct_answer": "B",
+    "explanation": "ZIF (Zero Insertion Force) sockets allow a CPU to be inserted or removed without applying physical force, secured with a locking lever.\n\n[മലയാളം]: മദർബോർഡിൽ ബലപ്രയോഗമില്ലാതെ പ്രോസസ്സർ ഘടിപ്പിക്കാൻ ഉപയോഗിക്കുന്ന ലിവർ സോക്കറ്റുകളാണ് ZIF (Zero Insertion Force) സോക്കറ്റുകൾ. ഇത് CPU-വുമായി ബന്ധപ്പെട്ടിരിക്കുന്നു.",
+    "subtopic": "CPU Sockets & ZIF"
+  },
+  {
+    "id": "PSC_170_2014_069",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "69. How many pins does a video connector have?",
+    "option_a": "15 pins in two rows",
+    "option_b": "9 pins in two rows",
+    "option_c": "15 pins in three rows",
+    "option_d": "9 pins in three rows",
+    "correct_answer": "C",
+    "explanation": "Standard VGA (Video Graphics Array) D-sub connectors have 15 pins arranged in three rows of 5 pins each.\n\n[മലയാളം]: സാധാരണ VGA വീഡിയോ കണക്ടറിൽ മൂന്ന് നിരകളിലായി 15 പിന്നുകളാണ് (15 pins in three rows) ഉള്ളത്.",
+    "subtopic": "Video Display Connectors: VGA"
+  },
+  {
+    "id": "PSC_170_2014_070",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "70. Applying thermal compound in CPU fan assembly is to :",
+    "option_a": "Improve heat transfer",
+    "option_b": "Control dust",
+    "option_c": "Increase fan speed",
+    "option_d": "Cool down the processor",
+    "correct_answer": "A",
+    "explanation": "Thermal paste/compound eliminates microscopic air gaps between the CPU heat spreader and heatsink surface to maximize conductive heat transfer.\n\n[മലയാളം]: പ്രോസസ്സറും ഹീറ്റ് സിങ്കും തമ്മിലുള്ള വായു അറകൾ ഒഴിവാക്കി ചൂട് വേഗത്തിൽ ഹീറ്റ് സിങ്കിലേക്ക് കടത്തിവിടാനാണ് (Improve heat transfer) തെർമൽ പേസ്റ്റ് ഉപയോഗിക്കുന്നത്.",
+    "subtopic": "CPU Cooling & Thermal Pastes"
+  },
+  {
+    "id": "PSC_170_2014_071",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "71. Each sector of hard disk can hold :",
+    "option_a": "126 Bytes",
+    "option_b": "512 Bytes",
+    "option_c": "1024 Bytes",
+    "option_d": "It depends on capacity of the disk",
+    "correct_answer": "B",
+    "explanation": "Traditional hard disk drive architecture standardized on storing exactly 512 bytes of user data per physical sector.\n\n[മലയാളം]: പരമ്പരാഗത ഹാർഡ് ഡിസ്കിലെ ഓരോ സെക്ടറിലും 512 ബൈറ്റ് (512 Bytes) ഡാറ്റയാണ് സൂക്ഷിക്കാൻ സാധിക്കുന്നത്.",
+    "subtopic": "Hard Disk Sector Capacity"
+  },
+  {
+    "id": "PSC_170_2014_072",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "72. Increasing the screen resolution also increases :",
+    "option_a": "Pixels",
+    "option_b": "Dot pitches",
+    "option_c": "VIS",
+    "option_d": "Colours",
+    "correct_answer": "A",
+    "explanation": "Increasing screen resolution increases the total count and density of pixels displayed on the screen, creating sharper, more detailed graphics.\n\n[മലയാളം]: സ്ക്രീൻ റെസല്യൂഷൻ വർദ്ധിപ്പിക്കുമ്പോൾ സ്ക്രീനിലെ പിക്സലുകളുടെ (Pixels) എണ്ണവും സാന്ദ്രതയുമാണ് വർദ്ധിക്കുന്നത്.",
+    "subtopic": "Display Resolution & Pixels"
+  },
+  {
+    "id": "PSC_170_2014_073",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "73. Which organic ink colour provides the best write for a CD-R?",
+    "option_a": "Blue",
+    "option_b": "Green",
+    "option_c": "Gold",
+    "option_d": "The ink colour doesn't matter",
+    "correct_answer": "D",
+    "explanation": "PSC Answer Key confirms: 'The ink colour doesn't matter'. Modern CD-R media dyes (cyanine, phthalocyanine, azo) are all optimized to read at the 780nm laser wavelength regardless of apparent visual dye color.\n\n[മലയാളം]: ഒഫീഷ്യൽ പി.എസ്.സി കീ പ്രകാരം 'The ink colour doesn't matter' എന്നാണ് ശരിയുത്തരം (വിവിധ തരം ഡൈകൾ ഉണ്ടെങ്കിലും ലേസർ വേവ്‌ലെങ്തിൽ പ്രവർത്തനം തുല്യമാണ്).",
+    "subtopic": "Optical Storage: CD-R Dyes"
+  },
+  {
+    "id": "PSC_170_2014_074",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "74. What happens to the CPU if any one of its pin is broken?",
+    "option_a": "The CPU is useless",
+    "option_b": "Used, but speed will be decreased",
+    "option_c": "Can be used by soldering a new pin",
+    "option_d": "Nothing. Most of the pins are redundant",
+    "correct_answer": "A",
+    "explanation": "A broken pin disrupts electrical signals (address, data, power, or clock lines) critical to CPU operation, rendering the processor non-functional (useless).\n\n[മലയാളം]: പ്രോസസ്സറിന്റെ ഏതെങ്കിലും ഒരു പിൻ ഒടിഞ്ഞുപോയാൽ ആ പ്രോസസ്സർ ഉപയോഗശൂന്യമായിത്തീരും (The CPU is useless).",
+    "subtopic": "CPU Maintenance & Pin Integrity"
+  },
+  {
+    "id": "PSC_170_2014_075",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "75. Which of the following factors identify a CPU?",
+    "option_a": "Manufacturer, Speed, Manufacturing process, Form factor",
+    "option_b": "Manufacturer, Model, Speed, Manufacturing Process",
+    "option_c": "Manufacturer, Model, Speed, Package",
+    "option_d": "Form factor, Model, Speed, Package",
+    "correct_answer": "C",
+    "explanation": "A CPU is primarily identified in hardware specifications by its Manufacturer (e.g., Intel/AMD), Model (e.g., Core i7 12700K), Speed/Clock Rate (e.g., 3.6 GHz), and Package type (e.g., LGA 1700).\n\n[മലയാളം]: ഒരു പ്രോസസ്സറിനെ പൂർണ്ണമായി തിരിച്ചറിയാൻ ഉപയോഗിക്കുന്ന ഘടകങ്ങൾ: Manufacturer, Model, Speed, Package എന്നിവയാണ്.",
+    "subtopic": "CPU Identification & Specifications"
+  },
+  {
+    "id": "PSC_170_2014_076",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "76. Which port allows a CD-ROM to play music from a CD through a computer?",
+    "option_a": "Serial",
+    "option_b": "AUX_IN",
+    "option_c": "Parallel",
+    "option_d": "CD_IN",
+    "correct_answer": "D",
+    "explanation": "The 4-pin analog CD_IN connector on sound cards or motherboards connected directly to the analog audio output port of internal CD-ROM drives.\n\n[മലയാളം]: സിഡി റോമിൽ നിന്ന് ഓഡിയോ നേരിട്ട് കമ്പ്യൂട്ടറിലെ സൗണ്ട് കാർഡിലൂടെ കേൾക്കാൻ ഉപയോഗിച്ചിരുന്ന ആന്തരിക കണക്ടറാണ് CD_IN.",
+    "subtopic": "Audio Connectors: CD_IN"
+  },
+  {
+    "id": "PSC_170_2014_077",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "77. Which of the following memory is used for Cache?",
+    "option_a": "Flash memory",
+    "option_b": "ROM Chip",
+    "option_c": "DRAM",
+    "option_d": "SRAM",
+    "correct_answer": "D",
+    "explanation": "SRAM (Static RAM) does not need periodic refreshing and is extremely fast, making it ideal for CPU L1, L2, and L3 cache memory.\n\n[മലയാളം]: അതിവേഗ കാഷ് മെമ്മറിയായി (Cache memory) ഉപയോഗിക്കുന്നത് സ്റ്റാറ്റിക് റാം (SRAM) ആണ്.",
+    "subtopic": "SRAM & Cache Architecture"
+  },
+  {
+    "id": "PSC_170_2014_078",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "78. Which of the following is not a primary storage device? [Deleted by PSC]",
+    "option_a": "Magnetic Tape",
+    "option_b": "Floppy Disk",
+    "option_c": "Optical Disk",
+    "option_d": "None of the above",
+    "correct_answer": "X",
+    "explanation": "[Note: This question was officially DELETED by PSC in the final answer key because Magnetic Tape, Floppy Disk, and Optical Disk are all secondary storage devices, so none of them are primary storage].\n\n[മലയാളം]: ഈ ചോദ്യം പി.എസ്.സി ഔദ്യോഗിക ഫൈനൽ കീയിൽ ഒഴിവാക്കിയിട്ടുണ്ട് (Deleted). മാഗ്നറ്റിക് ടേപ്പ്, ഫ്ലോപ്പി ഡിസ്ക്, ഒപ്റ്റിക്കൽ ഡിസ്ക് എന്നിവയെല്ലാം സെക്കൻഡറി സ്റ്റോറേജ് ഡിവൈസുകളാണ്.",
+    "subtopic": "Primary vs Secondary Storage"
+  },
+  {
+    "id": "PSC_170_2014_079",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "79. The software used to visit a website is :",
+    "option_a": "search engine",
+    "option_b": "browser",
+    "option_c": "file manager",
+    "option_d": "www",
+    "correct_answer": "B",
+    "explanation": "A Web Browser (such as Chrome, Firefox, Safari) is application software used to access, retrieve, and view web pages on the World Wide Web.\n\n[മലയാളം]: വെബ്സൈറ്റുകൾ സന്ദർശിക്കാനും ബ്രൗസ് ചെയ്യാനും ഉപയോഗിക്കുന്ന ആപ്ലിക്കേഷൻ സോഫ്റ്റ്‌വെയറാണ് വെബ് ബ്രൗസർ (Web browser).",
+    "subtopic": "Internet & Web Browsers"
+  },
+  {
+    "id": "PSC_170_2014_080",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "80. Which of the following is not a sound file format?",
+    "option_a": "TXT",
+    "option_b": "WAV",
+    "option_c": "WMA",
+    "option_d": "RM",
+    "correct_answer": "A",
+    "explanation": "TXT is a plain text file format. WAV, WMA, and RM (RealMedia Audio) are digital audio sound formats.\n\n[മലയാളം]: TXT എന്നത് ടെക്സ്റ്റ് ഫയൽ ഫോർമാറ്റാണ്; WAV, WMA, RM എന്നിവ ഓഡിയോ ഫയൽ ഫോർമാറ്റുകളാണ്.",
+    "subtopic": "Multimedia File Formats"
+  },
+  {
+    "id": "PSC_170_2014_081",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "81. The first Indian who became Governor General of India?",
+    "option_a": "Lord Mount Batten",
+    "option_b": "C. Rajagopalachari",
+    "option_c": "Dr. S. Radhakrishnan",
+    "option_d": "Sardar Vallabhai Patel",
+    "correct_answer": "B",
+    "explanation": "C. Rajagopalachari (Rajaji) served as the first and only Indian Governor-General of independent India from June 1948 to January 1950.\n\n[മലയാളം]: സ്വതന്ത്ര ഇന്ത്യയുടെ ആദ്യത്തെയും അവസാനത്തെയും ഇന്ത്യൻ ഗവർണർ ജനറൽ സി. രാജഗോപാലാചാരി (C. Rajagopalachari) ആയിരുന്നു.",
+    "subtopic": "Indian History"
+  },
+  {
+    "id": "PSC_170_2014_082",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "82. Longest river in India :",
+    "option_a": "Ganga",
+    "option_b": "Brahmaputra",
+    "option_c": "Yamuna",
+    "option_d": "Thapthi",
+    "correct_answer": "A",
+    "explanation": "The Ganga is the longest river flowing entirely within India, with an official length of 2,525 km.\n\n[മലയാളം]: ഇന്ത്യയിലൂടെ ഏറ്റവും കൂടുതൽ ദൂരം ഒഴുകുന്ന ഏറ്റവും നീളം കൂടിയ നദി ഗംഗ (Ganga - 2,525 km) ആണ്.",
+    "subtopic": "Indian Geography: Rivers"
+  },
+  {
+    "id": "PSC_170_2014_083",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "83. The slogan 'jai jawan, jai kisan' is associated with :",
+    "option_a": "Jawaharlal Nehru",
+    "option_b": "Gulsarilal Nanda",
+    "option_c": "Indira Gandhi",
+    "option_d": "Lal Bahadur Sastri",
+    "correct_answer": "D",
+    "explanation": "The historic slogan 'Jai Jawan, Jai Kisan' (Hail the Soldier, Hail the Farmer) was coined by India's second Prime Minister, Lal Bahadur Shastri, in 1965.\n\n[മലയാളം]: 'ജയ് ജവാൻ, ജയ് കിസാൻ' എന്ന വിഖ്യാത മുദ്രാവാക്യം മുഴക്കിയത് ലാൽ ബഹദൂർ ശാസ്ത്രി (Lal Bahadur Shastri) ആണ്.",
+    "subtopic": "Indian National Movement & Leaders"
+  },
+  {
+    "id": "PSC_170_2014_084",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "84. First democratically elected communist Government was constituted in :",
+    "option_a": "Manipur",
+    "option_b": "West Bengal",
+    "option_c": "Kerala",
+    "option_d": "Thripura",
+    "correct_answer": "C",
+    "explanation": "In 1957, the world's first democratically elected Communist ministry led by E.M.S. Namboodiripad assumed office in Kerala.\n\n[മലയാളം]: ലോകത്തിൽ ജനാധിപത്യ പ്രക്രിയയിലൂടെ തെരഞ്ഞെടുക്കപ്പെട്ട ആദ്യത്തെ കമ്മ്യൂണിസ്റ്റ് മന്ത്രിസഭ 1957-ൽ കേരളത്തിലാണ് (ഇ.എം.എസിന്റെ നേതൃത്വത്തിൽ) അധികാരത്തിൽ വന്നത്.",
+    "subtopic": "Kerala History"
+  },
+  {
+    "id": "PSC_170_2014_085",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "85. Who was known as 'Fontier Gandhi'?",
+    "option_a": "Ayub khan",
+    "option_b": "Firoz Gandhi",
+    "option_c": "Khan Abdul Gaffer Khan",
+    "option_d": "None of the above",
+    "correct_answer": "C",
+    "explanation": "Khan Abdul Ghaffar Khan (Badshah Khan), leader of the non-violent Khudai Khidmatgar movement in the North-West Frontier Province, was known as Frontier Gandhi.\n\n[മലയാളം]: 'അതിർത്തി ഗാന്ധി' (Frontier Gandhi) എന്നറിയപ്പെടുന്നത് ഖാൻ അബ്ദുൽ ഗാഫർ ഖാൻ (Khan Abdul Ghaffar Khan) ആണ്.",
+    "subtopic": "Indian Freedom Struggle"
+  },
+  {
+    "id": "PSC_170_2014_086",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "86. The first Indian received Nobel Prize in Medicine :",
+    "option_a": "Har Govind Khurana",
+    "option_b": "Ravindranath Tagore",
+    "option_c": "C.V. Raman",
+    "option_d": "Amartya Sen",
+    "correct_answer": "A",
+    "explanation": "Indian-American biochemist Har Gobind Khorana shared the 1968 Nobel Prize in Physiology or Medicine for interpreting the genetic code.\n\n[മലയാളം]: വൈദ്യശാസ്ത്രത്തിൽ (Medicine) നോബൽ സമ്മാനം നേടിയ ആദ്യത്തെ ഇന്ത്യൻ വംശജൻ ഡോ. ഹർ ഗോവിന്ദ് ഖുറാന (Har Gobind Khorana - 1968) ആണ്.",
+    "subtopic": "Indian Nobel Laureates"
+  },
+  {
+    "id": "PSC_170_2014_087",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "87. Temple entry proclamation was signed in the year :",
+    "option_a": "1936",
+    "option_b": "1934",
+    "option_c": "1933",
+    "option_d": "1932",
+    "correct_answer": "A",
+    "explanation": "The historic Temple Entry Proclamation was issued by the Maharaja of Travancore, Chithira Thirunal Balarama Varma, on November 12, 1936.\n\n[മലയാളം]: തിരുവിതാംകൂറിൽ ചരിത്രപ്രസിദ്ധമായ ക്ഷേത്രപ്രവേശന വിളംബരം പുറപ്പെടുവിച്ചത് 1936 നവംബർ 12-നാണ് (ശ്രീ ചിത്തിര തിരുനാൾ ബാലരാമവർമ്മ).",
+    "subtopic": "Kerala Renaissance & Temple Entry"
+  },
+  {
+    "id": "PSC_170_2014_088",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "88. Newly deposited alluvial soil that found in Northern Great Plain is known as :",
+    "option_a": "Bhangar",
+    "option_b": "Black soil",
+    "option_c": "Desert soil",
+    "option_d": "Khader",
+    "correct_answer": "D",
+    "explanation": "In the Indo-Gangetic plains, the newer, highly fertile alluvial soil deposited annually by floods is called Khadar (older alluvium is Bhangar).\n\n[മലയാളം]: ഉത്തരേന്ത്യൻ സമതലങ്ങളിൽ നദികൾ ഓരോ വർഷവും പുതുതായി നിക്ഷേപിക്കുന്ന ഫലഭൂയിഷ്ഠമായ എക്കൽമണ്ണിനെ 'ഖാദർ' (Khadar / Khader) എന്ന് വിളിക്കുന്നു (പഴയ എക്കൽമണ്ണ് ഭംഗാർ ആണ്).",
+    "subtopic": "Indian Soils & Geography"
+  },
+  {
+    "id": "PSC_170_2014_089",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "89. 'Adukkalayil ninnum arangethekku' is a famous drama written by :",
+    "option_a": "Thoppil Bhasi",
+    "option_b": "Chembaka Raman",
+    "option_c": "V.T. Bhattathirippad",
+    "option_d": "None of the above",
+    "correct_answer": "C",
+    "explanation": "'Adukkalayil Ninnum Arangathecku' (From the Kitchen to the Stage) is a revolutionary social drama written by V.T. Bhattathiripad in 1929 against orthodoxy in the Namboothiri community.\n\n[മലയാളം]: 'അടുക്കളയിൽ നിന്ന് അരങ്ങത്തേക്ക്' എന്ന പ്രശസ്ത സാമൂഹിക നാടകം രചിച്ചത് വി.ടി. ഭട്ടതിരിപ്പാട് (V.T. Bhattathiripad) ആണ്.",
+    "subtopic": "Kerala Renaissance Literature"
+  },
+  {
+    "id": "PSC_170_2014_090",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "90. Saadhu Jana Paripalana Sangham was founded by :",
+    "option_a": "Sri. Narayana Guru",
+    "option_b": "Ayyankali",
+    "option_c": "Chattampi Swamikal",
+    "option_d": "Dr. Palppu",
+    "correct_answer": "B",
+    "explanation": "Mahatma Ayyankali founded the Sadhu Jana Paripalana Sangham (SJPS) in 1907 to advance education and civil rights for marginalized Dalits.\n\n[മലയാളം]: 1907-ൽ സാധുജന പരിപാലന സംഘം (SJPS) സ്ഥാപിച്ചത് മഹാത്മാ അയ്യങ്കാളി (Ayyankali) ആണ്.",
+    "subtopic": "Kerala Renaissance Leaders: Ayyankali"
+  },
+  {
+    "id": "PSC_170_2014_091",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "91. NREGPA is a programme for :",
+    "option_a": "rural employment guarantee",
+    "option_b": "rural education guarantee",
+    "option_c": "rural women empowerment",
+    "option_d": "rural literacy programme",
+    "correct_answer": "A",
+    "explanation": "MGNREGA / NREGA provides a legal guarantee for at least 100 days of paid wage employment in a financial year to rural adult households.\n\n[മലയാളം]: ഗ്രാമീണ കുടുംബങ്ങൾക്ക് വർഷത്തിൽ 100 ദിവസത്തെ തൊഴിൽ ഉറപ്പുനൽകുന്ന പദ്ധതിയാണ് ഗ്രാമീണ തൊഴിലുറപ്പ് പദ്ധതി (Rural employment guarantee).",
+    "subtopic": "Social Welfare Schemes"
+  },
+  {
+    "id": "PSC_170_2014_092",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "92. 'One Caste, one religion, One God for mankind is associated with :",
+    "option_a": "Kumara Guru",
+    "option_b": "Sri Narayana Guru",
+    "option_c": "Vaikunta Swamikal",
+    "option_d": "Sahodaran Ayyappan",
+    "correct_answer": "B",
+    "explanation": "'One Caste, One Religion, One God for Mankind' (ഒരു ജാതി, ഒരു മതം, ഒരു ദൈവം മനുഷ്യന്) is the universal teaching of Sree Narayana Guru.\n\n[മലയാളം]: 'ഒരു ജാതി, ഒരു മതം, ഒരു ദൈവം മനുഷ്യന്' എന്ന വിശ്വപ്രസിദ്ധമായ സന്ദേശം നൽകിയത് ശ്രീനാരായണ ഗുരു (Sree Narayana Guru) ആണ്.",
+    "subtopic": "Kerala Renaissance: Sree Narayana Guru"
+  },
+  {
+    "id": "PSC_170_2014_093",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "93. The first spacecraft of India for lunar expedition :",
+    "option_a": "Rohini",
+    "option_b": "Aryabhatta",
+    "option_c": "Chandrayan-1",
+    "option_d": "None of the above",
+    "correct_answer": "C",
+    "explanation": "Chandrayaan-1 was India's first lunar probe mission, launched by ISRO using PSLV-C11 in October 2008.\n\n[മലയാളം]: ഇന്ത്യയുടെ പ്രഥമ ചാന്ദ്രദൗത്യ പേടകമാണ് ചന്ദ്രയാൻ-1 (Chandrayaan-1 - 2008).",
+    "subtopic": "Space Missions & ISRO"
+  },
+  {
+    "id": "PSC_170_2014_094",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "94. Founder of Grameen Bank who contributed the idea of micro credit and micro financing :",
+    "option_a": "Amartya Sen",
+    "option_b": "Muhammed Yunus",
+    "option_c": "Manmohan Singh",
+    "option_d": "Ranga Rajan",
+    "correct_answer": "B",
+    "explanation": "Muhammad Yunus of Bangladesh founded the Grameen Bank pioneering the concepts of microcredit and microfinance, receiving the Nobel Peace Prize in 2006.\n\n[മലയാളം]: ഗ്രാമീൺ ബാങ്ക് സ്ഥാപിച്ച് മൈക്രോക്രെഡിറ്റ്, മൈക്രോഫിനാൻസ് ആശയങ്ങൾ ലോകത്തിന് പരിചയപ്പെടുത്തിയത് മുഹമ്മദ് യൂനുസ് (Muhammad Yunus) ആണ്.",
+    "subtopic": "Economics & Global Personalities"
+  },
+  {
+    "id": "PSC_170_2014_095",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "95. Nobel Prize winner for Literature in 2013 :",
+    "option_a": "Peter Higgs",
+    "option_b": "Moyan",
+    "option_c": "Gabriel Garcia Marquiz",
+    "option_d": "Alice Munro",
+    "correct_answer": "D",
+    "explanation": "Canadian short-story author Alice Munro won the Nobel Prize in Literature in 2013 as a 'master of the contemporary short story'.\n\n[മലയാളം]: 2013-ലെ സാഹിത്യത്തിനുള്ള നോബൽ സമ്മാനം നേടിയത് കനേഡിയൻ എഴുത്തുകാരിയായ ആലീസ് മൺറോ (Alice Munro) ആണ്.",
+    "subtopic": "Nobel Prizes & Literature"
+  },
+  {
+    "id": "PSC_170_2014_096",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "96. 2010 FIFA World Cup winner :",
+    "option_a": "Brazil",
+    "option_b": "Netherland",
+    "option_c": "Italy",
+    "option_d": "Spain",
+    "correct_answer": "D",
+    "explanation": "Spain won the 2010 FIFA World Cup held in South Africa, defeating the Netherlands 1-0 in the final.\n\n[മലയാളം]: 2010-ൽ ദക്ഷിണാഫ്രിക്കയിൽ നടന്ന ഫിഫ ലോകകപ്പ് ഫുട്ബോൾ കിരീടം നേടിയ രാജ്യം സ്പെയിൻ (Spain) ആണ്.",
+    "subtopic": "Sports & FIFA World Cup"
+  },
+  {
+    "id": "PSC_170_2014_097",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "97. Original name of Kumara Guru who fought against discrimination towards Dalit Christians :",
+    "option_a": "Mathai Yohannan",
+    "option_b": "Poikayil Yohannan",
+    "option_c": "Pandit Karuppan",
+    "option_d": "Ayyankali",
+    "correct_answer": "B",
+    "explanation": "Poikayil Appachan (Poikayil Yohannan), also known as Kumara Guru, founded the Prathyaksha Raksha Daiva Sabha (PRDS) in 1909.\n\n[മലയാളം]: പൊയ്കയിൽ അപ്പച്ചൻ / പൊയ്കയിൽ യോഹന്നാൻ (Poikayil Yohannan) ആണ് കുമാരഗുരുദേവൻ എന്നറിയപ്പെടുന്നത്. അദ്ദേഹം PRDS സ്ഥാപിച്ചു.",
+    "subtopic": "Kerala Renaissance: Poikayil Yohannan"
+  },
+  {
+    "id": "PSC_170_2014_098",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "98. Present Chief Justice of India : [Deleted by PSC]",
+    "option_a": "R.M. Lodha",
+    "option_b": "Justice K.G. Balakrishnan",
+    "option_c": "J.H. Khania",
+    "option_d": "R.S. Pathak",
+    "correct_answer": "X",
+    "explanation": "[Note: This question was DELETED by PSC in the final key because Chief Justice R.M. Lodha retired on September 27, 2014, and Justice H.L. Dattu took over before the exam on October 17, 2014].\n\n[മലയാളം]: ഈ ചോദ്യം പി.എസ്.സി ഔദ്യോഗിക ഫൈനൽ കീയിൽ ഒഴിവാക്കിയിട്ടുണ്ട് (Deleted). 2014 സെപ്റ്റംബറിൽ ആർ.എം. ലോധ വിരമിച്ചതിനാലാണ് ചോദ്യം ഒഴിവാക്കിയത്.",
+    "subtopic": "Indian Judiciary"
+  },
+  {
+    "id": "PSC_170_2014_099",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "99. Jalianwala Bagh was held in :",
+    "option_a": "1917",
+    "option_b": "1919",
+    "option_c": "1920",
+    "option_d": "1921",
+    "correct_answer": "B",
+    "explanation": "The Jallianwala Bagh massacre occurred on April 13, 1919, in Amritsar, Punjab, when British troops commanded by General Dyer opened fire on unarmed crowds.\n\n[മലയാളം]: ജാലിയൻ വാലാബാഗ് കൂട്ടക്കൊല നടന്നത് 1919 ഏപ്രിൽ 13-നാണ്.",
+    "subtopic": "Indian National Movement"
+  },
+  {
+    "id": "PSC_170_2014_100",
+    "sheetName": "PSC_Tradesman_170_2014",
+    "question": "100. Edakkal Cave is situated in :",
+    "option_a": "Palakkad",
+    "option_b": "Kannur",
+    "option_c": "Kasergod",
+    "option_d": "Wayanad",
+    "correct_answer": "D",
+    "explanation": "The historic prehistoric Edakkal Caves containing Neolithic rock petroglyphs are situated on Ambukuthi Mala in Wayanad district, Kerala.\n\n[മലയാളം]: നവീന ശിലായുഗ ചിത്രങ്ങൾ കാണപ്പെടുന്ന ചരിത്രപ്രസിദ്ധമായ എടക്കൽ ഗുഹകൾ സ്ഥിതി ചെയ്യുന്നത് വയനാട് (Wayanad) ജില്ലയിലാണ്.",
+    "subtopic": "Kerala Geography & Prehistoric Sites"
   }
 ];
 }

@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-const CURRENT_DATA_VERSION = "2026_11_24_TRADESMAN_191_V1";
+const CURRENT_DATA_VERSION = "2026_11_24_TRADESMAN_170_V2";
 
 function getAllBuiltinQuestions() {
   const list = (typeof SAMPLE_QUESTIONS !== 'undefined' && Array.isArray(SAMPLE_QUESTIONS)) ? [...SAMPLE_QUESTIONS] : [];
@@ -48,6 +48,16 @@ function getAllBuiltinQuestions() {
   // Merge Tradesman CHM 191/2015 questions
   if (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_191_QUESTIONS)) {
     PSC_TRADESMAN_191_QUESTIONS.forEach(q => {
+      if (!existingIds.has(q.id)) {
+        list.push(q);
+        existingIds.add(q.id);
+      }
+    });
+  }
+
+  // Merge Tradesman CHM 170/2014 questions
+  if (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_170_QUESTIONS)) {
+    PSC_TRADESMAN_170_QUESTIONS.forEach(q => {
       if (!existingIds.has(q.id)) {
         list.push(q);
         existingIds.add(q.id);
@@ -85,6 +95,16 @@ function loadQuestions() {
 
       if (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_191_QUESTIONS)) {
         PSC_TRADESMAN_191_QUESTIONS.forEach(q => {
+          if (!existingIds.has(q.id)) {
+            state.questions.push(q);
+            existingIds.add(q.id);
+            addedNew = true;
+          }
+        });
+      }
+
+      if (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_170_QUESTIONS)) {
+        PSC_TRADESMAN_170_QUESTIONS.forEach(q => {
           if (!existingIds.has(q.id)) {
             state.questions.push(q);
             existingIds.add(q.id);
@@ -403,6 +423,55 @@ function startTradesman191Exam() {
     currentIndex: 0,
     userAnswers: {},
     timeRemaining: 60 * 60, // 60 minutes for 83 questions
+    timerInterval: null,
+    isSubmitted: false
+  };
+
+  initQuizUI();
+  startExamTimer();
+}
+
+// Start Tradesman CHM 170/2014 Practice Mode (Instant answers, Malayalam explanations, jump palette)
+function startTradesman170Practice() {
+  const questions = (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && PSC_TRADESMAN_170_QUESTIONS.length > 0)
+    ? PSC_TRADESMAN_170_QUESTIONS
+    : state.questions.filter(q => q.sheetName === "PSC_Tradesman_170_2014");
+
+  if (!questions || questions.length === 0) {
+    alert("Tradesman 170/2014 questions not found! Please check psc_tradesman_170_2014.js or sync with Google Sheets.");
+    return;
+  }
+
+  state.activeSession = {
+    mode: 'practice',
+    title: 'Tradesman CHM (Code: 170/2014) - Practice Mode',
+    questions: [...questions],
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+
+  initQuizUI();
+}
+
+// Start Tradesman CHM 170/2014 Full Exam Mode (-0.33 mark, 75 minutes, 100 Qs)
+function startTradesman170Exam() {
+  const questions = (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && PSC_TRADESMAN_170_QUESTIONS.length > 0)
+    ? PSC_TRADESMAN_170_QUESTIONS
+    : state.questions.filter(q => q.sheetName === "PSC_Tradesman_170_2014");
+
+  if (!questions || questions.length === 0) {
+    alert("Tradesman 170/2014 questions not found! Please check psc_tradesman_170_2014.js or sync with Google Sheets.");
+    return;
+  }
+
+  state.activeSession = {
+    mode: 'exam',
+    title: 'Tradesman CHM Full Exam (Code: 170/2014 - 100 Qs)',
+    questions: [...questions],
+    currentIndex: 0,
+    userAnswers: {},
+    timeRemaining: 75 * 60, // 75 minutes for 100 questions
     timerInterval: null,
     isSubmitted: false
   };
@@ -995,6 +1064,10 @@ async function syncWithGoogleSheet(isAutoSync = false) {
       const hasTradesmanInSync = merged.some(q => q.sheetName === "PSC_Tradesman_191_2015");
       if (!hasTradesmanInSync && typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined') {
         merged = merged.concat(PSC_TRADESMAN_191_QUESTIONS);
+      }
+      const hasTradesman170InSync = merged.some(q => q.sheetName === "PSC_Tradesman_170_2014");
+      if (!hasTradesman170InSync && typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined') {
+        merged = merged.concat(PSC_TRADESMAN_170_QUESTIONS);
       }
       state.questions = merged;
       state.apiUrl = urlInput;

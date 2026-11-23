@@ -214,7 +214,42 @@
 
       <!-- PSC Previous Exams Section -->
       <div class="space-y-4">
-        <!-- Paper 1: Tradesman CHM 191/2015 (Exact Post) -->
+        <!-- Paper 1: Tradesman CHM 170/2014 (100 Qs Full Paper) -->
+        <div class="bg-gradient-to-r from-blue-950 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-blue-400/40 relative overflow-hidden">
+          <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div class="space-y-2.5 max-w-2xl">
+              <div class="flex items-center flex-wrap gap-2">
+                <span class="bg-blue-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <i class="fa-solid fa-star"></i> 100 പൂർണ്ണ ചോദ്യങ്ങൾ (Full Paper)
+                </span>
+                <span class="bg-blue-900/90 text-blue-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-700">
+                  Question Code: 170/2014
+                </span>
+                <span class="text-xs text-blue-300">
+                  Tradesman Computer Hardware (Tvm, Idk, Pkd) • 17/10/2014
+                </span>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+                Tradesman (CHM) - യഥാർത്ഥ മുൻകാല പരീക്ഷ (100 Qs)
+              </h3>
+              <p class="text-sm text-blue-100 leading-relaxed">
+                കേരള പി.എസ്.സി നടത്തിയ Tradesman CHM പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ ഫൈനൽ ആൻസർ കീയും (Alpha Code A) മലയാളം വിശദീകരണങ്ങളും സഹിതം.
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
+              <button onclick="startTradesman170Practice()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-blue-300/40">
+                <i class="fa-solid fa-book-open-reader text-amber-300"></i>
+                <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
+              </button>
+              <button onclick="startTradesman170Exam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
+                <i class="fa-solid fa-stopwatch"></i>
+                <span>100Q Exam (75 Min)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paper 2: Tradesman CHM 191/2015 (Exact Post) -->
         <div class="bg-gradient-to-r from-teal-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-teal-400/40 relative overflow-hidden">
           <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div class="space-y-2.5 max-w-2xl">
@@ -754,6 +789,7 @@
   <script src="sample_data.js"></script>
   <script src="psc_previous_data.js"></script>
   <script src="psc_tradesman_191_2015.js"></script>
+  <script src="psc_tradesman_170_2014.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
