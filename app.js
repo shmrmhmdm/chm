@@ -29,18 +29,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-const CURRENT_DATA_VERSION = "2026_11_23_PSC_147_2023_V1";
+const CURRENT_DATA_VERSION = "2026_11_24_TRADESMAN_191_V1";
 
 function getAllBuiltinQuestions() {
   const list = (typeof SAMPLE_QUESTIONS !== 'undefined' && Array.isArray(SAMPLE_QUESTIONS)) ? [...SAMPLE_QUESTIONS] : [];
+  const existingIds = new Set(list.map(q => q.id));
+
+  // Merge Junior Instructor 147/2023 questions
   if (typeof PSC_PREVIOUS_QUESTIONS !== 'undefined' && Array.isArray(PSC_PREVIOUS_QUESTIONS)) {
-    const existingIds = new Set(list.map(q => q.id));
     PSC_PREVIOUS_QUESTIONS.forEach(q => {
       if (!existingIds.has(q.id)) {
         list.push(q);
+        existingIds.add(q.id);
       }
     });
   }
+
+  // Merge Tradesman CHM 191/2015 questions
+  if (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_191_QUESTIONS)) {
+    PSC_TRADESMAN_191_QUESTIONS.forEach(q => {
+      if (!existingIds.has(q.id)) {
+        list.push(q);
+        existingIds.add(q.id);
+      }
+    });
+  }
+
   return list;
 }
 
@@ -56,19 +70,31 @@ function loadQuestions() {
   } else {
     try {
       state.questions = JSON.parse(cached);
-      // Ensure PSC previous questions are included
+      let addedNew = false;
+      const existingIds = new Set(state.questions.map(q => q.id));
+
       if (typeof PSC_PREVIOUS_QUESTIONS !== 'undefined' && Array.isArray(PSC_PREVIOUS_QUESTIONS)) {
-        const existingIds = new Set(state.questions.map(q => q.id));
-        let addedNew = false;
         PSC_PREVIOUS_QUESTIONS.forEach(q => {
           if (!existingIds.has(q.id)) {
             state.questions.push(q);
+            existingIds.add(q.id);
             addedNew = true;
           }
         });
-        if (addedNew) {
-          localStorage.setItem('chm_cached_questions', JSON.stringify(state.questions));
-        }
+      }
+
+      if (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_191_QUESTIONS)) {
+        PSC_TRADESMAN_191_QUESTIONS.forEach(q => {
+          if (!existingIds.has(q.id)) {
+            state.questions.push(q);
+            existingIds.add(q.id);
+            addedNew = true;
+          }
+        });
+      }
+
+      if (addedNew) {
+        localStorage.setItem('chm_cached_questions', JSON.stringify(state.questions));
       }
     } catch (e) {
       state.questions = getAllBuiltinQuestions();
@@ -334,6 +360,55 @@ function startPscPreviousPractice() {
   };
 
   initQuizUI();
+}
+
+// Start Tradesman CHM 191/2015 Practice Mode (Instant answers, Malayalam explanations, jump palette)
+function startTradesman191Practice() {
+  const questions = (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && PSC_TRADESMAN_191_QUESTIONS.length > 0)
+    ? PSC_TRADESMAN_191_QUESTIONS
+    : state.questions.filter(q => q.sheetName === "PSC_Tradesman_191_2015");
+
+  if (!questions || questions.length === 0) {
+    alert("Tradesman 191/2015 questions not found! Please check psc_tradesman_191_2015.js or sync with Google Sheets.");
+    return;
+  }
+
+  state.activeSession = {
+    mode: 'practice',
+    title: 'Tradesman CHM (Code: 191/2015) - Practice Mode',
+    questions: [...questions],
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+
+  initQuizUI();
+}
+
+// Start Tradesman CHM 191/2015 Timed Exam Mode (-0.33 mark, 60 minutes)
+function startTradesman191Exam() {
+  const questions = (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && PSC_TRADESMAN_191_QUESTIONS.length > 0)
+    ? PSC_TRADESMAN_191_QUESTIONS
+    : state.questions.filter(q => q.sheetName === "PSC_Tradesman_191_2015");
+
+  if (!questions || questions.length === 0) {
+    alert("Tradesman 191/2015 questions not found! Please check psc_tradesman_191_2015.js or sync with Google Sheets.");
+    return;
+  }
+
+  state.activeSession = {
+    mode: 'exam',
+    title: 'Tradesman CHM Exam (Code: 191/2015)',
+    questions: [...questions],
+    currentIndex: 0,
+    userAnswers: {},
+    timeRemaining: 60 * 60, // 60 minutes for 83 questions
+    timerInterval: null,
+    isSubmitted: false
+  };
+
+  initQuizUI();
+  startExamTimer();
 }
 
 // Start Timed Test for a Specific Module
@@ -912,10 +987,14 @@ async function syncWithGoogleSheet(isAutoSync = false) {
 
     if (data.status === "success" && data.questions) {
       let merged = [...data.questions];
-      // If the synced sheet doesn't have PSC_Previous_Exam yet, keep built-in previous questions
-      const hasPscSheetInSync = merged.some(q => q.sheetName === "PSC_Previous_Exam");
-      if (!hasPscSheetInSync && typeof PSC_PREVIOUS_QUESTIONS !== 'undefined') {
+      // Keep built-in previous questions if not yet in synced Google Sheet
+      const hasPsc147InSync = merged.some(q => q.sheetName === "PSC_Previous_Exam");
+      if (!hasPsc147InSync && typeof PSC_PREVIOUS_QUESTIONS !== 'undefined') {
         merged = merged.concat(PSC_PREVIOUS_QUESTIONS);
+      }
+      const hasTradesmanInSync = merged.some(q => q.sheetName === "PSC_Tradesman_191_2015");
+      if (!hasTradesmanInSync && typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined') {
+        merged = merged.concat(PSC_TRADESMAN_191_QUESTIONS);
       }
       state.questions = merged;
       state.apiUrl = urlInput;

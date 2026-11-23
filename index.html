@@ -212,37 +212,75 @@
         </div>
       </div>
 
-      <!-- PSC Previous Exam Special Card -->
-      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-amber-400/30 relative overflow-hidden">
-        <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div class="space-y-2.5 max-w-2xl">
-            <div class="flex items-center flex-wrap gap-2">
-              <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                <i class="fa-solid fa-certificate"></i> Official PSC Paper
-              </span>
-              <span class="bg-indigo-800 text-indigo-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-indigo-700">
-                Question Code: 147/2023
-              </span>
-              <span class="text-xs text-indigo-300">
-                Cat. No: 745/2021 • Exam Date: 11/08/2023
-              </span>
+      <!-- PSC Previous Exams Section -->
+      <div class="space-y-4">
+        <!-- Paper 1: Tradesman CHM 191/2015 (Exact Post) -->
+        <div class="bg-gradient-to-r from-teal-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-teal-400/40 relative overflow-hidden">
+          <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div class="space-y-2.5 max-w-2xl">
+              <div class="flex items-center flex-wrap gap-2">
+                <span class="bg-teal-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <i class="fa-solid fa-star"></i> ഇതേ തസ്തികയുടെ യഥാർത്ഥ ചോദ്യപേപ്പർ
+                </span>
+                <span class="bg-teal-900/90 text-teal-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-teal-700">
+                  Question Code: 191/2015
+                </span>
+                <span class="text-xs text-teal-300">
+                  Tradesman Computer Hardware • 09/10/2015
+                </span>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+                Tradesman (CHM) - യഥാർത്ഥ മുൻകാല പരീക്ഷ (83 Qs)
+              </h3>
+              <p class="text-sm text-teal-100 leading-relaxed">
+                കേരള പി.എസ്.സി നടത്തിയ Tradesman - Computer Hardware Maintenance പരീക്ഷയിലെ ഒഫീഷ്യൽ ചോദ്യങ്ങളും ഫൈനൽ ആൻസർ കീയും (Alpha Code A) മലയാളം വിശദീകരണങ്ങളും സഹിതം.
+              </p>
             </div>
-            <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-              Junior Instructor (COPA) - യഥാർത്ഥ മുൻകാല ചോദ്യങ്ങൾ (100 Qs)
-            </h3>
-            <p class="text-sm text-indigo-200 leading-relaxed">
-              കേരള പി.എസ്.സി നടത്തിയ യഥാർത്ഥ പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ ആൻസർ കീയും മലയാളം വിശദീകരണങ്ങളും സഹിതം. ട്രേഡ്സ്മാൻ കമ്പ്യൂട്ടർ ഹാർഡ്‌വെയർ പരീക്ഷയ്ക്കുള്ള ഏറ്റവും മികച്ച മുൻകാല ചോദ്യ പരിശീലനം!
-            </p>
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
+              <button onclick="startTradesman191Practice()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-teal-300/40">
+                <i class="fa-solid fa-book-open-reader text-amber-300"></i>
+                <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
+              </button>
+              <button onclick="startTradesman191Exam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
+                <i class="fa-solid fa-stopwatch"></i>
+                <span>83Q Exam (60 Min)</span>
+              </button>
+            </div>
           </div>
-          <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
-            <button onclick="startPscPreviousPractice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-emerald-400/40">
-              <i class="fa-solid fa-book-open-reader text-amber-300"></i>
-              <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
-            </button>
-            <button onclick="startPscPreviousExam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
-              <i class="fa-solid fa-stopwatch"></i>
-              <span>100Q Exam (75 Min)</span>
-            </button>
+        </div>
+
+        <!-- Paper 2: Junior Instructor COPA 147/2023 -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-amber-400/30 relative overflow-hidden">
+          <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div class="space-y-2.5 max-w-2xl">
+              <div class="flex items-center flex-wrap gap-2">
+                <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <i class="fa-solid fa-certificate"></i> Official PSC Paper
+                </span>
+                <span class="bg-indigo-800 text-indigo-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-indigo-700">
+                  Question Code: 147/2023
+                </span>
+                <span class="text-xs text-indigo-300">
+                  Junior Instructor COPA • Cat. 745/2021 • 11/08/2023
+                </span>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+                Junior Instructor (COPA) - യഥാർത്ഥ മുൻകാല ചോദ്യങ്ങൾ (100 Qs)
+              </h3>
+              <p class="text-sm text-indigo-200 leading-relaxed">
+                കേരള പി.എസ്.സി നടത്തിയ യഥാർത്ഥ പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ ആൻസർ കീയും മലയാളം വിശദീകരണങ്ങളും സഹിതം.
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
+              <button onclick="startPscPreviousPractice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-emerald-400/40">
+                <i class="fa-solid fa-book-open-reader text-amber-300"></i>
+                <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
+              </button>
+              <button onclick="startPscPreviousExam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
+                <i class="fa-solid fa-stopwatch"></i>
+                <span>100Q Exam (75 Min)</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -715,6 +753,7 @@
   <script src="revision_data.js"></script>
   <script src="sample_data.js"></script>
   <script src="psc_previous_data.js"></script>
+  <script src="psc_tradesman_191_2015.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

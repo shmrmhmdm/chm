@@ -1,5 +1,5 @@
 // Kerala PSC Tradesman CHM - Service Worker for PWA & Offline Support
-const CACHE_NAME = 'chm-psc-prep-v2';
+const CACHE_NAME = 'chm-psc-prep-v3';
 
 const STATIC_ASSETS = [
   './',
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
   './app.js',
   './sample_data.js',
   './psc_previous_data.js',
+  './psc_tradesman_191_2015.js',
   './syllabus_data.js',
   './revision_data.js',
   './manifest.json',
