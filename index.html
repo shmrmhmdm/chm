@@ -97,6 +97,10 @@
           <i class="fa-solid fa-graduation-cap"></i>
           <span class="hidden sm:inline">PSC Previous Exam</span>
         </button>
+        <button onclick="openAnswerHistoryView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-emerald-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700" title="View Your Past Answers & Sync">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span class="hidden lg:inline">My Answers</span>
+        </button>
         <button onclick="openToolsView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-cyan-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700" title="Hardware Cheat Sheet & Calculators">
           <i class="fa-solid fa-calculator"></i>
           <span class="hidden lg:inline">Tools</span>
@@ -292,6 +296,11 @@
             <span class="flex items-center gap-1 text-rose-700"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Weak Area (&lt;50%)</span>
           </div>
         </div>
+        <!-- Neglected / Least Covered Modules Spotlight -->
+        <div id="neglected-modules-banner" class="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <!-- Dynamically populated -->
+        </div>
+
         <div id="module-analytics-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
           <!-- Dynamically populated module performance bars -->
         </div>
@@ -519,9 +528,12 @@
       <!-- Question Card -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
         <!-- Subtopic & Marks tag -->
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+        <div class="flex items-center justify-between flex-wrap gap-2 text-xs font-semibold text-slate-500">
           <span id="question-subtopic" class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">General</span>
-          <span id="question-marks-tag" class="text-indigo-600">+1.00 / -0.33</span>
+          <div class="flex items-center gap-2">
+            <span id="last-attempt-badge" class="hidden px-2.5 py-1 rounded-md text-[11px] font-bold"></span>
+            <span id="question-marks-tag" class="text-indigo-600">+1.00 / -0.33</span>
+          </div>
         </div>
 
         <!-- Question Text -->
@@ -828,6 +840,57 @@
         </div>
 
         <div id="tools-content-container" class="pt-1">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 9: MY ANSWER HISTORY & CLOUD SYNC -->
+    <section id="view-history" class="hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200 space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition">
+              <i class="fa-solid fa-arrow-left text-lg"></i>
+            </button>
+            <div>
+              <h3 class="font-bold text-slate-900 text-xl flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
+                <span>My Attempt History (ചെയ്ത ചോദ്യങ്ങളും തിരഞ്ഞെടുത്ത ഉത്തരങ്ങളും)</span>
+              </h3>
+              <p class="text-xs text-slate-500">നിങ്ങൾ അവസാനമായി തിരഞ്ഞെടുത്ത ഓപ്ഷൻ, ശരിയുത്തരം, സമയം എന്നിവ ഇവിടെ കാണാം</p>
+            </div>
+          </div>
+
+          <div class="flex items-center flex-wrap gap-2">
+            <button onclick="syncAllProgressToSheet()" id="btn-push-progress" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>Save to Google Sheet</span>
+            </button>
+            <button onclick="loadProgressFromSheet()" id="btn-pull-progress" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+              <span>Restore from Sheet</span>
+            </button>
+            <button onclick="clearAnswerHistory()" class="text-xs text-rose-600 hover:underline font-semibold px-2">Clear Local</button>
+          </div>
+        </div>
+
+        <div id="history-sync-status" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+
+        <!-- Filters -->
+        <div class="flex items-center flex-wrap gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
+          <select id="history-filter-result" onchange="renderAnswerHistoryList()" class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-slate-700 focus:outline-none">
+            <option value="all">എല്ലാം (All Attempts)</option>
+            <option value="wrong">❌ തെറ്റിയവ മാത്രം (Wrong Only)</option>
+            <option value="correct">✅ ശരിയായവ മാത്രം (Correct Only)</option>
+          </select>
+          <select id="history-filter-module" onchange="renderAnswerHistoryList()" class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-slate-700 focus:outline-none">
+            <option value="all">All Modules & Papers</option>
+          </select>
+          <span id="history-count-label" class="ml-auto font-bold text-slate-500">0 Records</span>
+        </div>
+
+        <div id="answer-history-list" class="space-y-3">
           <!-- Dynamically populated -->
         </div>
       </div>

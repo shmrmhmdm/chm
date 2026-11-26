@@ -15,6 +15,7 @@ let state = {
   studyLog: JSON.parse(localStorage.getItem('chm_study_log') || '{}'),
   dailyGoal: parseInt(localStorage.getItem('chm_daily_goal') || '25', 10),
   examHistory: JSON.parse(localStorage.getItem('chm_exam_history') || '[]'),
+  answerHistory: JSON.parse(localStorage.getItem('chm_answer_history') || '{}'),
   practicePrefs: JSON.parse(localStorage.getItem('chm_practice_prefs') || '{"order":"shuffle","unattemptedOnly":false}'),
   apiUrl: localStorage.getItem('chm_api_url') || DEFAULT_API_URL,
   geminiKey: localStorage.getItem('chm_gemini_key') || DEFAULT_GEMINI_KEY
@@ -131,7 +132,7 @@ function loadQuestions() {
 
 // Navigation Router
 function navigate(viewName) {
-  ['home', 'quiz', 'results', 'mistakes', 'revision', 'syllabus', 'bookmarks', 'tools'].forEach(v => {
+  ['home', 'quiz', 'results', 'mistakes', 'revision', 'syllabus', 'bookmarks', 'tools', 'history'].forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
   });
@@ -218,17 +219,47 @@ function renderDashboard() {
   });
 }
 
-// Render Module Analytics & Weak Area Progress Bars
+// Render Module Analytics, Coverage % & Neglected Modules Spotlight
 function renderModuleAnalytics() {
   const container = document.getElementById('module-analytics-container');
+  const banner = document.getElementById('neglected-modules-banner');
   if (!container) return;
   container.innerHTML = '';
 
+  const attemptedSet = new Set(state.attemptedIds || []);
+  const coverageList = [];
+
   MODULE_DEFINITIONS.forEach(mod => {
+    const modQuestions = state.questions.filter(q => q.sheetName === mod.id);
+    const totalInMod = modQuestions.length;
+    const uniqueCovered = modQuestions.filter(q => attemptedSet.has(q.id)).length;
+    const coveragePct = totalInMod > 0 ? Math.round((uniqueCovered / totalInMod) * 100) : 0;
+
+    // Find most recent attempt timestamp in this module
+    let lastTs = null;
+    modQuestions.forEach(q => {
+      const rec = state.answerHistory && state.answerHistory[q.id];
+      if (rec && rec.timestamp) {
+        const t = new Date(rec.timestamp).getTime();
+        if (!lastTs || t > lastTs) lastTs = t;
+      }
+    });
+
     const stats = state.moduleStats[mod.id] || { attempted: 0, correct: 0, wrong: 0 };
     const attempted = stats.attempted || 0;
     const correct = stats.correct || 0;
     const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
+
+    coverageList.push({
+      id: mod.id,
+      name: mod.name,
+      marks: mod.marks,
+      totalInMod,
+      uniqueCovered,
+      coveragePct,
+      attempted,
+      lastTs
+    });
 
     let badgeClass = "bg-slate-100 text-slate-600";
     let badgeText = "പരിശീലിച്ചിട്ടില്ല";
@@ -250,6 +281,10 @@ function renderModuleAnalytics() {
       }
     }
 
+    const lastText = lastTs
+      ? new Date(lastTs).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+      : 'ഇതുവരെ ഇല്ല';
+
     const item = document.createElement('div');
     item.className = "p-3.5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition flex flex-col justify-between";
     item.innerHTML = `
@@ -262,15 +297,16 @@ function renderModuleAnalytics() {
             ${badgeText}
           </span>
         </div>
-        <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1.5">
-          <span>പരിശീലിച്ചത്: <strong>${attempted}</strong> ചോദ്യങ്ങൾ (${correct} ശരി)</span>
-          <span class="font-bold text-indigo-700">${mod.marks} Marks</span>
+        <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+          <span>Coverage: <strong class="text-slate-800">${uniqueCovered}/${totalInMod} (${coveragePct}%)</strong></span>
+          <span class="font-bold text-indigo-700">${mod.marks} Marks • Last: ${lastText}</span>
         </div>
         <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mb-2">
           <div class="${barColor} h-full transition-all duration-500" style="width: ${attempted > 0 ? accuracy : 0}%"></div>
         </div>
       </div>
-      <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-200/50">
+      <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/50">
+        <span class="text-[10px] text-slate-400">Attempts: ${attempted} (${correct} ശരി)</span>
         <button onclick="startModulePractice('${mod.id}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 hover:underline">
           <i class="fa-solid fa-play text-[10px]"></i> പരിശീലിക്കുക
         </button>
@@ -278,6 +314,32 @@ function renderModuleAnalytics() {
     `;
     container.appendChild(item);
   });
+
+  // Render Neglected / Least Covered Modules Banner
+  if (banner && coverageList.length > 0) {
+    const sorted = [...coverageList].sort((a, b) => a.coveragePct - b.coveragePct || a.attempted - b.attempted);
+    const topNeglected = sorted.slice(0, 3);
+    const pills = topNeglected.map(m => `
+      <button onclick="startModulePractice('${m.id}')" class="px-2.5 py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100 text-[11px] font-bold text-amber-950 transition flex items-center gap-1">
+        <span>${m.name.split(':')[0]}</span>
+        <span class="text-rose-600">(${m.coveragePct}%)</span>
+      </button>
+    `).join('');
+
+    banner.innerHTML = `
+      <div class="space-y-1.5">
+        <div class="text-xs font-extrabold text-amber-950 flex items-center gap-1.5">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+          <span>കുറവ് നോക്കിയ / തീരെ നോക്കാത്ത മൊഡ്യൂളുകൾ (Least Covered):</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5">${pills}</div>
+      </div>
+      <button onclick="startModulePractice('${sorted[0].id}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl shadow-sm transition whitespace-nowrap flex items-center gap-1.5 shrink-0">
+        <i class="fa-solid fa-bullseye"></i>
+        <span>Practice Least Covered (${sorted[0].name.split(':')[0]})</span>
+      </button>
+    `;
+  }
 }
 
 // Record Result for Module
@@ -691,6 +753,22 @@ function renderCurrentQuestion() {
   document.getElementById('question-subtopic').innerText = q.subtopic || q.sheetName || 'CHM';
   document.getElementById('question-text').innerText = q.question;
 
+  // Last Attempt Badge
+  const lastBadge = document.getElementById('last-attempt-badge');
+  if (lastBadge) {
+    const prev = state.answerHistory && state.answerHistory[q.id];
+    if (prev && session.mode !== 'exam') {
+      const dt = prev.timestamp ? new Date(prev.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '';
+      lastBadge.classList.remove('hidden');
+      lastBadge.className = prev.isCorrect
+        ? "px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200"
+        : "px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200";
+      lastBadge.innerText = `🕒 Last: Option (${prev.selectedOption}) ${prev.isCorrect ? '✓' : '✗'}${dt ? ' • ' + dt : ''}`;
+    } else {
+      lastBadge.classList.add('hidden');
+    }
+  }
+
   // Bookmark icon update
   const isBookmarked = state.bookmarks.includes(q.id);
   const bmBtn = document.getElementById('bookmark-btn');
@@ -804,7 +882,7 @@ function selectOption(optKey) {
   // Update Global Stats if practice mode
   if (session.mode === 'practice') {
     recordModuleResult(q.sheetName, isCorrect);
-    recordQuestionAttempt(q.id);
+    recordQuestionAttempt(q, optKey, isCorrect, 'practice');
     state.stats.attempted++;
     if (isCorrect) {
       state.stats.correct++;
@@ -992,9 +1070,17 @@ function submitExam() {
   const score = Math.max(0, (correct * 1.0) - penalty);
 
   // Update Lifetime Stats & Exam History
+  const examItemsToSync = [];
   session.questions.forEach((q, i) => {
-    if (session.userAnswers[i]) recordQuestionAttempt(q.id);
+    const ans = session.userAnswers[i];
+    if (ans) {
+      const rec = recordQuestionAttempt(q, ans.selected, ans.isCorrect, 'exam', true);
+      if (rec) examItemsToSync.push(rec);
+    }
   });
+  if (examItemsToSync.length > 0) {
+    postProgressToSheet(examItemsToSync);
+  }
   state.stats.attempted += (correct + wrong);
   state.stats.correct += correct;
   state.stats.wrong += wrong;
@@ -2346,8 +2432,11 @@ function updateExamCountdown() {
   }
 }
 
-function recordQuestionAttempt(questionId) {
-  if (!questionId) return;
+function recordQuestionAttempt(qOrId, selectedOption = '', isCorrect = false, mode = 'practice', skipAutoPost = false) {
+  const isObj = qOrId && typeof qOrId === 'object';
+  const questionId = isObj ? qOrId.id : qOrId;
+  if (!questionId) return null;
+
   if (!state.attemptedIds.includes(questionId)) {
     state.attemptedIds.push(questionId);
     localStorage.setItem('chm_attempted_ids', JSON.stringify(state.attemptedIds));
@@ -2355,6 +2444,42 @@ function recordQuestionAttempt(questionId) {
   const today = getTodayKey();
   state.studyLog[today] = (state.studyLog[today] || 0) + 1;
   localStorage.setItem('chm_study_log', JSON.stringify(state.studyLog));
+
+  if (isObj && selectedOption) {
+    const rec = {
+      questionId: questionId,
+      sheetName: qOrId.sheetName || '',
+      selectedOption: String(selectedOption).toUpperCase(),
+      correctOption: String(qOrId.correct_answer || '').toUpperCase(),
+      isCorrect: !!isCorrect,
+      mode: mode,
+      timestamp: new Date().toISOString(),
+      question: qOrId.question || ''
+    };
+    state.answerHistory[questionId] = rec;
+    localStorage.setItem('chm_answer_history', JSON.stringify(state.answerHistory));
+
+    if (!skipAutoPost) {
+      postProgressToSheet([rec]);
+    }
+    return rec;
+  }
+  return null;
+}
+
+function postProgressToSheet(items) {
+  if (!state.apiUrl || !items || items.length === 0) return;
+  try {
+    fetch(state.apiUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'saveProgress',
+        items: items
+      })
+    }).catch(() => {});
+  } catch (e) {}
 }
 
 function calculateStreak() {
@@ -2925,3 +3050,191 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowLeft') prevQuestion();
   else if (key === 'e' && state.activeSession.mode === 'practice') toggleExplanation();
 });
+
+
+// ============================================================================
+// 📜 MY ANSWER HISTORY & GOOGLE SHEET PROGRESS SYNC
+// ============================================================================
+
+function openAnswerHistoryView() {
+  navigate('history');
+  const modSelect = document.getElementById('history-filter-module');
+  if (modSelect) {
+    const existing = modSelect.value || 'all';
+    const sheets = Array.from(new Set(Object.values(state.answerHistory || {}).map(r => r.sheetName).filter(Boolean)));
+    modSelect.innerHTML = `<option value="all">All Modules & Papers</option>` +
+      sheets.map(s => `<option value="${s}">${s}</option>`).join('');
+    modSelect.value = sheets.includes(existing) ? existing : 'all';
+  }
+  renderAnswerHistoryList();
+}
+
+function renderAnswerHistoryList() {
+  const container = document.getElementById('answer-history-list');
+  const countLabel = document.getElementById('history-count-label');
+  if (!container) return;
+
+  const resFilter = document.getElementById('history-filter-result')?.value || 'all';
+  const modFilter = document.getElementById('history-filter-module')?.value || 'all';
+
+  let records = Object.values(state.answerHistory || {});
+  records.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+
+  if (resFilter === 'wrong') records = records.filter(r => !r.isCorrect);
+  else if (resFilter === 'correct') records = records.filter(r => r.isCorrect);
+
+  if (modFilter !== 'all') records = records.filter(r => r.sheetName === modFilter);
+
+  if (countLabel) countLabel.innerText = `${records.length} Records`;
+
+  if (records.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center text-slate-500 text-sm space-y-2 bg-slate-50 rounded-2xl border border-slate-200">
+        <i class="fa-solid fa-clock-rotate-left text-3xl text-slate-300"></i>
+        <p class="font-bold text-slate-700">ഇതുവരെ ഉത്തരങ്ങളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല!</p>
+        <p class="text-xs">നിങ്ങൾ ഇനി പ്രാക്ടീസ് ചെയ്യുമ്പോഴും പരീക്ഷ എഴുതുമ്പോഴും തിരഞ്ഞെടുക്കുന്ന ഓരോ ഉത്തരവും ഇവിടെ തനിയെ സേവ് ആകും.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = records.map((rec, idx) => {
+    const qObj = state.questions.find(q => q.id === rec.questionId);
+    const qText = qObj ? qObj.question : (rec.question || rec.questionId);
+    const chosenText = qObj ? (qObj[`option_${(rec.selectedOption || 'a').toLowerCase()}`] || '') : '';
+    const correctText = qObj ? (qObj[`option_${(rec.correctOption || 'a').toLowerCase()}`] || '') : '';
+    const dt = rec.timestamp ? new Date(rec.timestamp).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+
+    return `
+      <div class="p-4 rounded-2xl bg-slate-50 border ${rec.isCorrect ? 'border-emerald-200' : 'border-rose-200'} space-y-2 text-xs">
+        <div class="flex items-center justify-between flex-wrap gap-2 text-[11px] font-bold">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded ${rec.isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${rec.isCorrect ? '✅ ശരി' : '❌ തെറ്റ്'}
+            </span>
+            <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">${rec.sheetName || 'Module'}</span>
+            <span class="text-slate-400 uppercase">${rec.mode || 'practice'}</span>
+          </div>
+          <span class="text-slate-400">${dt}</span>
+        </div>
+        <div class="font-bold text-slate-900 text-sm">${idx + 1}. ${qText}</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <div class="p-2.5 rounded-xl ${rec.isCorrect ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-rose-50 text-rose-900 border border-rose-200'}">
+            <span class="font-bold">നിങ്ങൾ തിരഞ്ഞെടുത്തത്: Option (${rec.selectedOption})</span>
+            ${chosenText ? `<div class="text-[11px] opacity-90 mt-0.5">${chosenText}</div>` : ''}
+          </div>
+          <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200">
+            <span class="font-bold">ശരിയായ ഉത്തരം: Option (${rec.correctOption})</span>
+            ${correctText ? `<div class="text-[11px] opacity-90 mt-0.5">${correctText}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function syncAllProgressToSheet() {
+  const statusEl = document.getElementById('history-sync-status');
+  const btn = document.getElementById('btn-push-progress');
+  if (!state.apiUrl) {
+    alert("Google Apps Script URL നൽകിയിട്ടില്ല. ആദ്യം Sync സെറ്റിംഗ്സിൽ URL നൽകുക.");
+    return;
+  }
+
+  const items = Object.values(state.answerHistory || {});
+  if (items.length === 0) {
+    alert("സേവ് ചെയ്യാൻ ഉത്തരങ്ങളൊന്നും ഇതുവരെ ഇല്ല!");
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (statusEl) {
+    statusEl.className = "p-3 rounded-xl text-xs font-medium bg-amber-50 text-amber-800 block";
+    statusEl.innerText = `${items.length} ഉത്തരങ്ങൾ Google Sheet-ലെ 'User_Progress' ടാബിലേക്ക് അപ്‌ലോഡ് ചെയ്യുന്നു...`;
+  }
+
+  try {
+    await fetch(state.apiUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'saveProgress',
+        items: items
+      })
+    });
+    if (statusEl) {
+      statusEl.className = "p-3 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-800 block";
+      statusEl.innerText = `✅ വിജയിച്ചു! ${items.length} ചോദ്യങ്ങളുടെയും ഉത്തരങ്ങൾ Google Sheet-ലെ 'User_Progress' ഷീറ്റിലേക്ക് സേവ് ചെയ്തു. (പുതിയ Apps Script കോഡ് ഡിപ്ലോയ് ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പുവരുത്തുക).`;
+    }
+  } catch (err) {
+    if (statusEl) {
+      statusEl.className = "p-3 rounded-xl text-xs font-medium bg-rose-50 text-rose-800 block";
+      statusEl.innerText = `Error: ${err.message}`;
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadProgressFromSheet() {
+  const statusEl = document.getElementById('history-sync-status');
+  const btn = document.getElementById('btn-pull-progress');
+  if (!state.apiUrl) {
+    alert("Google Apps Script URL നൽകിയിട്ടില്ല.");
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (statusEl) {
+    statusEl.className = "p-3 rounded-xl text-xs font-medium bg-amber-50 text-amber-800 block";
+    statusEl.innerText = "Google Sheet-ൽ നിന്നും പഴയ ഉത്തരങ്ങൾ തിരികെ എടുക്കുന്നു...";
+  }
+
+  try {
+    const fetchUrl = state.apiUrl.includes('?') ? `${state.apiUrl}&action=getProgress` : `${state.apiUrl}?action=getProgress`;
+    const res = await fetch(fetchUrl);
+    const data = await res.json();
+
+    if (data.status === "success" && Array.isArray(data.progress)) {
+      let restored = 0;
+      data.progress.forEach(rec => {
+        if (rec.questionId) {
+          const existing = state.answerHistory[rec.questionId];
+          if (!existing || new Date(rec.timestamp) >= new Date(existing.timestamp || 0)) {
+            state.answerHistory[rec.questionId] = rec;
+            restored++;
+          }
+          if (!state.attemptedIds.includes(rec.questionId)) {
+            state.attemptedIds.push(rec.questionId);
+          }
+        }
+      });
+      localStorage.setItem('chm_answer_history', JSON.stringify(state.answerHistory));
+      localStorage.setItem('chm_attempted_ids', JSON.stringify(state.attemptedIds));
+      openAnswerHistoryView();
+
+      if (statusEl) {
+        statusEl.className = "p-3 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-800 block";
+        statusEl.innerText = `✅ വിജയിച്ചു! Google Sheet-ൽ നിന്നും ${restored} ഉത്തരങ്ങൾ ആപ്പിലേക്ക് തിരികെ കൊണ്ടുവന്നു.`;
+      }
+    } else {
+      throw new Error(data.message || "Could not read progress from sheet");
+    }
+  } catch (err) {
+    if (statusEl) {
+      statusEl.className = "p-3 rounded-xl text-xs font-medium bg-rose-50 text-rose-800 block";
+      statusEl.innerText = `Error: ${err.message}. Apps Script പുതിയ കോഡ് അപ്‌ഡേറ്റ് ചെയ്ത് Deploy ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പുവരുത്തുക.`;
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function clearAnswerHistory() {
+  if (confirm("ഈ ബ്രൗസറിൽ സേവ് ചെയ്തിട്ടുള്ള ഉത്തരങ്ങളുടെ ഹിസ്റ്ററി മായ്ക്കണോ?")) {
+    state.answerHistory = {};
+    localStorage.setItem('chm_answer_history', '{}');
+    renderAnswerHistoryList();
+  }
+}

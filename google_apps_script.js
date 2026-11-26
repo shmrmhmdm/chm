@@ -143,9 +143,36 @@ function doGet(e) {
         status: "success",
         modules: sheetNames
       };
+    } else if (params.action === "getProgress") {
+      const progSheet = ss.getSheetByName("User_Progress");
+      let progress = [];
+      if (progSheet && progSheet.getLastRow() > 1) {
+        const rows = progSheet.getDataRange().getValues();
+        for (let i = 1; i < rows.length; i++) {
+          if (rows[i][1]) {
+            progress.push({
+              timestamp: rows[i][0],
+              questionId: String(rows[i][1]),
+              sheetName: String(rows[i][2] || ""),
+              selectedOption: String(rows[i][3] || ""),
+              correctOption: String(rows[i][4] || ""),
+              isCorrect: rows[i][5] === true || String(rows[i][5]).toUpperCase() === "TRUE",
+              mode: String(rows[i][6] || "practice"),
+              question: String(rows[i][7] || "")
+            });
+          }
+        }
+      }
+      result = {
+        status: "success",
+        total: progress.length,
+        progress: progress
+      };
     } else if (!moduleName || moduleName.toLowerCase() === "all") {
       let allQuestions = [];
       sheets.forEach(sheet => {
+        const sName = sheet.getName();
+        if (sName === "User_Progress" || sName === "Reference_Notes") return;
         const qList = getQuestionsFromSheet(sheet);
         allQuestions = allQuestions.concat(qList);
       });
@@ -189,6 +216,44 @@ function doPost(e) {
     }
     const data = JSON.parse(contents);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // ഉപയോക്താവിന്റെ ഉത്തരങ്ങൾ (Answer History) User_Progress ഷീറ്റിലേക്ക് സേവ് ചെയ്യാൻ
+    if (data.action === "saveProgress") {
+      let progSheet = ss.getSheetByName("User_Progress");
+      if (!progSheet) {
+        progSheet = ss.insertSheet("User_Progress");
+        progSheet.appendRow(["timestamp", "questionId", "sheetName", "selectedOption", "correctOption", "isCorrect", "mode", "question"]);
+        const hRange = progSheet.getRange(1, 1, 1, 8);
+        hRange.setBackground("#1e293b");
+        hRange.setFontColor("#ffffff");
+        hRange.setFontWeight("bold");
+        progSheet.setFrozenRows(1);
+      }
+
+      const items = Array.isArray(data.items) ? data.items : [data];
+      let savedCount = 0;
+      items.forEach(item => {
+        if (item && item.questionId && item.selectedOption) {
+          progSheet.appendRow([
+            item.timestamp || new Date().toISOString(),
+            item.questionId,
+            item.sheetName || "",
+            String(item.selectedOption).toUpperCase(),
+            String(item.correctOption || "").toUpperCase(),
+            !!item.isCorrect,
+            item.mode || "practice",
+            item.question || ""
+          ]);
+          savedCount++;
+        }
+      });
+
+      return createJsonResponse({
+        status: "success",
+        message: `${savedCount} answer records saved to User_Progress sheet!`,
+        saved: savedCount
+      });
+    }
     
     const questions = Array.isArray(data.questions) ? data.questions : (Array.isArray(data) ? data : [data]);
     let addedCount = 0;
