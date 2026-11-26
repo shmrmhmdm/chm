@@ -2826,11 +2826,24 @@ function switchToolTab(tab) {
     const tolOpts = RESISTOR_COLORS.filter(c => c.tol !== null)
       .map(c => `<option value="${c.tol}" ${c.name === 'Gold' ? 'selected' : ''}>${c.name} (${c.tol})</option>`).join('');
 
+    const colorRefRows = RESISTOR_COLORS.map(c => `
+      <tr class="border-b border-slate-100">
+        <td class="p-2.5 font-bold flex items-center gap-2">
+          <span class="w-4 h-4 rounded border border-slate-300 inline-block" style="background:${c.bg}"></span>
+          <span>${c.name}</span>
+        </td>
+        <td class="p-2.5 font-mono font-bold text-indigo-700">${c.val !== null ? c.val : '-'}</td>
+        <td class="p-2.5 font-mono font-bold text-emerald-700">${c.multLabel}</td>
+        <td class="p-2.5 font-mono font-semibold text-amber-700">${c.tol || '-'}</td>
+      </tr>
+    `).join('');
+
     container.innerHTML = `
-      <div class="space-y-5">
+      <div class="space-y-6">
         <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-900">
           <strong>Mnemonic (ഓർത്തിരിക്കാൻ എളുപ്പവഴി):</strong> <em>"<strong>B</strong>.<strong>B</strong>. <strong>R</strong>OY of <strong>G</strong>reat <strong>B</strong>ritain had a <strong>V</strong>ery <strong>G</strong>ood <strong>W</strong>ife"</em> (Black=0, Brown=1, Red=2, Orange=3, Yellow=4, Green=5, Blue=6, Violet=7, Grey=8, White=9)
         </div>
+
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Band 1 (1st Digit)</label>
@@ -2849,9 +2862,67 @@ function switchToolTab(tab) {
             <select id="res-tol" onchange="updateResistorCalc()" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold">${tolOpts}</select>
           </div>
         </div>
+
         <div class="p-6 rounded-2xl bg-slate-900 text-white text-center space-y-2">
           <div class="text-xs uppercase tracking-wider text-slate-400 font-bold">Calculated Resistance Value</div>
           <div id="res-output" class="text-3xl sm:text-4xl font-black text-amber-400">10 Ω ±5%</div>
+          <div id="res-steps" class="text-xs font-mono text-emerald-300 pt-1"></div>
+        </div>
+
+        <!-- Step-by-Step Procedure & Solved Examples -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <h4 class="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-list-ol text-indigo-600"></i>
+              <span>കണക്കുകൂട്ടുന്ന രീതി (4-Band Procedure)</span>
+            </h4>
+            <div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 font-mono font-bold text-indigo-900 text-center">
+              R = (Band₁ × 10 + Band₂) × Multiplier ± Tolerance
+            </div>
+            <ol class="list-decimal list-inside space-y-1.5 text-slate-700 leading-relaxed">
+              <li><strong>ഒന്നാമത്തെ ബാൻഡ് (Band 1):</strong> ആദ്യത്തെ അക്കം (1st Digit) എഴുതുക.</li>
+              <li><strong>രണ്ടാമത്തെ ബാൻഡ് (Band 2):</strong> രണ്ടാമത്തെ അക്കം അതിനോട് ചേർത്ത് എഴുതുക (2-digit number).</li>
+              <li><strong>മൂന്നാമത്തെ ബാൻഡ് (Band 3 - Multiplier):</strong> കിട്ടിയ സംഖ്യയെ 10-ന്റെ ഘാതം (Multiplier) കൊണ്ട് ഗുണിക്കുക (അതായത് നിറത്തിന്റെ വിലയ്ക്ക് തുല്യമായ പൂജ്യങ്ങൾ ചേർക്കുക).</li>
+              <li><strong>നാലാമത്തെ ബാൻഡ് (Band 4 - Tolerance):</strong> Gold ആയാൽ ±5%, Silver ആയാൽ ±10%, നിറമില്ലെങ്കിൽ ±20%.</li>
+            </ol>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2.5">
+            <h4 class="font-bold text-sm text-emerald-950 flex items-center gap-1.5">
+              <i class="fa-solid fa-chalkboard-user text-emerald-600"></i>
+              <span>പരീക്ഷാ ഉദാഹരണങ്ങൾ (Solved Examples)</span>
+            </h4>
+            <div class="space-y-2 text-slate-700">
+              <div class="p-2.5 rounded-xl bg-white border border-emerald-200 space-y-0.5">
+                <div class="font-bold text-slate-900">1) Red – Violet – Orange – Gold</div>
+                <div class="font-mono text-[11px]">Red = 2, Violet = 7 → <strong>27</strong> | Orange = ×10³ (1,000)</div>
+                <div class="text-emerald-700 font-bold">ഉത്തരം: 27 × 1000 = 27,000 Ω = 27 kΩ ±5%</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white border border-emerald-200 space-y-0.5">
+                <div class="font-bold text-slate-900">2) Brown – Black – Red – Gold</div>
+                <div class="font-mono text-[11px]">Brown = 1, Black = 0 → <strong>10</strong> | Red = ×10² (100)</div>
+                <div class="text-emerald-700 font-bold">ഉത്തരം: 10 × 100 = 1,000 Ω = 1 kΩ ±5%</div>
+              </div>
+              <div class="p-2.5 rounded-xl bg-white border border-emerald-200 space-y-0.5">
+                <div class="font-bold text-slate-900">3) Yellow – Violet – Brown – Silver</div>
+                <div class="font-mono text-[11px]">Yellow = 4, Violet = 7 → <strong>47</strong> | Brown = ×10¹ (10)</div>
+                <div class="text-emerald-700 font-bold">ഉത്തരം: 47 × 10 = 470 Ω ±10%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reference Table -->
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">🎨 Complete Resistor Color Code Chart</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold">
+                <tr><th class="p-2.5">Color</th><th class="p-2.5">Digit (B1/B2)</th><th class="p-2.5">Multiplier (B3)</th><th class="p-2.5">Tolerance (B4)</th></tr>
+              </thead>
+              <tbody>${colorRefRows}</tbody>
+            </table>
+          </div>
         </div>
       </div>
     `;
@@ -2861,8 +2932,8 @@ function switchToolTab(tab) {
     updateResistorCalc();
   } else if (tab === 'converter') {
     container.innerHTML = `
-      <div class="space-y-4">
-        <p class="text-xs text-slate-500">ഏതെങ്കിലും ഒരു ബോക്സിൽ സംഖ്യ നൽകിയാൽ ബാക്കി മൂന്ന് നമ്പർ സിസ്റ്റങ്ങളിലേക്കും തത്സമയം മാറും:</p>
+      <div class="space-y-6">
+        <p class="text-xs text-slate-500">ഏതെങ്കിലും ഒരു ബോക്സിൽ സംഖ്യ നൽകിയാൽ ബാക്കി മൂന്ന് നമ്പർ സിസ്റ്റങ്ങളിലേക്കും തത്സമയം മാറും + താഴെ അതിന്റെ Step-by-Step വിവരങ്ങളും കാണാം:</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
             <label class="text-xs font-bold text-indigo-700">Decimal (Base 10)</label>
@@ -2879,6 +2950,60 @@ function switchToolTab(tab) {
           <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
             <label class="text-xs font-bold text-rose-700">Hexadecimal (Base 16)</label>
             <input type="text" id="conv-hex" oninput="convertNumberBase('hex')" placeholder="e.g. FF" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold uppercase">
+          </div>
+        </div>
+
+        <!-- Live Step-by-Step Breakdown Box -->
+        <div id="conv-steps" class="hidden p-4 rounded-2xl bg-slate-900 text-slate-100 text-xs font-mono space-y-1.5"></div>
+
+        <!-- Step-by-Step Procedures & Examples -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 class="font-bold text-sm text-indigo-900">1️⃣ Decimal → Binary (2 കൊണ്ട് ഹരിക്കുക)</h4>
+            <p class="text-slate-600 leading-relaxed">ദശാംശ സംഖ്യയെ തുടർച്ചയായി <strong>2</strong> കൊണ്ട് ഹരിച്ച് ശിഷ്ടം (Remainder: 0 അല്ലെങ്കിൽ 1) എഴുതുക. അവസാനം <strong>താഴെ നിന്നും മുകളിലേക്ക് (Bottom-to-Top)</strong> എഴുതുക.</p>
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200 font-mono text-[11px] space-y-0.5">
+              <div><strong>ഉദാഹരണം: (25)₁₀ → Binary</strong></div>
+              <div>25 ÷ 2 = 12, Remainder = <strong>1</strong></div>
+              <div>12 ÷ 2 = 6,  Remainder = <strong>0</strong></div>
+              <div>6 ÷ 2  = 3,  Remainder = <strong>0</strong></div>
+              <div>3 ÷ 2  = 1,  Remainder = <strong>1</strong></div>
+              <div>1 ÷ 2  = 0,  Remainder = <strong>1</strong></div>
+              <div class="text-emerald-700 font-bold pt-1">താഴെ നിന്ന് മുകളിലേക്ക്: (11001)₂</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 class="font-bold text-sm text-emerald-900">2️⃣ Binary → Decimal (2-ന്റെ ഘാതങ്ങൾ)</h4>
+            <p class="text-slate-600 leading-relaxed">വലത്തുനിന്ന് ഇടത്തോട്ട് ഓരോ ബിറ്റിനെയും <strong>2⁰, 2¹, 2², 2³...</strong> (1, 2, 4, 8, 16...) കൊണ്ട് ഗുണിച്ച് കൂട്ടുക.</p>
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200 font-mono text-[11px] space-y-0.5">
+              <div><strong>ഉദാഹരണം: (10110)₂ → Decimal</strong></div>
+              <div>= (1×2⁴) + (0×2³) + (1×2²) + (1×2¹) + (0×2⁰)</div>
+              <div>= 16 + 0 + 4 + 2 + 0</div>
+              <div class="text-emerald-700 font-bold pt-1">ഉത്തരം: (22)₁₀</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 class="font-bold text-sm text-rose-900">3️⃣ Decimal → Hexadecimal (16 കൊണ്ട് ഹരിക്കുക)</h4>
+            <p class="text-slate-600 leading-relaxed">സംഖ്യയെ <strong>16</strong> കൊണ്ട് ഹരിക്കുക. ശിഷ്ടം 10 മുതൽ 15 വരെയാണെങ്കിൽ അക്ഷരങ്ങൾ ഉപയോഗിക്കുക: <strong>10=A, 11=B, 12=C, 13=D, 14=E, 15=F</strong>.</p>
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200 font-mono text-[11px] space-y-0.5">
+              <div><strong>ഉദാഹരണം 1 (PSC 170/2014): (17)₁₀ → Hex</strong></div>
+              <div>17 ÷ 16 = 1, Remainder = <strong>1</strong> → <strong>(11)₁₆</strong></div>
+              <div class="pt-1"><strong>ഉദാഹരണം 2: (255)₁₀ → Hex</strong></div>
+              <div>255 ÷ 16 = 15 (F), Rem = 15 (F) → <strong class="text-emerald-700">(FF)₁₆</strong></div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 class="font-bold text-sm text-amber-900">4️⃣ Binary ↔ Hex (4-Bit Grouping എളുപ്പവഴി)</h4>
+            <p class="text-slate-600 leading-relaxed">ബൈനറിയെ വലത്തുനിന്ന് <strong>4 ബിറ്റുകളുടെ ഗ്രൂപ്പുകളാക്കി</strong> തിരിച്ച് ഓരോ ഗ്രൂപ്പിനും <strong>8-4-2-1</strong> വില നൽകുക (Octal ആണെങ്കിൽ 3 ബിറ്റ്: <strong>4-2-1</strong>).</p>
+            <div class="p-2.5 rounded-xl bg-white border border-slate-200 font-mono text-[11px] space-y-0.5">
+              <div><strong>ഉദാഹരണം: (10111110)₂ → Hex</strong></div>
+              <div>4-bit ഗ്രൂപ്പുകൾ: <strong>1011</strong> | <strong>1110</strong></div>
+              <div>1011 = 8+0+2+1 = 11 = <strong>B</strong></div>
+              <div>1110 = 8+4+2+0 = 14 = <strong>E</strong></div>
+              <div class="text-emerald-700 font-bold pt-1">ഉത്തരം: (BE)₁₆</div>
+            </div>
           </div>
         </div>
       </div>
@@ -2979,6 +3104,11 @@ function updateResistorCalc() {
 
   const out = document.getElementById('res-output');
   if (out) out.innerText = `${formatted} ${tol}`;
+
+  const stepsEl = document.getElementById('res-steps');
+  if (stepsEl) {
+    stepsEl.innerText = `Step: (${b1} × 10 + ${b2}) × ${mult} = ${ohms} Ω = ${formatted} ${tol}`;
+  }
 }
 
 function convertNumberBase(source) {
@@ -2986,11 +3116,13 @@ function convertNumberBase(source) {
   const binEl = document.getElementById('conv-bin');
   const octEl = document.getElementById('conv-oct');
   const hexEl = document.getElementById('conv-hex');
+  const stepsEl = document.getElementById('conv-steps');
   if (!decEl || !binEl || !octEl || !hexEl) return;
 
   const raw = document.getElementById(`conv-${source}`).value.trim();
   if (!raw) {
     decEl.value = binEl.value = octEl.value = hexEl.value = '';
+    if (stepsEl) stepsEl.classList.add('hidden');
     return;
   }
 
@@ -3001,10 +3133,26 @@ function convertNumberBase(source) {
   else if (source === 'hex' && /^[0-9a-fA-F]+$/.test(raw)) num = parseInt(raw, 16);
 
   if (isNaN(num)) return;
+  const binStr = num.toString(2);
+  const octStr = num.toString(8);
+  const hexStr = num.toString(16).toUpperCase();
+
   if (source !== 'dec') decEl.value = num.toString(10);
-  if (source !== 'bin') binEl.value = num.toString(2);
-  if (source !== 'oct') octEl.value = num.toString(8);
-  if (source !== 'hex') hexEl.value = num.toString(16).toUpperCase();
+  if (source !== 'bin') binEl.value = binStr;
+  if (source !== 'oct') octEl.value = octStr;
+  if (source !== 'hex') hexEl.value = hexStr;
+
+  if (stepsEl) {
+    const paddedBin = binStr.padStart(Math.ceil(binStr.length / 4) * 4, '0');
+    const nibbles = paddedBin.match(/.{1,4}/g) || [];
+    const hexMap = nibbles.map(n => `${n}→${parseInt(n, 2).toString(16).toUpperCase()}`).join(' | ');
+    stepsEl.classList.remove('hidden');
+    stepsEl.innerHTML = `
+      <div class="text-amber-400 font-bold">⚡ Live Conversion Breakdown (${num}₁₀):</div>
+      <div>• Binary 4-bit Hex Grouping: ${hexMap} = <span class="text-emerald-300 font-bold">(${hexStr})₁₆</span></div>
+      <div>• Octal (Base 8): <span class="text-amber-300 font-bold">(${octStr})₈</span></div>
+    `;
+  }
 }
 
 // ============================================================================
