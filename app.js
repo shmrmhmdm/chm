@@ -11,13 +11,20 @@ let state = {
   bookmarks: JSON.parse(localStorage.getItem('chm_bookmarks') || '[]'),
   stats: JSON.parse(localStorage.getItem('chm_stats') || '{"attempted": 0, "correct": 0, "wrong": 0}'),
   moduleStats: JSON.parse(localStorage.getItem('chm_module_stats') || '{}'),
+  attemptedIds: JSON.parse(localStorage.getItem('chm_attempted_ids') || '[]'),
+  studyLog: JSON.parse(localStorage.getItem('chm_study_log') || '{}'),
+  dailyGoal: parseInt(localStorage.getItem('chm_daily_goal') || '25', 10),
+  examHistory: JSON.parse(localStorage.getItem('chm_exam_history') || '[]'),
+  practicePrefs: JSON.parse(localStorage.getItem('chm_practice_prefs') || '{"order":"shuffle","unattemptedOnly":false}'),
   apiUrl: localStorage.getItem('chm_api_url') || DEFAULT_API_URL,
   geminiKey: localStorage.getItem('chm_gemini_key') || DEFAULT_GEMINI_KEY
 };
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+  initDarkMode();
   loadQuestions();
+  loadPracticePreferencesUI();
   renderDashboard();
   updateMistakeBadge();
   if (state.apiUrl) {
@@ -124,7 +131,7 @@ function loadQuestions() {
 
 // Navigation Router
 function navigate(viewName) {
-  ['home', 'quiz', 'results', 'mistakes', 'revision', 'syllabus'].forEach(v => {
+  ['home', 'quiz', 'results', 'mistakes', 'revision', 'syllabus', 'bookmarks', 'tools'].forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
   });
@@ -140,6 +147,9 @@ function navigate(viewName) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (viewName === 'syllabus') {
     renderSyllabusView();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (viewName === 'tools') {
+    switchToolTab('resistor');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
@@ -157,6 +167,11 @@ function renderDashboard() {
   document.getElementById('stat-mistakes').innerText = state.mistakes.length;
   document.getElementById('home-mistakes-count').innerText = state.mistakes.length;
   document.getElementById('stat-bookmarks').innerText = state.bookmarks.length;
+
+  // Render Countdown, Streak & Exam History
+  updateExamCountdown();
+  renderDailyStreak();
+  renderExamHistory();
 
   // Render Module Analytics
   renderModuleAnalytics();
@@ -280,7 +295,7 @@ function recordModuleResult(moduleId, isCorrect) {
   saveUserData();
 }
 
-// Start Module Practice Mode
+// Start Module Practice Mode (Respects Order & Unattempted Only preferences)
 function startModulePractice(moduleId) {
   const modDef = MODULE_DEFINITIONS.find(m => m.id === moduleId);
   let questions = state.questions.filter(q => q.sheetName === moduleId);
@@ -290,8 +305,27 @@ function startModulePractice(moduleId) {
     return;
   }
 
-  // Shuffle questions for practice
-  questions = [...questions].sort(() => Math.random() - 0.5);
+  // Apply Unattempted Only filter if enabled
+  if (state.practicePrefs && state.practicePrefs.unattemptedOnly) {
+    const attemptedSet = new Set(state.attemptedIds || []);
+    const unattempted = questions.filter(q => !attemptedSet.has(q.id));
+    if (unattempted.length === 0) {
+      if (confirm(`ഈ മൊഡ്യൂളിലെ മുഴുവൻ ${questions.length} ചോദ്യങ്ങളും നിങ്ങൾ ഇതിനകം പരിശീലിച്ചു കഴിഞ്ഞു! എല്ലാ ചോദ്യങ്ങളും വീണ്ടും പരിശീലിക്കണോ?`)) {
+        // proceed with all questions
+      } else {
+        return;
+      }
+    } else {
+      questions = unattempted;
+    }
+  }
+
+  // Apply Order preference (Shuffle vs Sequential)
+  if (!state.practicePrefs || state.practicePrefs.order !== 'sequential') {
+    questions = [...questions].sort(() => Math.random() - 0.5);
+  } else {
+    questions = [...questions];
+  }
 
   state.activeSession = {
     mode: 'practice',
@@ -303,6 +337,54 @@ function startModulePractice(moduleId) {
   };
 
   initQuizUI();
+}
+
+// Start Official Syllabus Weighted PSC Mock Exam (100 Questions proportional to Syllabus Marks)
+function startWeightedMockExam() {
+  if (state.questions.length === 0) {
+    alert("No questions available! Please connect Google Sheet or load sample questions.");
+    return;
+  }
+
+  let selected = [];
+  const usedIds = new Set();
+
+  // Pick questions per module strictly matching mod.marks (M1:12, M2:8, M3-10:10)
+  MODULE_DEFINITIONS.forEach(mod => {
+    const modPool = state.questions.filter(q => q.sheetName === mod.id);
+    const shuffled = [...modPool].sort(() => Math.random() - 0.5);
+    const take = shuffled.slice(0, mod.marks);
+    take.forEach(q => {
+      selected.push(q);
+      usedIds.add(q.id);
+    });
+  });
+
+  // If total < 100 (e.g. a module has fewer than 10 questions), top up from remaining syllabus questions
+  if (selected.length < 100) {
+    const remainingPool = state.questions
+      .filter(q => !usedIds.has(q.id) && q.sheetName && q.sheetName.startsWith('Module_'))
+      .sort(() => Math.random() - 0.5);
+    const needed = 100 - selected.length;
+    remainingPool.slice(0, needed).forEach(q => {
+      selected.push(q);
+      usedIds.add(q.id);
+    });
+  }
+
+  state.activeSession = {
+    mode: 'exam',
+    title: 'Weighted PSC Mock Exam (Official Syllabus Pattern)',
+    questions: selected,
+    currentIndex: 0,
+    userAnswers: {},
+    timeRemaining: Math.max(selected.length * 45, 300), // 45 sec per question (75 mins for 100 Qs)
+    timerInterval: null,
+    isSubmitted: false
+  };
+
+  initQuizUI();
+  startExamTimer();
 }
 
 // Start Full PSC Mock Exam Mode (100 Questions, 75 Minutes, -0.33 negative)
@@ -320,7 +402,7 @@ function startFullMockExam() {
 
   state.activeSession = {
     mode: 'exam',
-    title: 'PSC CHM Full Mock Exam (Cat: 884/2025)',
+    title: 'PSC CHM Random 100Q Mock Exam (Cat: 884/2025)',
     questions: examQuestions,
     currentIndex: 0,
     userAnswers: {},
@@ -382,21 +464,32 @@ function startPscPreviousPractice() {
   initQuizUI();
 }
 
+function filterTechnicalOnly(questions, checkboxId) {
+  const cb = document.getElementById(checkboxId);
+  if (!cb || !cb.checked) return [...questions];
+  return questions.filter(q => {
+    const num = parseInt(String(q.id || '').split('_').pop(), 10);
+    return isNaN(num) || num <= 80;
+  });
+}
+
 // Start Tradesman CHM 191/2015 Practice Mode (Instant answers, Malayalam explanations, jump palette)
 function startTradesman191Practice() {
-  const questions = (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && PSC_TRADESMAN_191_QUESTIONS.length > 0)
+  const base = (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && PSC_TRADESMAN_191_QUESTIONS.length > 0)
     ? PSC_TRADESMAN_191_QUESTIONS
     : state.questions.filter(q => q.sheetName === "PSC_Tradesman_191_2015");
 
+  const questions = filterTechnicalOnly(base, 'tech-only-191');
   if (!questions || questions.length === 0) {
     alert("Tradesman 191/2015 questions not found! Please check psc_tradesman_191_2015.js or sync with Google Sheets.");
     return;
   }
 
+  const isTech = document.getElementById('tech-only-191')?.checked;
   state.activeSession = {
     mode: 'practice',
-    title: 'Tradesman CHM (Code: 191/2015) - Practice Mode',
-    questions: [...questions],
+    title: `Tradesman CHM (191/2015)${isTech ? ' - Technical Only' : ''} - Practice`,
+    questions: questions,
     currentIndex: 0,
     userAnswers: {},
     isSubmitted: false
@@ -405,24 +498,26 @@ function startTradesman191Practice() {
   initQuizUI();
 }
 
-// Start Tradesman CHM 191/2015 Timed Exam Mode (-0.33 mark, 60 minutes)
+// Start Tradesman CHM 191/2015 Timed Exam Mode (-0.33 mark)
 function startTradesman191Exam() {
-  const questions = (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && PSC_TRADESMAN_191_QUESTIONS.length > 0)
+  const base = (typeof PSC_TRADESMAN_191_QUESTIONS !== 'undefined' && PSC_TRADESMAN_191_QUESTIONS.length > 0)
     ? PSC_TRADESMAN_191_QUESTIONS
     : state.questions.filter(q => q.sheetName === "PSC_Tradesman_191_2015");
 
+  const questions = filterTechnicalOnly(base, 'tech-only-191');
   if (!questions || questions.length === 0) {
     alert("Tradesman 191/2015 questions not found! Please check psc_tradesman_191_2015.js or sync with Google Sheets.");
     return;
   }
 
+  const isTech = document.getElementById('tech-only-191')?.checked;
   state.activeSession = {
     mode: 'exam',
-    title: 'Tradesman CHM Exam (Code: 191/2015)',
-    questions: [...questions],
+    title: `Tradesman CHM Exam (191/2015)${isTech ? ' - Technical Only' : ''}`,
+    questions: questions,
     currentIndex: 0,
     userAnswers: {},
-    timeRemaining: 60 * 60, // 60 minutes for 83 questions
+    timeRemaining: Math.round(questions.length * 45),
     timerInterval: null,
     isSubmitted: false
   };
@@ -433,19 +528,21 @@ function startTradesman191Exam() {
 
 // Start Tradesman CHM 170/2014 Practice Mode (Instant answers, Malayalam explanations, jump palette)
 function startTradesman170Practice() {
-  const questions = (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && PSC_TRADESMAN_170_QUESTIONS.length > 0)
+  const base = (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && PSC_TRADESMAN_170_QUESTIONS.length > 0)
     ? PSC_TRADESMAN_170_QUESTIONS
     : state.questions.filter(q => q.sheetName === "PSC_Tradesman_170_2014");
 
+  const questions = filterTechnicalOnly(base, 'tech-only-170');
   if (!questions || questions.length === 0) {
     alert("Tradesman 170/2014 questions not found! Please check psc_tradesman_170_2014.js or sync with Google Sheets.");
     return;
   }
 
+  const isTech = document.getElementById('tech-only-170')?.checked;
   state.activeSession = {
     mode: 'practice',
-    title: 'Tradesman CHM (Code: 170/2014) - Practice Mode',
-    questions: [...questions],
+    title: `Tradesman CHM (170/2014)${isTech ? ' - Technical Only' : ''} - Practice`,
+    questions: questions,
     currentIndex: 0,
     userAnswers: {},
     isSubmitted: false
@@ -454,24 +551,26 @@ function startTradesman170Practice() {
   initQuizUI();
 }
 
-// Start Tradesman CHM 170/2014 Full Exam Mode (-0.33 mark, 75 minutes, 100 Qs)
+// Start Tradesman CHM 170/2014 Full Exam Mode (-0.33 mark)
 function startTradesman170Exam() {
-  const questions = (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && PSC_TRADESMAN_170_QUESTIONS.length > 0)
+  const base = (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && PSC_TRADESMAN_170_QUESTIONS.length > 0)
     ? PSC_TRADESMAN_170_QUESTIONS
     : state.questions.filter(q => q.sheetName === "PSC_Tradesman_170_2014");
 
+  const questions = filterTechnicalOnly(base, 'tech-only-170');
   if (!questions || questions.length === 0) {
     alert("Tradesman 170/2014 questions not found! Please check psc_tradesman_170_2014.js or sync with Google Sheets.");
     return;
   }
 
+  const isTech = document.getElementById('tech-only-170')?.checked;
   state.activeSession = {
     mode: 'exam',
-    title: 'Tradesman CHM Full Exam (Code: 170/2014 - 100 Qs)',
-    questions: [...questions],
+    title: `Tradesman CHM Exam (170/2014)${isTech ? ' - Technical Only (80 Qs)' : ' - 100 Qs'}`,
+    questions: questions,
     currentIndex: 0,
     userAnswers: {},
-    timeRemaining: 75 * 60, // 75 minutes for 100 questions
+    timeRemaining: Math.round(questions.length * 45),
     timerInterval: null,
     isSubmitted: false
   };
@@ -705,6 +804,7 @@ function selectOption(optKey) {
   // Update Global Stats if practice mode
   if (session.mode === 'practice') {
     recordModuleResult(q.sheetName, isCorrect);
+    recordQuestionAttempt(q.id);
     state.stats.attempted++;
     if (isCorrect) {
       state.stats.correct++;
@@ -891,10 +991,28 @@ function submitExam() {
   const penalty = wrong * 0.33;
   const score = Math.max(0, (correct * 1.0) - penalty);
 
-  // Update Lifetime Stats
+  // Update Lifetime Stats & Exam History
+  session.questions.forEach((q, i) => {
+    if (session.userAnswers[i]) recordQuestionAttempt(q.id);
+  });
   state.stats.attempted += (correct + wrong);
   state.stats.correct += correct;
   state.stats.wrong += wrong;
+
+  // Save to Exam History
+  state.examHistory.unshift({
+    date: new Date().toISOString(),
+    title: session.title,
+    score: parseFloat(score.toFixed(2)),
+    totalMarks: session.questions.length,
+    correct: correct,
+    wrong: wrong,
+    unattempted: unattempted,
+    pct: session.questions.length > 0 ? Math.round((score / session.questions.length) * 100) : 0
+  });
+  if (state.examHistory.length > 30) state.examHistory = state.examHistory.slice(0, 30);
+  localStorage.setItem('chm_exam_history', JSON.stringify(state.examHistory));
+
   saveUserData();
 
   // Show Results
@@ -2201,3 +2319,609 @@ function clearAiReferenceNotes() {
 
 
 
+
+
+// ============================================================================
+// ⏳ EXAM COUNTDOWN & DAILY STUDY STREAK
+// ============================================================================
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function updateExamCountdown() {
+  const el = document.getElementById('exam-countdown-text');
+  if (!el) return;
+  const examDate = new Date('2026-12-17T00:00:00+05:30');
+  const now = new Date();
+  const diffMs = examDate - now;
+  const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  if (days > 0) {
+    el.innerText = `${days} Days Left for Exam!`;
+  } else if (days === 0) {
+    el.innerText = `Exam is TODAY! All the Best!`;
+  } else {
+    el.innerText = `Exam Completed`;
+  }
+}
+
+function recordQuestionAttempt(questionId) {
+  if (!questionId) return;
+  if (!state.attemptedIds.includes(questionId)) {
+    state.attemptedIds.push(questionId);
+    localStorage.setItem('chm_attempted_ids', JSON.stringify(state.attemptedIds));
+  }
+  const today = getTodayKey();
+  state.studyLog[today] = (state.studyLog[today] || 0) + 1;
+  localStorage.setItem('chm_study_log', JSON.stringify(state.studyLog));
+}
+
+function calculateStreak() {
+  let streak = 0;
+  const d = new Date();
+  const todayKey = getTodayKey();
+  if ((state.studyLog[todayKey] || 0) > 0) {
+    streak++;
+  }
+  // Check previous days consecutively
+  for (let i = 1; i <= 365; i++) {
+    const prev = new Date(d);
+    prev.setDate(d.getDate() - i);
+    const key = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
+    if ((state.studyLog[key] || 0) > 0) {
+      streak++;
+    } else if (i === 1 && streak === 0) {
+      break;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function renderDailyStreak() {
+  const today = getTodayKey();
+  const todayCount = state.studyLog[today] || 0;
+  const goal = state.dailyGoal || 25;
+  const streak = calculateStreak();
+
+  const countEl = document.getElementById('today-q-count');
+  const targetEl = document.getElementById('daily-goal-target');
+  const barEl = document.getElementById('daily-goal-bar');
+  const badgeEl = document.getElementById('streak-badge');
+
+  if (countEl) countEl.innerText = todayCount;
+  if (targetEl) targetEl.innerText = goal;
+  if (barEl) {
+    const pct = Math.min(100, Math.round((todayCount / goal) * 100));
+    barEl.style.width = `${pct}%`;
+  }
+  if (badgeEl) badgeEl.innerText = `🔥 ${streak} ${streak === 1 ? 'Day' : 'Days'}`;
+}
+
+function changeDailyGoal() {
+  const val = prompt("ദിവസവും എത്ര ചോദ്യങ്ങൾ വീതം പഠിക്കാനാണ് ലക്ഷ്യമിടുന്നത്? (Daily Question Goal):", state.dailyGoal || 25);
+  const num = parseInt(val, 10);
+  if (num && num >= 5 && num <= 500) {
+    state.dailyGoal = num;
+    localStorage.setItem('chm_daily_goal', String(num));
+    renderDailyStreak();
+  }
+}
+
+// ============================================================================
+// 🧠 SMART PRACTICE PREFERENCES (SHUFFLE / SEQUENTIAL & UNATTEMPTED)
+// ============================================================================
+
+function loadPracticePreferencesUI() {
+  const orderEl = document.getElementById('practice-order-select');
+  const unattemptedEl = document.getElementById('practice-unattempted-only');
+  if (orderEl && state.practicePrefs) orderEl.value = state.practicePrefs.order || 'shuffle';
+  if (unattemptedEl && state.practicePrefs) unattemptedEl.checked = !!state.practicePrefs.unattemptedOnly;
+}
+
+function savePracticePreferences() {
+  const orderEl = document.getElementById('practice-order-select');
+  const unattemptedEl = document.getElementById('practice-unattempted-only');
+  state.practicePrefs = {
+    order: orderEl ? orderEl.value : 'shuffle',
+    unattemptedOnly: unattemptedEl ? unattemptedEl.checked : false
+  };
+  localStorage.setItem('chm_practice_prefs', JSON.stringify(state.practicePrefs));
+}
+
+// ============================================================================
+// 🔍 GLOBAL QUESTION SEARCH
+// ============================================================================
+
+let lastSearchMatches = [];
+
+function handleGlobalSearch() {
+  const input = document.getElementById('home-search-input');
+  const resultsEl = document.getElementById('home-search-results');
+  const clearBtn = document.getElementById('btn-clear-search');
+  if (!input || !resultsEl) return;
+
+  const query = input.value.trim().toLowerCase();
+  if (query.length < 2) {
+    resultsEl.classList.add('hidden');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    lastSearchMatches = [];
+    return;
+  }
+
+  if (clearBtn) clearBtn.classList.remove('hidden');
+  resultsEl.classList.remove('hidden');
+
+  lastSearchMatches = state.questions.filter(q =>
+    (q.question && q.question.toLowerCase().includes(query)) ||
+    (q.subtopic && q.subtopic.toLowerCase().includes(query)) ||
+    (q.explanation && q.explanation.toLowerCase().includes(query)) ||
+    (q.option_a && q.option_a.toLowerCase().includes(query)) ||
+    (q.option_b && q.option_b.toLowerCase().includes(query)) ||
+    (q.option_c && q.option_c.toLowerCase().includes(query)) ||
+    (q.option_d && q.option_d.toLowerCase().includes(query))
+  );
+
+  if (lastSearchMatches.length === 0) {
+    resultsEl.innerHTML = `<div class="text-xs text-slate-500 p-3 text-center">"${query}" എന്നതുമായി ബന്ധപ്പെട്ട ചോദ്യങ്ങൾ കണ്ടെത്തിയില്ല.</div>`;
+    return;
+  }
+
+  let html = `
+    <div class="flex items-center justify-between px-1 pb-1">
+      <span class="text-xs font-bold text-indigo-700">${lastSearchMatches.length} ചോദ്യങ്ങൾ കണ്ടെത്തി</span>
+      <button onclick="practiceSearchResults()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold px-3 py-1 rounded-lg transition">
+        ▶️ ഇവ മാത്രം പ്രാക്ടീസ് ചെയ്യുക
+      </button>
+    </div>
+  `;
+
+  lastSearchMatches.slice(0, 15).forEach((q, idx) => {
+    const ansText = q[`option_${(q.correct_answer || 'A').toLowerCase()}`] || '';
+    html += `
+      <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+        <div class="flex items-center justify-between text-[10px] font-bold text-slate-500">
+          <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">${q.sheetName || 'Module'}</span>
+          <span>${q.subtopic || ''}</span>
+        </div>
+        <div class="font-bold text-slate-800">${idx + 1}. ${q.question}</div>
+        <div class="text-emerald-700 font-semibold">✅ Answer (${q.correct_answer}): ${ansText}</div>
+      </div>
+    `;
+  });
+
+  if (lastSearchMatches.length > 15) {
+    html += `<div class="text-[11px] text-center text-slate-500 pt-1">ആദ്യത്തെ 15 ചോദ്യങ്ങൾ കാണിക്കുന്നു. മുഴുവൻ (${lastSearchMatches.length}) പഠിക്കാൻ മുകളിലെ "പ്രാക്ടീസ് ചെയ്യുക" ബട്ടൺ ക്ലിക്ക് ചെയ്യുക.</div>`;
+  }
+
+  resultsEl.innerHTML = html;
+}
+
+function clearGlobalSearch() {
+  const input = document.getElementById('home-search-input');
+  const resultsEl = document.getElementById('home-search-results');
+  const clearBtn = document.getElementById('btn-clear-search');
+  if (input) input.value = '';
+  if (resultsEl) resultsEl.classList.add('hidden');
+  if (clearBtn) clearBtn.classList.add('hidden');
+  lastSearchMatches = [];
+}
+
+function practiceSearchResults() {
+  if (!lastSearchMatches || lastSearchMatches.length === 0) return;
+  const query = document.getElementById('home-search-input')?.value.trim() || 'Search';
+  state.activeSession = {
+    mode: 'practice',
+    title: `Search: "${query}" (${lastSearchMatches.length} Qs)`,
+    questions: [...lastSearchMatches],
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+  initQuizUI();
+}
+
+// ============================================================================
+// 📈 EXAM HISTORY & SCORE PROGRESS CHART
+// ============================================================================
+
+function renderExamHistory() {
+  const container = document.getElementById('exam-history-container');
+  if (!container) return;
+
+  const history = state.examHistory || [];
+  if (history.length === 0) {
+    container.innerHTML = `
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+        നിങ്ങൾ ഇതുവരെ മോക്ക് ടെസ്റ്റുകളൊന്നും എഴുതിയിട്ടില്ല. ഒരു ടെസ്റ്റ് പൂർത്തിയാക്കിയാൽ നിങ്ങളുടെ മാർക്ക് പുരോഗതി ഇവിടെ ഗ്രാഫായി കാണാം!
+      </div>
+    `;
+    return;
+  }
+
+  // Last 10 exams in chronological order for chart
+  const recent = [...history].slice(0, 10).reverse();
+  const barsHtml = recent.map((h, i) => {
+    const heightPct = Math.max(8, Math.min(100, h.pct || 0));
+    const colorClass = h.pct >= 70 ? 'bg-emerald-500' : (h.pct >= 45 ? 'bg-indigo-500' : 'bg-rose-500');
+    const shortDate = new Date(h.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    return `
+      <div class="flex-1 flex flex-col items-center gap-1 min-w-[36px]" title="${h.title}: ${h.score}/${h.totalMarks} (${h.pct}%)">
+        <span class="text-[10px] font-black text-slate-700">${h.pct}%</span>
+        <div class="w-full max-w-[32px] h-24 bg-slate-100 rounded-lg flex items-end overflow-hidden border border-slate-200">
+          <div class="${colorClass} w-full rounded-t-md transition-all duration-500" style="height: ${heightPct}%"></div>
+        </div>
+        <span class="text-[9px] text-slate-500 font-medium">${shortDate}</span>
+      </div>
+    `;
+  }).join('');
+
+  const rowsHtml = history.slice(0, 5).map(h => {
+    const dt = new Date(h.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+        <div class="min-w-0">
+          <div class="font-bold text-slate-800 truncate">${h.title}</div>
+          <div class="text-[10px] text-slate-500">${dt} • ✅ ${h.correct} | ❌ ${h.wrong} | ⏭️ ${h.unattempted}</div>
+        </div>
+        <div class="text-right shrink-0">
+          <span class="font-black text-indigo-700 text-sm">${h.score}</span>
+          <span class="text-[10px] text-slate-500">/ ${h.totalMarks} (${h.pct}%)</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="flex items-end gap-2 sm:gap-3 pt-2 pb-1 overflow-x-auto custom-scrollbar">
+      ${barsHtml}
+    </div>
+    <div class="space-y-2 pt-2 border-t border-slate-100">
+      ${rowsHtml}
+    </div>
+  `;
+}
+
+function clearExamHistory() {
+  if (confirm("മോക്ക് ടെസ്റ്റ് ഹിസ്റ്ററി മുഴുവൻ മായ്ക്കണോ?")) {
+    state.examHistory = [];
+    localStorage.setItem('chm_exam_history', '[]');
+    renderExamHistory();
+  }
+}
+
+// ============================================================================
+// 🔖 SAVED BOOKMARKS VIEW
+// ============================================================================
+
+function openBookmarksView() {
+  navigate('bookmarks');
+  const container = document.getElementById('bookmarks-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const bookmarkedQuestions = state.questions.filter(q => state.bookmarks.includes(q.id));
+  if (bookmarkedQuestions.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center text-slate-500 text-sm space-y-2">
+        <i class="fa-regular fa-star text-4xl text-amber-400"></i>
+        <p class="font-bold text-slate-700">ഇതുവരെ ചോദ്യങ്ങളൊന്നും ബുക്ക്‌മാർക്ക് ചെയ്തിട്ടില്ല!</p>
+        <p class="text-xs">പ്രാക്ടീസ് ചെയ്യുമ്പോൾ മുകളിലുള്ള ⭐ സ്റ്റാർ ഐക്കണിൽ ക്ലിക്ക് ചെയ്താൽ പ്രധാനപ്പെട്ട ചോദ്യങ്ങൾ ഇവിടെ സേവ് ആകും.</p>
+      </div>
+    `;
+    return;
+  }
+
+  bookmarkedQuestions.forEach((q, index) => {
+    const card = document.createElement('div');
+    card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3";
+    card.innerHTML = `
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+        <span class="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">${q.sheetName || 'Module'}</span>
+        <button onclick="removeBookmarkItem('${q.id}')" class="text-slate-400 hover:text-rose-600 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-trash-can"></i> Remove
+        </button>
+      </div>
+      <h4 class="font-bold text-slate-800 text-base">${index + 1}. ${q.question}</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div class="p-2 rounded-lg bg-slate-50"><strong>A:</strong> ${q.option_a}</div>
+        <div class="p-2 rounded-lg bg-slate-50"><strong>B:</strong> ${q.option_b}</div>
+        <div class="p-2 rounded-lg bg-slate-50"><strong>C:</strong> ${q.option_c}</div>
+        <div class="p-2 rounded-lg bg-slate-50"><strong>D:</strong> ${q.option_d}</div>
+      </div>
+      <div class="p-3 bg-emerald-50 text-emerald-900 rounded-xl text-xs space-y-2">
+        <div class="font-bold text-sm">Correct Answer: Option (${q.correct_answer})</div>
+        <div>${formatExplanation(q.explanation, q.explanation_malayalam)}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function removeBookmarkItem(questionId) {
+  state.bookmarks = state.bookmarks.filter(id => id !== questionId);
+  saveUserData();
+  openBookmarksView();
+}
+
+function practiceBookmarks() {
+  const bookmarkedQuestions = state.questions.filter(q => state.bookmarks.includes(q.id));
+  if (bookmarkedQuestions.length === 0) {
+    alert("ബുക്ക്‌മാർക്ക് ചെയ്ത ചോദ്യങ്ങളൊന്നുമില്ല!");
+    return;
+  }
+  state.activeSession = {
+    mode: 'practice',
+    title: `Saved Bookmarks (${bookmarkedQuestions.length} Qs)`,
+    questions: [...bookmarkedQuestions],
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+  initQuizUI();
+}
+
+function clearBookmarks() {
+  if (state.bookmarks.length === 0) return;
+  if (confirm("ബുക്ക്‌മാർക്ക് ചെയ്ത എല്ലാ ചോദ്യങ്ങളും നീക്കം ചെയ്യണോ?")) {
+    state.bookmarks = [];
+    saveUserData();
+    openBookmarksView();
+  }
+}
+
+// ============================================================================
+// 🧮 HARDWARE CHEAT SHEET & MINI-TOOLS
+// ============================================================================
+
+function openToolsView() {
+  navigate('tools');
+}
+
+function switchToolTab(tab) {
+  ['resistor', 'converter', 'specs', 'network'].forEach(t => {
+    const btn = document.getElementById(`tool-tab-${t}`);
+    if (btn) {
+      btn.className = t === tab
+        ? "px-4 py-2.5 rounded-xl bg-indigo-600 text-white flex items-center gap-2 whitespace-nowrap transition"
+        : "px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition";
+    }
+  });
+
+  const container = document.getElementById('tools-content-container');
+  if (!container) return;
+
+  if (tab === 'resistor') {
+    const digitOpts = RESISTOR_COLORS.filter(c => c.val !== null)
+      .map(c => `<option value="${c.val}" style="background:${c.bg};color:${c.text}">${c.name} (${c.val})</option>`).join('');
+    const multOpts = RESISTOR_COLORS.filter(c => c.mult !== null)
+      .map(c => `<option value="${c.mult}" style="background:${c.bg};color:${c.text}">${c.name} (${c.multLabel})</option>`).join('');
+    const tolOpts = RESISTOR_COLORS.filter(c => c.tol !== null)
+      .map(c => `<option value="${c.tol}" ${c.name === 'Gold' ? 'selected' : ''}>${c.name} (${c.tol})</option>`).join('');
+
+    container.innerHTML = `
+      <div class="space-y-5">
+        <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-900">
+          <strong>Mnemonic (ഓർത്തിരിക്കാൻ എളുപ്പവഴി):</strong> <em>"<strong>B</strong>.<strong>B</strong>. <strong>R</strong>OY of <strong>G</strong>reat <strong>B</strong>ritain had a <strong>V</strong>ery <strong>G</strong>ood <strong>W</strong>ife"</em> (Black=0, Brown=1, Red=2, Orange=3, Yellow=4, Green=5, Blue=6, Violet=7, Grey=8, White=9)
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Band 1 (1st Digit)</label>
+            <select id="res-b1" onchange="updateResistorCalc()" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold">${digitOpts}</select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Band 2 (2nd Digit)</label>
+            <select id="res-b2" onchange="updateResistorCalc()" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold">${digitOpts}</select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Band 3 (Multiplier)</label>
+            <select id="res-mult" onchange="updateResistorCalc()" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold">${multOpts}</select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Band 4 (Tolerance)</label>
+            <select id="res-tol" onchange="updateResistorCalc()" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold">${tolOpts}</select>
+          </div>
+        </div>
+        <div class="p-6 rounded-2xl bg-slate-900 text-white text-center space-y-2">
+          <div class="text-xs uppercase tracking-wider text-slate-400 font-bold">Calculated Resistance Value</div>
+          <div id="res-output" class="text-3xl sm:text-4xl font-black text-amber-400">10 Ω ±5%</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('res-b1').value = "1";
+    document.getElementById('res-b2').value = "0";
+    document.getElementById('res-mult').value = "100";
+    updateResistorCalc();
+  } else if (tab === 'converter') {
+    container.innerHTML = `
+      <div class="space-y-4">
+        <p class="text-xs text-slate-500">ഏതെങ്കിലും ഒരു ബോക്സിൽ സംഖ്യ നൽകിയാൽ ബാക്കി മൂന്ന് നമ്പർ സിസ്റ്റങ്ങളിലേക്കും തത്സമയം മാറും:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <label class="text-xs font-bold text-indigo-700">Decimal (Base 10)</label>
+            <input type="text" id="conv-dec" oninput="convertNumberBase('dec')" placeholder="e.g. 255" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold">
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <label class="text-xs font-bold text-emerald-700">Binary (Base 2)</label>
+            <input type="text" id="conv-bin" oninput="convertNumberBase('bin')" placeholder="e.g. 11111111" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold">
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <label class="text-xs font-bold text-amber-700">Octal (Base 8)</label>
+            <input type="text" id="conv-oct" oninput="convertNumberBase('oct')" placeholder="e.g. 377" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold">
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <label class="text-xs font-bold text-rose-700">Hexadecimal (Base 16)</label>
+            <input type="text" id="conv-hex" oninput="convertNumberBase('hex')" placeholder="e.g. FF" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold uppercase">
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'specs') {
+    const specRows = CHEATSHEET_HARDWARE_SPECS.map(s => `
+      <tr class="border-b border-slate-100">
+        <td class="p-3 font-bold text-slate-800">${s.item}</td>
+        <td class="p-3 font-mono font-bold text-indigo-700">${s.spec}</td>
+        <td class="p-3 text-slate-600">${s.note}</td>
+      </tr>
+    `).join('');
+    const smpsRows = CHEATSHEET_SMPS_WIRES.map(w => `
+      <tr class="border-b border-slate-100">
+        <td class="p-3 font-bold flex items-center gap-2">
+          <span class="w-4 h-4 rounded-full border border-slate-300 inline-block" style="background:${w.hex}"></span>
+          <span>${w.color}</span>
+        </td>
+        <td class="p-3 font-mono font-bold text-emerald-700">${w.voltage}</td>
+        <td class="p-3 text-slate-600">${w.use}</td>
+      </tr>
+    `).join('');
+    container.innerHTML = `
+      <div class="space-y-6">
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">📌 Essential Hardware Specs, Pins & POST Codes</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold"><tr><th class="p-3">Component</th><th class="p-3">Specification</th><th class="p-3">Key Notes</th></tr></thead>
+              <tbody>${specRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">🔌 ATX SMPS Wire Color Codes & Voltages</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold"><tr><th class="p-3">Wire Color</th><th class="p-3">Voltage / Signal</th><th class="p-3">Purpose</th></tr></thead>
+              <tbody>${smpsRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'network') {
+    const portRows = CHEATSHEET_PORTS.map(p => `
+      <tr class="border-b border-slate-100">
+        <td class="p-3 font-mono font-black text-indigo-700">${p.port}</td>
+        <td class="p-3 font-bold text-slate-800">${p.protocol}</td>
+        <td class="p-3 text-slate-600">${p.desc}</td>
+      </tr>
+    `).join('');
+    const osiRows = CHEATSHEET_OSI_LAYERS.map(l => `
+      <tr class="border-b border-slate-100">
+        <td class="p-3 font-black text-indigo-700">Layer ${l.num}</td>
+        <td class="p-3 font-bold text-slate-800">${l.name}</td>
+        <td class="p-3 font-mono text-emerald-700 font-semibold">${l.pdu}</td>
+        <td class="p-3 text-slate-600">${l.devices}</td>
+        <td class="p-3 text-slate-600">${l.protocols}</td>
+      </tr>
+    `).join('');
+    container.innerHTML = `
+      <div class="space-y-6">
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">🌐 OSI 7-Layer Reference Model</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold"><tr><th class="p-3">Layer</th><th class="p-3">Name</th><th class="p-3">PDU</th><th class="p-3">Devices</th><th class="p-3">Protocols</th></tr></thead>
+              <tbody>${osiRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">🚪 Important TCP/UDP Port Numbers</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold"><tr><th class="p-3">Port</th><th class="p-3">Protocol</th><th class="p-3">Description</th></tr></thead>
+              <tbody>${portRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function updateResistorCalc() {
+  const b1 = parseInt(document.getElementById('res-b1')?.value || '1', 10);
+  const b2 = parseInt(document.getElementById('res-b2')?.value || '0', 10);
+  const mult = parseFloat(document.getElementById('res-mult')?.value || '100');
+  const tol = document.getElementById('res-tol')?.value || '±5%';
+
+  const ohms = ((b1 * 10) + b2) * mult;
+  let formatted = '';
+  if (ohms >= 1000000) formatted = `${(ohms / 1000000).toFixed(2).replace(/\.00$/, '')} MΩ`;
+  else if (ohms >= 1000) formatted = `${(ohms / 1000).toFixed(2).replace(/\.00$/, '')} kΩ`;
+  else formatted = `${ohms.toFixed(2).replace(/\.00$/, '')} Ω`;
+
+  const out = document.getElementById('res-output');
+  if (out) out.innerText = `${formatted} ${tol}`;
+}
+
+function convertNumberBase(source) {
+  const decEl = document.getElementById('conv-dec');
+  const binEl = document.getElementById('conv-bin');
+  const octEl = document.getElementById('conv-oct');
+  const hexEl = document.getElementById('conv-hex');
+  if (!decEl || !binEl || !octEl || !hexEl) return;
+
+  const raw = document.getElementById(`conv-${source}`).value.trim();
+  if (!raw) {
+    decEl.value = binEl.value = octEl.value = hexEl.value = '';
+    return;
+  }
+
+  let num = NaN;
+  if (source === 'dec' && /^[0-9]+$/.test(raw)) num = parseInt(raw, 10);
+  else if (source === 'bin' && /^[01]+$/.test(raw)) num = parseInt(raw, 2);
+  else if (source === 'oct' && /^[0-7]+$/.test(raw)) num = parseInt(raw, 8);
+  else if (source === 'hex' && /^[0-9a-fA-F]+$/.test(raw)) num = parseInt(raw, 16);
+
+  if (isNaN(num)) return;
+  if (source !== 'dec') decEl.value = num.toString(10);
+  if (source !== 'bin') binEl.value = num.toString(2);
+  if (source !== 'oct') octEl.value = num.toString(8);
+  if (source !== 'hex') hexEl.value = num.toString(16).toUpperCase();
+}
+
+// ============================================================================
+// 🌙 DARK MODE & ⌨️ KEYBOARD SHORTCUTS
+// ============================================================================
+
+function initDarkMode() {
+  const isDark = localStorage.getItem('chm_dark_mode') === 'true';
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  }
+  updateDarkModeIcon();
+}
+
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  localStorage.setItem('chm_dark_mode', String(isDark));
+  updateDarkModeIcon();
+}
+
+function updateDarkModeIcon() {
+  const btn = document.getElementById('btn-dark-mode');
+  if (!btn) return;
+  const isDark = document.documentElement.classList.contains('dark');
+  btn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+}
+
+document.addEventListener('keydown', (e) => {
+  const quizView = document.getElementById('view-quiz');
+  if (!quizView || quizView.classList.contains('hidden')) return;
+  if (!state.activeSession) return;
+
+  const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+  const key = e.key.toLowerCase();
+  if (key === '1' || key === 'a') selectOption('A');
+  else if (key === '2' || key === 'b') selectOption('B');
+  else if (key === '3' || key === 'c') selectOption('C');
+  else if (key === '4' || key === 'd') selectOption('D');
+  else if (e.key === 'ArrowRight') nextQuestion();
+  else if (e.key === 'ArrowLeft') prevQuestion();
+  else if (key === 'e' && state.activeSession.mode === 'practice') toggleExplanation();
+});

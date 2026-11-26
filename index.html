@@ -50,9 +50,27 @@
       background: #cbd5e1;
       border-radius: 4px;
     }
+
+    /* Dark Mode Overrides */
+    html.dark body { background-color: #0f172a; color: #e2e8f0; }
+    html.dark .bg-white { background-color: #1e293b !important; color: #f1f5f9; }
+    html.dark .bg-slate-50 { background-color: #0f172a !important; }
+    html.dark .bg-slate-100 { background-color: #334155 !important; color: #f1f5f9; }
+    html.dark .border-slate-200 { border-color: #334155 !important; }
+    html.dark .border-slate-100 { border-color: #334155 !important; }
+    html.dark .text-slate-900, html.dark .text-slate-800 { color: #f8fafc !important; }
+    html.dark .text-slate-700, html.dark .text-slate-600 { color: #cbd5e1 !important; }
+    html.dark .text-slate-500 { color: #94a3b8 !important; }
+    html.dark input, html.dark select, html.dark textarea {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #475569 !important;
+    }
+    html.dark .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+    html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- Top Navigation Header -->
   <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-40">
@@ -79,6 +97,10 @@
           <i class="fa-solid fa-graduation-cap"></i>
           <span class="hidden sm:inline">PSC Previous Exam</span>
         </button>
+        <button onclick="openToolsView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-cyan-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700" title="Hardware Cheat Sheet & Calculators">
+          <i class="fa-solid fa-calculator"></i>
+          <span class="hidden lg:inline">Tools</span>
+        </button>
         <button onclick="openSyllabusView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
           <i class="fa-solid fa-book-open text-amber-300"></i>
           <span class="hidden md:inline">Syllabus</span>
@@ -89,9 +111,9 @@
         </button>
         <button onclick="openAiGeneratorModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm border border-emerald-400/30">
           <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
-          <span>Generate MCQ</span>
+          <span class="hidden sm:inline">Generate MCQ</span>
         </button>
-        <button onclick="openSettingsModal()" class="flex items-center gap-2 bg-indigo-800/80 hover:bg-indigo-700 px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
+        <button onclick="openSettingsModal()" class="flex items-center gap-2 bg-indigo-800/80 hover:bg-indigo-700 px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700" title="Sync Google Sheet">
           <i class="fa-solid fa-sheet-plastic text-emerald-400"></i>
           <span class="hidden md:inline">Sync</span>
         </button>
@@ -99,6 +121,9 @@
           <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
           <span id="mistake-count-badge" class="font-bold bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-xs">0</span>
           <span class="hidden md:inline">Mistakes</span>
+        </button>
+        <button id="btn-dark-mode" onclick="toggleDarkMode()" class="p-2 bg-indigo-800/80 hover:bg-indigo-700 text-amber-300 rounded-lg text-sm transition border border-indigo-700" title="Toggle Dark Mode">
+          <i class="fa-solid fa-moon"></i>
         </button>
       </div>
     </div>
@@ -112,32 +137,46 @@
       
       <!-- Exam Info Hero Banner -->
       <div class="bg-gradient-to-r from-indigo-700 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-        <div class="relative z-10 max-w-2xl">
-          <span class="inline-block px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-semibold rounded-full mb-3">
-            Exam Date: 17/12/2026 • 100 Marks • 10 Modules
-          </span>
+        <div class="relative z-10 max-w-3xl">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span class="inline-block px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-semibold rounded-full">
+              Exam Date: 17/12/2026 • 100 Marks • 10 Modules
+            </span>
+            <span id="exam-countdown-badge" class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/25 text-rose-200 border border-rose-400/40 text-xs font-extrabold rounded-full">
+              <i class="fa-solid fa-hourglass-half text-amber-300"></i>
+              <span id="exam-countdown-text">Calculating...</span>
+            </span>
+          </div>
           <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">Target Rank 1: Daily MCQ Practice</h2>
           <p class="text-indigo-200 text-sm sm:text-base mb-6">
             ഓരോ മൊഡ്യൂളും ആഴത്തിൽ പഠിച്ച് തെറ്റിയ ചോദ്യങ്ങൾ വീണ്ടും പരിശീലിക്കൂ. ഗൂഗിൾ ഷീറ്റിൽ ചോദ്യങ്ങൾ ആഡ് ചെയ്യുന്ന മുറയ്ക്ക് തത്സമയം വെബ് ആപ്പിൽ ലഭ്യമാകും.
           </p>
-          <div class="flex flex-wrap gap-3">
-            <button onclick="openSyllabusView()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2">
+          <div class="flex flex-wrap gap-2.5 sm:gap-3">
+            <button onclick="openSyllabusView()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 text-sm">
               <i class="fa-solid fa-book-open"></i>
               Official Syllabus & AI Topics
             </button>
-            <button onclick="openRevisionView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/20">
-              <i class="fa-solid fa-bolt text-amber-300"></i>
-              Quick Revision (Flashcards)
+            <button onclick="startWeightedMockExam()" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 border border-indigo-300/40 text-sm" title="100 Questions strictly weighted by Syllabus Marks (M1:12, M2:8, M3-10:10)">
+              <i class="fa-solid fa-scale-balanced text-amber-300"></i>
+              Weighted PSC Mock (100Q)
             </button>
-            <button onclick="startFullMockExam()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 border border-indigo-400/40">
+            <button onclick="startFullMockExam()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 border border-indigo-400/40 text-sm">
               <i class="fa-solid fa-play"></i>
-              PSC 100Q Full Mock Test
+              Random 100Q Mock
             </button>
-            <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+            <button onclick="openToolsView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/20 text-sm">
+              <i class="fa-solid fa-calculator text-cyan-300"></i>
+              Hardware Cheat Sheet
+            </button>
+            <button onclick="openRevisionView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/20 text-sm">
+              <i class="fa-solid fa-bolt text-amber-300"></i>
+              Quick Revision
+            </button>
+            <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm">
               <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
               Generate MCQ (AI)
             </button>
-            <button onclick="openMistakeNotebook()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/10">
+            <button onclick="openMistakeNotebook()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/10 text-sm">
               <i class="fa-solid fa-book-bookmark text-amber-300"></i>
               Mistakes (<span id="home-mistakes-count">0</span>)
             </button>
@@ -145,6 +184,49 @@
         </div>
         <div class="absolute -right-10 -bottom-10 opacity-10 text-white text-[15rem] pointer-events-none">
           <i class="fa-solid fa-award"></i>
+        </div>
+      </div>
+
+      <!-- Daily Streak & Global Question Search Bar -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Daily Study Goal & Streak Card -->
+        <div class="lg:col-span-5 bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-fire"></i>
+              </div>
+              <div>
+                <div class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <span>Daily Study Streak</span>
+                  <span id="streak-badge" class="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full font-black">0 Days</span>
+                </div>
+                <p class="text-[11px] text-slate-500">ഇന്ന് പഠിച്ചത്: <strong id="today-q-count" class="text-slate-800">0</strong> / <span id="daily-goal-target">25</span> ചോദ്യങ്ങൾ</p>
+              </div>
+            </div>
+            <button onclick="changeDailyGoal()" class="text-[11px] text-indigo-600 hover:underline font-bold">Edit Goal</button>
+          </div>
+          <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+            <div id="daily-goal-bar" class="bg-gradient-to-r from-orange-400 to-amber-500 h-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Global Question Search Card -->
+        <div class="lg:col-span-7 bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-center gap-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-magnifying-glass text-indigo-600"></i>
+              <span>ഏത് ചോദ്യവും തിരയുക (Search Across All 380+ Questions)</span>
+            </label>
+            <button id="btn-clear-search" onclick="clearGlobalSearch()" class="hidden text-[11px] text-rose-600 font-bold hover:underline">Clear</button>
+          </div>
+          <div class="relative flex gap-2">
+            <input type="text" id="home-search-input" oninput="handleGlobalSearch()" placeholder="ഉദാ: SMPS, DDR3, RAID, BIOS, Motherboard, IRQ..." 
+              class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+          </div>
+          <div id="home-search-results" class="hidden mt-2 max-h-72 overflow-y-auto custom-scrollbar space-y-2 pt-2 border-t border-slate-100">
+            <!-- Dynamically populated search results -->
+          </div>
         </div>
       </div>
 
@@ -170,7 +252,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+        <div onclick="openMistakeNotebook()" class="cursor-pointer bg-white rounded-2xl p-4 shadow-sm border border-slate-200 hover:border-rose-300 hover:shadow-md transition flex items-center gap-4">
           <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
             <i class="fa-solid fa-rotate-left"></i>
           </div>
@@ -180,13 +262,16 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+        <div onclick="openBookmarksView()" class="cursor-pointer bg-white rounded-2xl p-4 shadow-sm border border-slate-200 hover:border-amber-400 hover:shadow-md transition flex items-center gap-4" title="Click to view saved bookmarks">
           <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
             <i class="fa-solid fa-star"></i>
           </div>
           <div>
             <div id="stat-bookmarks" class="text-2xl font-black text-slate-800">0</div>
-            <div class="text-xs font-medium text-slate-500">Bookmarks</div>
+            <div class="text-xs font-medium text-slate-500 flex items-center gap-1">
+              <span>Bookmarks</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-amber-500"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -209,6 +294,25 @@
         </div>
         <div id="module-analytics-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
           <!-- Dynamically populated module performance bars -->
+        </div>
+      </div>
+
+      <!-- Exam History & Score Progress Graph -->
+      <div id="exam-history-card" class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-emerald-600"></i>
+              <span>മോക്ക് ടെസ്റ്റ് സ്കോർ ഗ്രാഫ് (Exam History & Progress)</span>
+            </h3>
+            <p class="text-xs text-slate-500">നിങ്ങൾ എഴുതിയ പരീക്ഷകളിലെ മാർക്ക് പുരോഗതി (Net PSC Score out of 100%)</p>
+          </div>
+          <button onclick="clearExamHistory()" class="text-xs text-slate-400 hover:text-rose-600 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-trash-can"></i> Clear History
+          </button>
+        </div>
+        <div id="exam-history-container" class="space-y-4">
+          <!-- Dynamically populated SVG progress chart & recent tests -->
         </div>
       </div>
 
@@ -235,6 +339,10 @@
               <p class="text-sm text-blue-100 leading-relaxed">
                 കേരള പി.എസ്.സി നടത്തിയ Tradesman CHM പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ ഫൈനൽ ആൻസർ കീയും (Alpha Code A) മലയാളം വിശദീകരണങ്ങളും സഹിതം.
               </p>
+              <label class="inline-flex items-center gap-2 bg-blue-900/60 border border-blue-500/40 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-100 cursor-pointer hover:bg-blue-900 transition">
+                <input type="checkbox" id="tech-only-170" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
+                <span>🎯 Technical Questions Only (Q1–Q80 മാത്രം — GK ഒഴിവാക്കുക)</span>
+              </label>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
               <button onclick="startTradesman170Practice()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-blue-300/40">
@@ -243,7 +351,7 @@
               </button>
               <button onclick="startTradesman170Exam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
                 <i class="fa-solid fa-stopwatch"></i>
-                <span>100Q Exam (75 Min)</span>
+                <span>Exam Mode</span>
               </button>
             </div>
           </div>
@@ -270,6 +378,10 @@
               <p class="text-sm text-teal-100 leading-relaxed">
                 കേരള പി.എസ്.സി നടത്തിയ Tradesman - Computer Hardware Maintenance പരീക്ഷയിലെ ഒഫീഷ്യൽ ചോദ്യങ്ങളും ഫൈനൽ ആൻസർ കീയും (Alpha Code A) മലയാളം വിശദീകരണങ്ങളും സഹിതം.
               </p>
+              <label class="inline-flex items-center gap-2 bg-teal-900/60 border border-teal-500/40 px-3 py-1.5 rounded-xl text-xs font-bold text-teal-100 cursor-pointer hover:bg-teal-900 transition">
+                <input type="checkbox" id="tech-only-191" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
+                <span>🎯 Technical Questions Only (Q1–Q80 മാത്രം — GK ഒഴിവാക്കുക)</span>
+              </label>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
               <button onclick="startTradesman191Practice()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-teal-300/40">
@@ -278,7 +390,7 @@
               </button>
               <button onclick="startTradesman191Exam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
                 <i class="fa-solid fa-stopwatch"></i>
-                <span>83Q Exam (60 Min)</span>
+                <span>Exam Mode</span>
               </button>
             </div>
           </div>
@@ -322,12 +434,23 @@
 
       <!-- Module Selection Grid -->
       <div>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
             <h3 class="text-xl font-bold text-slate-900">Module-wise Question Practice</h3>
             <p class="text-xs text-slate-500">സിലബസിലെ 10 മൊഡ്യൂളുകളിൽ നിന്നും ഇഷ്ടമുള്ളത് തിരഞ്ഞെടുത്ത് പരിശീലിക്കുക</p>
           </div>
-          <span class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-semibold">10 Modules</span>
+          <!-- Smart Practice Filters -->
+          <div class="flex items-center flex-wrap gap-2 bg-white px-3 py-2 rounded-2xl border border-slate-200 shadow-sm text-xs">
+            <span class="font-bold text-slate-600">Practice Mode:</span>
+            <select id="practice-order-select" onchange="savePracticePreferences()" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-700 focus:outline-none">
+              <option value="shuffle">🔀 Shuffle Questions</option>
+              <option value="sequential">🔢 Sequential (1, 2, 3...)</option>
+            </select>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">
+              <input type="checkbox" id="practice-unattempted-only" onchange="savePracticePreferences()" class="w-3.5 h-3.5 accent-indigo-600 rounded cursor-pointer">
+              <span>🆕 Unattempted Only</span>
+            </label>
+          </div>
         </div>
 
         <div id="modules-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -641,6 +764,75 @@
       </div>
     </section>
 
+    <!-- VIEW 7: BOOKMARKS VIEW -->
+    <section id="view-bookmarks" class="hidden max-w-4xl mx-auto space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200 space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition">
+              <i class="fa-solid fa-arrow-left text-lg"></i>
+            </button>
+            <div>
+              <h3 class="font-bold text-slate-900 text-xl flex items-center gap-2">
+                <i class="fa-solid fa-star text-amber-500"></i>
+                <span>Saved Bookmarks (ബുക്ക്‌മാർക്ക് ചെയ്ത ചോദ്യങ്ങൾ)</span>
+              </h3>
+              <p class="text-xs text-slate-500">പ്രയാസമുള്ളതോ പ്രധാനപ്പെട്ടതോ ആയ ചോദ്യങ്ങൾ ഇവിടെ സൂക്ഷിച്ചിരിക്കുന്നു</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="practiceBookmarks()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+              <i class="fa-solid fa-play"></i> Practice All Bookmarks
+            </button>
+            <button onclick="clearBookmarks()" class="text-xs text-rose-600 hover:underline font-semibold px-2">Clear All</button>
+          </div>
+        </div>
+        <div id="bookmarks-list" class="space-y-4">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 8: HARDWARE CHEAT SHEET & MINI-TOOLS -->
+    <section id="view-tools" class="hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition">
+              <i class="fa-solid fa-arrow-left text-lg"></i>
+            </button>
+            <div>
+              <h3 class="font-bold text-slate-900 text-xl flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-cyan-600"></i>
+                <span>Hardware Cheat Sheet & Mini-Tools</span>
+              </h3>
+              <p class="text-xs text-slate-500">പരീക്ഷയ്ക്ക് ഉറപ്പായും ചോദിക്കുന്ന Resistor Color Code, Number Conversion, SMPS & Ports</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar text-xs font-bold">
+          <button id="tool-tab-resistor" onclick="switchToolTab('resistor')" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-sliders"></i> Resistor Color Code
+          </button>
+          <button id="tool-tab-converter" onclick="switchToolTab('converter')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-binary"></i> Binary / Hex Converter
+          </button>
+          <button id="tool-tab-specs" onclick="switchToolTab('specs')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-microchip"></i> RAM, ATX & SMPS Pins
+          </button>
+          <button id="tool-tab-network" onclick="switchToolTab('network')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-network-wired"></i> Ports & OSI Layers
+          </button>
+        </div>
+
+        <div id="tools-content-container" class="pt-1">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Google Sheet Sync Settings Modal -->
@@ -790,6 +982,7 @@
   <script src="psc_previous_data.js"></script>
   <script src="psc_tradesman_191_2015.js"></script>
   <script src="psc_tradesman_170_2014.js"></script>
+  <script src="cheatsheet_data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
