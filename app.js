@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-const CURRENT_DATA_VERSION = "2026_11_24_TRADESMAN_170_V2";
+const CURRENT_DATA_VERSION = "2026_11_27_SYLLABUS_EXTRA_V3";
 
 function getAllBuiltinQuestions() {
   const list = (typeof SAMPLE_QUESTIONS !== 'undefined' && Array.isArray(SAMPLE_QUESTIONS)) ? [...SAMPLE_QUESTIONS] : [];
@@ -66,6 +66,16 @@ function getAllBuiltinQuestions() {
   // Merge Tradesman CHM 170/2014 questions
   if (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_170_QUESTIONS)) {
     PSC_TRADESMAN_170_QUESTIONS.forEach(q => {
+      if (!existingIds.has(q.id)) {
+        list.push(q);
+        existingIds.add(q.id);
+      }
+    });
+  }
+
+  // Merge Syllabus Gap Extra Questions
+  if (typeof SYLLABUS_EXTRA_QUESTIONS !== 'undefined' && Array.isArray(SYLLABUS_EXTRA_QUESTIONS)) {
+    SYLLABUS_EXTRA_QUESTIONS.forEach(q => {
       if (!existingIds.has(q.id)) {
         list.push(q);
         existingIds.add(q.id);
@@ -113,6 +123,16 @@ function loadQuestions() {
 
       if (typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined' && Array.isArray(PSC_TRADESMAN_170_QUESTIONS)) {
         PSC_TRADESMAN_170_QUESTIONS.forEach(q => {
+          if (!existingIds.has(q.id)) {
+            state.questions.push(q);
+            existingIds.add(q.id);
+            addedNew = true;
+          }
+        });
+      }
+
+      if (typeof SYLLABUS_EXTRA_QUESTIONS !== 'undefined' && Array.isArray(SYLLABUS_EXTRA_QUESTIONS)) {
+        SYLLABUS_EXTRA_QUESTIONS.forEach(q => {
           if (!existingIds.has(q.id)) {
             state.questions.push(q);
             existingIds.add(q.id);
@@ -469,6 +489,38 @@ function startFullMockExam() {
     currentIndex: 0,
     userAnswers: {},
     timeRemaining: 75 * 60, // 75 minutes in seconds
+    timerInterval: null,
+    isSubmitted: false
+  };
+
+  initQuizUI();
+  startExamTimer();
+}
+
+// Start 5-Minute Quick Sprint (10 High-Yield Technical Questions)
+function startQuickSprint() {
+  const techPool = state.questions.filter(q => {
+    if (q.sheetName === 'PSC_Tradesman_170_2014' || q.sheetName === 'PSC_Tradesman_191_2015') {
+      const num = parseInt(String(q.id || '').split('_').pop(), 10);
+      return isNaN(num) || num <= 80;
+    }
+    return true;
+  });
+
+  if (techPool.length === 0) {
+    alert("No questions available for Quick Sprint!");
+    return;
+  }
+
+  const sprintQs = [...techPool].sort(() => Math.random() - 0.5).slice(0, 10);
+
+  state.activeSession = {
+    mode: 'exam',
+    title: '⚡ 5-Minute Quick Sprint (10 Qs)',
+    questions: sprintQs,
+    currentIndex: 0,
+    userAnswers: {},
+    timeRemaining: 5 * 60, // 5 minutes
     timerInterval: null,
     isSubmitted: false
   };
@@ -1273,6 +1325,12 @@ async function syncWithGoogleSheet(isAutoSync = false) {
       if (!hasTradesman170InSync && typeof PSC_TRADESMAN_170_QUESTIONS !== 'undefined') {
         merged = merged.concat(PSC_TRADESMAN_170_QUESTIONS);
       }
+      if (typeof SYLLABUS_EXTRA_QUESTIONS !== 'undefined') {
+        const syncedIds = new Set(merged.map(q => q.id));
+        SYLLABUS_EXTRA_QUESTIONS.forEach(q => {
+          if (!syncedIds.has(q.id)) merged.push(q);
+        });
+      }
       state.questions = merged;
       state.apiUrl = urlInput;
       localStorage.setItem('chm_cached_questions', JSON.stringify(merged));
@@ -1480,6 +1538,7 @@ ${topicDescription}
 
 Difficulty: ${difficulty}
 Target Question Count: ${count}
+${difficulty === 'hard' ? 'BONUS DEPTH (Official PSC Syllabus NOTE): Include rank-deciding numericals, ITI/VHSE/Diploma-level practical troubleshooting, and subtle distinction questions (e.g., SCR latching vs holding current, subnetting, RAID capacity, System32/PowerShell, IT Act sections).' : ''}
 ${notesContext}
 REQUIREMENTS:
 1. Each question must test practical and theoretical concepts according to the Kerala PSC Tradesman syllabus.
@@ -2806,7 +2865,7 @@ function openToolsView() {
 }
 
 function switchToolTab(tab) {
-  ['resistor', 'converter', 'specs', 'network', 'ip'].forEach(t => {
+  ['resistor', 'converter', 'specs', 'network', 'ip', 'electronics', 'commands', 'law'].forEach(t => {
     const btn = document.getElementById(`tool-tab-${t}`);
     if (btn) {
       btn.className = t === tab
@@ -3183,6 +3242,182 @@ function switchToolTab(tab) {
       </div>
     `;
     calculateIpv4Subnet();
+  } else if (tab === 'electronics') {
+    container.innerHTML = `
+      <div class="space-y-6">
+        <!-- Interactive Logic Gates Simulator -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h4 class="font-bold text-sm text-slate-900">🔌 Interactive Logic Gates Simulator (Module 1)</h4>
+              <p class="text-xs text-slate-500">Input A, B എന്നിവ മാറ്റി (0 അല്ലെങ്കിൽ 1) എല്ലാ ലോജിക് ഗേറ്റുകളുടെയും ഔട്ട്പുട്ട് തത്സമയം പരിശോധിക്കുക:</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="flex items-center gap-1.5 bg-white border border-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer">
+                <span>Input A:</span>
+                <select id="gate-in-a" onchange="updateLogicGatesSim()" class="font-mono font-black text-indigo-700 bg-transparent focus:outline-none">
+                  <option value="0">0 (LOW)</option>
+                  <option value="1" selected>1 (HIGH)</option>
+                </select>
+              </label>
+              <label class="flex items-center gap-1.5 bg-white border border-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer">
+                <span>Input B:</span>
+                <select id="gate-in-b" onchange="updateLogicGatesSim()" class="font-mono font-black text-emerald-700 bg-transparent focus:outline-none">
+                  <option value="0" selected>0 (LOW)</option>
+                  <option value="1">1 (HIGH)</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div id="logic-gates-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+          <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-950">
+            <strong>📌 PSC Exam Key Point:</strong> <strong>NAND</strong>, <strong>NOR</strong> എന്നിവയാണ് <strong>Universal Gates</strong> (ഇവ ഉപയോഗിച്ച് മറ്റെല്ലാ ഗേറ്റുകളും നിർമ്മിക്കാം). <strong>XOR</strong> ഔട്ട്പുട്ട് 1 ആകുന്നത് രണ്ട് ഇൻപുട്ടുകളും വ്യത്യസ്തമാകുമ്പോൾ മാത്രമാണ്.
+          </div>
+        </div>
+
+        <!-- Interactive Ohm's Law & Series/Parallel Calculator -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+            <h4 class="font-bold text-sm text-slate-900">⚡ Ohm's Law & Power (V, I, R, P)</h4>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">Voltage (V)</label>
+                <input type="number" id="ohm-v" value="12" oninput="calcOhmsLaw()" class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+              </div>
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">Resistance (R in Ω)</label>
+                <input type="number" id="ohm-r" value="4" oninput="calcOhmsLaw()" class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+              </div>
+            </div>
+            <div id="ohm-out" class="p-3 rounded-xl bg-slate-900 text-emerald-300 font-mono font-bold"></div>
+            <div class="text-[11px] text-slate-600">• <strong>V = I × R</strong> | <strong>P = V × I = I²R = V²/R</strong></div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+            <h4 class="font-bold text-sm text-slate-900">🔗 Series & Parallel (R₁ & R₂)</h4>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">Value 1 (R₁ / C₁)</label>
+                <input type="number" id="sp-v1" value="6" oninput="calcSeriesParallel()" class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+              </div>
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">Value 2 (R₂ / C₂)</label>
+                <input type="number" id="sp-v2" value="3" oninput="calcSeriesParallel()" class="w-full px-3 py-1.5 rounded-xl border border-slate-300 font-mono font-bold">
+              </div>
+            </div>
+            <div id="sp-out" class="p-3 rounded-xl bg-slate-900 text-amber-300 font-mono font-bold"></div>
+            <div class="text-[11px] text-slate-600">• Capacitors-ന് Resistors-ന്റെ നേരെ വിപരീതമാണ് (Series-ൽ കുറയും, Parallel-ൽ കൂടും).</div>
+          </div>
+        </div>
+
+        <!-- Power Devices & Regulators Summary -->
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-1.5 text-slate-800">
+          <h4 class="font-bold text-sm text-amber-950">🔋 Power Electronics & Regulators Quick Notes (Module 1)</h4>
+          <div>• <strong>SCR:</strong> 4 layers (PNPN), 3 junctions, 3 terminals (A, K, G). Unidirectional. Latching Current &gt; Holding Current.</div>
+          <div>• <strong>DIAC:</strong> 2 terminals (No Gate), Bidirectional — used to trigger TRIAC. <strong>TRIAC:</strong> 3 terminals (MT1, MT2, Gate), Bidirectional AC control.</div>
+          <div>• <strong>3-Pin Regulators:</strong> <strong>78xx</strong> (+ve fixed, e.g., 7805 = +5V), <strong>79xx</strong> (-ve fixed, e.g., 7912 = -12V), <strong>LM317</strong> (Adjustable +1.25V to +37V).</div>
+        </div>
+      </div>
+    `;
+    updateLogicGatesSim();
+    calcOhmsLaw();
+    calcSeriesParallel();
+  } else if (tab === 'commands') {
+    const raidRows = CHEATSHEET_RAID_LEVELS.map(r => `
+      <tr class="border-b border-slate-100">
+        <td class="p-2.5 font-black text-indigo-700">${r.level}</td>
+        <td class="p-2.5 font-bold text-slate-800">${r.name}</td>
+        <td class="p-2.5 font-mono font-bold">${r.minDisks}</td>
+        <td class="p-2.5 text-emerald-700 font-semibold">${r.faultTol}</td>
+        <td class="p-2.5 font-mono">${r.capacity}</td>
+        <td class="p-2.5 text-slate-600">${r.use}</td>
+      </tr>
+    `).join('');
+    const cmdRows = CHEATSHEET_CLI_COMMANDS.map(c => `
+      <tr class="border-b border-slate-100">
+        <td class="p-2.5 font-mono font-bold text-indigo-700">${c.cmd}</td>
+        <td class="p-2.5 font-bold text-slate-700">${c.os}</td>
+        <td class="p-2.5 text-slate-600">${c.desc}</td>
+      </tr>
+    `).join('');
+    const offRows = CHEATSHEET_OFFICE_FORMULAS.map(o => `
+      <tr class="border-b border-slate-100">
+        <td class="p-2.5 font-mono font-bold text-emerald-700">${o.item}</td>
+        <td class="p-2.5 font-bold text-slate-700">${o.app}</td>
+        <td class="p-2.5 text-slate-600">${o.desc}</td>
+      </tr>
+    `).join('');
+
+    container.innerHTML = `
+      <div class="space-y-6">
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">💾 RAID Levels Comparison (Module 3)</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold">
+                <tr><th class="p-2.5">Level</th><th class="p-2.5">Type</th><th class="p-2.5">Min Disks</th><th class="p-2.5">Fault Tolerance</th><th class="p-2.5">Usable Space</th><th class="p-2.5">Use Case</th></tr>
+              </thead>
+              <tbody>${raidRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">💻 Essential Windows & Linux CLI Commands (Module 4, 5, 8)</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold"><tr><th class="p-2.5">Command</th><th class="p-2.5">OS</th><th class="p-2.5">Purpose</th></tr></thead>
+              <tbody>${cmdRows}</tbody>
+            </table>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1.5">• Windows <strong>hosts</strong> file path: <code class="font-mono font-bold">C:\\Windows\\System32\\drivers\\etc\\hosts</code> | MBR Max: 4 Primary Partitions, 2 TB (GPT: 128 Primary).</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">📊 MS Office Formulas & Shortcuts (Module 6)</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold"><tr><th class="p-2.5">Formula / Feature</th><th class="p-2.5">App</th><th class="p-2.5">Description</th></tr></thead>
+              <tbody>${offRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'law') {
+    const itRows = CHEATSHEET_IT_ACT.map(i => `
+      <tr class="border-b border-slate-100">
+        <td class="p-2.5 font-mono font-black text-rose-700">${i.sec}</td>
+        <td class="p-2.5 font-bold text-slate-800">${i.topic}</td>
+        <td class="p-2.5 text-slate-600">${i.desc}</td>
+      </tr>
+    `).join('');
+
+    container.innerHTML = `
+      <div class="space-y-6">
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">⚖️ Information Technology (IT) Act 2000 – Key Sections (Module 10)</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold"><tr><th class="p-2.5">Section</th><th class="p-2.5">Offence / Topic</th><th class="p-2.5">Details</th></tr></thead>
+              <tbody>${itRows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 space-y-1.5">
+            <h4 class="font-bold text-sm text-indigo-950">☁️ Cloud Service Models</h4>
+            <div class="text-slate-700">• <strong>IaaS (Infrastructure):</strong> Virtual Machines, Storage, Networks (e.g., AWS EC2, Azure VM).</div>
+            <div class="text-slate-700">• <strong>PaaS (Platform):</strong> App runtime & dev tools (e.g., Google App Engine, Heroku).</div>
+            <div class="text-slate-700">• <strong>SaaS (Software):</strong> Ready-to-use cloud apps (e.g., Gmail, Office 365, Google Docs).</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1.5">
+            <h4 class="font-bold text-sm text-emerald-950">🖥️ Hypervisors (Virtualization)</h4>
+            <div class="text-slate-700">• <strong>Type 1 (Bare-metal):</strong> Runs directly on physical hardware (VMware ESXi, Hyper-V, KVM).</div>
+            <div class="text-slate-700">• <strong>Type 2 (Hosted):</strong> Runs on top of a host OS like Windows/Linux (VirtualBox, VMware Workstation).</div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 }
 
@@ -3540,4 +3775,86 @@ function clearAnswerHistory() {
     localStorage.setItem('chm_answer_history', '{}');
     renderAnswerHistoryList();
   }
+}
+
+
+// ============================================================================
+// ⚡ ELECTRONICS SIMULATOR & 🔄 RETRY WRONG FROM HISTORY
+// ============================================================================
+
+function updateLogicGatesSim() {
+  const grid = document.getElementById('logic-gates-grid');
+  if (!grid) return;
+  const a = parseInt(document.getElementById('gate-in-a')?.value || '0', 10);
+  const b = parseInt(document.getElementById('gate-in-b')?.value || '0', 10);
+
+  const gates = [
+    { name: "AND", expr: "A · B", out: a & b },
+    { name: "OR", expr: "A + B", out: a | b },
+    { name: "NOT (A)", expr: "A'", out: a ? 0 : 1 },
+    { name: "NAND (Univ)", expr: "(A · B)'", out: (a & b) ? 0 : 1 },
+    { name: "NOR (Univ)", expr: "(A + B)'", out: (a | b) ? 0 : 1 },
+    { name: "XOR", expr: "A ⊕ B", out: a ^ b },
+    { name: "XNOR", expr: "(A ⊕ B)'", out: (a ^ b) ? 0 : 1 }
+  ];
+
+  grid.innerHTML = gates.map(g => `
+    <div class="p-3 rounded-xl bg-white border ${g.out ? 'border-emerald-400' : 'border-slate-200'} flex items-center justify-between text-xs shadow-sm">
+      <div>
+        <div class="font-black text-slate-900">${g.name}</div>
+        <div class="text-[10px] font-mono text-slate-500">${g.expr}</div>
+      </div>
+      <span class="w-8 h-8 rounded-lg flex items-center justify-center font-mono font-black text-sm ${g.out ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-700'}">
+        ${g.out}
+      </span>
+    </div>
+  `).join('');
+}
+
+function calcOhmsLaw() {
+  const v = parseFloat(document.getElementById('ohm-v')?.value || '0');
+  const r = parseFloat(document.getElementById('ohm-r')?.value || '0');
+  const out = document.getElementById('ohm-out');
+  if (!out) return;
+  if (!r || r <= 0) {
+    out.innerText = "Resistance must be > 0";
+    return;
+  }
+  const i = v / r;
+  const p = v * i;
+  out.innerText = `Current (I) = ${i.toFixed(2)} A | Power (P) = ${p.toFixed(2)} W`;
+}
+
+function calcSeriesParallel() {
+  const v1 = parseFloat(document.getElementById('sp-v1')?.value || '0');
+  const v2 = parseFloat(document.getElementById('sp-v2')?.value || '0');
+  const out = document.getElementById('sp-out');
+  if (!out) return;
+  const seriesR = v1 + v2;
+  const parallelR = (v1 + v2) > 0 ? (v1 * v2) / (v1 + v2) : 0;
+  out.innerText = `R_series = ${seriesR.toFixed(2)} Ω | R_parallel = ${parallelR.toFixed(2)} Ω`;
+}
+
+function retryWrongFromHistory() {
+  const wrongIds = Object.values(state.answerHistory || {})
+    .filter(r => !r.isCorrect)
+    .map(r => r.questionId);
+
+  const wrongSet = new Set(wrongIds);
+  const wrongQs = state.questions.filter(q => wrongSet.has(q.id));
+
+  if (wrongQs.length === 0) {
+    alert("അഭിനന്ദനങ്ങൾ! നിങ്ങളുടെ Answer History-ൽ തെറ്റിയ ചോദ്യങ്ങളൊന്നും നിലവിൽ ഇല്ല.");
+    return;
+  }
+
+  state.activeSession = {
+    mode: 'practice',
+    title: `🔄 Retry Wrong Questions (${wrongQs.length} Qs)`,
+    questions: [...wrongQs],
+    currentIndex: 0,
+    userAnswers: {},
+    isSubmitted: false
+  };
+  initQuizUI();
 }

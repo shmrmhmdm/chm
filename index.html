@@ -208,6 +208,10 @@
               <i class="fa-solid fa-play"></i>
               Random 100Q Mock
             </button>
+            <button onclick="startQuickSprint()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-rose-600/20 hover:-translate-y-0.5 transition-all flex items-center gap-2 border border-rose-400/30 text-sm" title="10 High-Yield Questions • 5 Minutes">
+              <i class="fa-solid fa-bolt"></i>
+              5-Min Sprint (10Q)
+            </button>
             <button onclick="openSyllabusView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-2xl transition backdrop-blur-md flex items-center gap-2 border border-white/15 text-sm">
               <i class="fa-solid fa-book-open text-amber-300"></i>
               Syllabus
@@ -870,6 +874,15 @@
           <button id="tool-tab-ip" onclick="switchToolTab('ip')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
             <i class="fa-solid fa-globe"></i> IP Addressing & Subnetting
           </button>
+          <button id="tool-tab-electronics" onclick="switchToolTab('electronics')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-wave-square"></i> Logic Gates & Electronics
+          </button>
+          <button id="tool-tab-commands" onclick="switchToolTab('commands')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-terminal"></i> Commands, RAID & Office
+          </button>
+          <button id="tool-tab-law" onclick="switchToolTab('law')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-2 whitespace-nowrap transition">
+            <i class="fa-solid fa-scale-balanced"></i> IT Act 2000 & Cloud
+          </button>
         </div>
 
         <div id="tools-content-container" class="pt-1">
@@ -896,6 +909,10 @@
           </div>
 
           <div class="flex items-center flex-wrap gap-2">
+            <button onclick="retryWrongFromHistory()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+              <i class="fa-solid fa-rotate-right"></i>
+              <span>Retry Wrong Qs</span>
+            </button>
             <button onclick="syncAllProgressToSheet()" id="btn-push-progress" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
               <i class="fa-solid fa-cloud-arrow-up"></i>
               <span>Save to Google Sheet</span>
@@ -1086,6 +1103,7 @@
   <script src="psc_previous_data.js"></script>
   <script src="psc_tradesman_191_2015.js"></script>
   <script src="psc_tradesman_170_2014.js"></script>
+  <script src="syllabus_extra_questions.js"></script>
   <script src="cheatsheet_data.js"></script>
   <script src="app.js"></script>
 </body>

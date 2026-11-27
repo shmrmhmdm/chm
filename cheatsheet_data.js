@@ -65,3 +65,45 @@ const RESISTOR_COLORS = [
   { name: "Gold", val: null, mult: 0.1, multLabel: "×0.1 Ω", tol: "±5%", bg: "#f59e0b", text: "#0f172a" },
   { name: "Silver", val: null, mult: 0.01, multLabel: "×0.01 Ω", tol: "±10%", bg: "#cbd5e1", text: "#0f172a" }
 ];
+
+
+const CHEATSHEET_RAID_LEVELS = [
+  { level: "RAID 0", name: "Striping", minDisks: "2", faultTol: "None (0 disk)", capacity: "100% (N)", use: "Maximum speed, gaming/scratch disk (No redundancy)" },
+  { level: "RAID 1", name: "Mirroring", minDisks: "2", faultTol: "1 disk failure", capacity: "50% (N/2)", use: "OS boot drives, high reliability" },
+  { level: "RAID 5", name: "Striping + Distributed Parity", minDisks: "3", faultTol: "1 disk failure", capacity: "(N - 1) / N", use: "Balanced performance, capacity & redundancy" },
+  { level: "RAID 6", name: "Striping + Double Parity", minDisks: "4", faultTol: "2 disk failures", capacity: "(N - 2) / N", use: "Critical enterprise storage servers" },
+  { level: "RAID 10", name: "Mirrored Stripes (1+0)", minDisks: "4", faultTol: "1 per mirror pair", capacity: "50% (N/2)", use: "High-speed databases with strong fault tolerance" }
+];
+
+const CHEATSHEET_CLI_COMMANDS = [
+  { cmd: "sfc /scannow", os: "Windows", desc: "Scans and repairs corrupted System32 & protected OS files" },
+  { cmd: "chkdsk /f /r", os: "Windows", desc: "Checks disk file system errors and locates bad sectors" },
+  { cmd: "diskpart", os: "Windows", desc: "Command-line disk partitioning utility (MBR/GPT, clean, create)" },
+  { cmd: "bcdedit", os: "Windows", desc: "Manages Boot Configuration Data (BCD) & multi-boot entries" },
+  { cmd: "gpedit.msc / services.msc", os: "Windows", desc: "Opens Local Group Policy Editor / Windows Services console" },
+  { cmd: "eventvwr.msc", os: "Windows", desc: "Opens Event Viewer to inspect system & application crash logs" },
+  { cmd: "ping / tracert / netstat", os: "Win/Linux", desc: "Test reachability, trace route hops, view active ports/connections" },
+  { cmd: "nslookup / ipconfig", os: "Windows", desc: "Query DNS records / view IP, Subnet Mask & Default Gateway" },
+  { cmd: "chmod / chown", os: "Linux", desc: "Change file permissions (r=4, w=2, x=1) / change file owner" },
+  { cmd: "grep / ps / kill", os: "Linux", desc: "Search text patterns / list running processes / terminate process" }
+];
+
+const CHEATSHEET_OFFICE_FORMULAS = [
+  { item: "=VLOOKUP(val, tbl, col, FALSE)", app: "Excel", desc: "Searches 1st column vertically and returns matching row value" },
+  { item: "=IF(cond, true_val, false_val)", app: "Excel", desc: "Conditional logic test returning different values" },
+  { item: "=COUNTIF(range, criteria)", app: "Excel", desc: "Counts cells matching a specific condition (e.g. \">50\")" },
+  { item: "$A$1 (Dollar Sign $)", app: "Excel", desc: "Absolute Cell Reference — locks both column and row when copied" },
+  { item: "Mail Merge", app: "Word", desc: "Combines a template letter with Excel/CSV list for bulk letters" },
+  { item: "F5 / Shift + F5", app: "PowerPoint", desc: "Start Slide Show from Beginning (F5) / Current Slide (Shift+F5)" }
+];
+
+const CHEATSHEET_IT_ACT = [
+  { sec: "Section 43", topic: "Damage to Computer System", desc: "Unauthorized access, downloading data, introducing viruses (Civil penalty)" },
+  { sec: "Section 65", topic: "Tampering with Source Code", desc: "Concealing, destroying or altering computer source code intentionally" },
+  { sec: "Section 66", topic: "Computer Related Offences", desc: "Dishonestly or fraudulently committing acts under Sec 43 (Up to 3 yrs)" },
+  { sec: "Section 66C", topic: "Identity Theft", desc: "Fraudulent use of another person's password or electronic signature" },
+  { sec: "Section 66D", topic: "Cheating by Personation", desc: "Cheating using computer resources / fake identity" },
+  { sec: "Section 66F", topic: "Cyber Terrorism", desc: "Threatening unity/integrity/security of India (Up to life imprisonment)" },
+  { sec: "Section 67", topic: "Obscene Material", desc: "Publishing or transmitting obscene material in electronic form" },
+  { sec: "Digital Signature", topic: "Authentication (Asymmetric)", desc: "Uses Public Key Infrastructure (PKI) & Certifying Authorities (CA)" }
+];
