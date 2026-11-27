@@ -35,9 +35,19 @@
     }
   </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Malayalam', sans-serif;
+      background-image: radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                        radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+    .bento-card {
+      box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.05), 0 1px 3px 0 rgba(15, 23, 42, 0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .bento-card:hover {
+      box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.09), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
@@ -52,12 +62,17 @@
     }
 
     /* Dark Mode Overrides */
-    html.dark body { background-color: #0f172a; color: #e2e8f0; }
-    html.dark .bg-white { background-color: #1e293b !important; color: #f1f5f9; }
-    html.dark .bg-slate-50 { background-color: #0f172a !important; }
-    html.dark .bg-slate-100 { background-color: #334155 !important; color: #f1f5f9; }
-    html.dark .border-slate-200 { border-color: #334155 !important; }
-    html.dark .border-slate-100 { border-color: #334155 !important; }
+    html.dark body {
+      background-color: #090d16;
+      color: #e2e8f0;
+      background-image: radial-gradient(at 100% 0%, rgba(79, 70, 229, 0.14) 0px, transparent 50%),
+                        radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.09) 0px, transparent 50%);
+    }
+    html.dark .bg-white { background-color: #131c2e !important; color: #f1f5f9; }
+    html.dark .bg-slate-50 { background-color: #0b1120 !important; }
+    html.dark .bg-slate-100 { background-color: #1e293b !important; color: #f1f5f9; }
+    html.dark .border-slate-200 { border-color: #243047 !important; }
+    html.dark .border-slate-100 { border-color: #1e293b !important; }
     html.dark .text-slate-900, html.dark .text-slate-800 { color: #f8fafc !important; }
     html.dark .text-slate-700, html.dark .text-slate-600 { color: #cbd5e1 !important; }
     html.dark .text-slate-500 { color: #94a3b8 !important; }
@@ -96,61 +111,60 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col transition-colors duration-200">
 
-  <!-- Top Navigation Header -->
-  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="navigate('home')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-indigo-500 flex items-center justify-center font-black text-xl text-white shadow-inner">
+  <!-- Top Gradient Accent -->
+  <div class="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 sticky top-0 z-50"></div>
+
+  <!-- Top Navigation Header (Modern Frosted Glass) -->
+  <header class="bg-slate-900/95 backdrop-blur-xl text-white border-b border-white/10 shadow-lg sticky top-1 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-3 cursor-pointer group" onclick="navigate('home')">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-amber-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition">
           <i class="fa-solid fa-microchip"></i>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
-            CHM Rank 1 Master
-            <span class="text-xs bg-amber-400 text-slate-900 font-extrabold px-2 py-0.5 rounded-full">Cat: 884/2025</span>
+          <h1 class="font-extrabold text-base sm:text-lg tracking-tight leading-tight flex items-center gap-2">
+            <span>CHM Rank 1</span>
+            <span class="text-[10px] bg-amber-400/95 text-slate-950 font-black px-2 py-0.5 rounded-full tracking-wide">884/2025</span>
           </h1>
-          <p class="text-xs text-indigo-200">Kerala PSC Tradesman Computer Hardware</p>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Kerala PSC Tradesman Computer Hardware</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button id="btn-install-app" onclick="installPwaApp()" class="hidden items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm animate-pulse">
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="btn-install-app" onclick="installPwaApp()" class="hidden items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm transition shadow-sm animate-pulse">
           <i class="fa-solid fa-download"></i>
-          <span>Install App</span>
+          <span>Install</span>
         </button>
-        <button onclick="startPscPreviousPractice()" class="flex items-center gap-1.5 bg-amber-500/90 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm border border-amber-300">
-          <i class="fa-solid fa-graduation-cap"></i>
-          <span class="hidden sm:inline">PSC Previous Exam</span>
-        </button>
-        <button onclick="openAnswerHistoryView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-emerald-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700" title="View Your Past Answers & Sync">
+        <button onclick="openAnswerHistoryView()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-emerald-300 font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition border border-white/10" title="View Your Past Answers & Sync">
           <i class="fa-solid fa-clock-rotate-left"></i>
           <span class="hidden lg:inline">My Answers</span>
         </button>
-        <button onclick="openToolsView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-cyan-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700" title="Hardware Cheat Sheet & Calculators">
+        <button onclick="openToolsView()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-cyan-300 font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition border border-white/10" title="Hardware Cheat Sheet & Calculators">
           <i class="fa-solid fa-calculator"></i>
           <span class="hidden lg:inline">Tools</span>
         </button>
-        <button onclick="openSyllabusView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
+        <button onclick="openSyllabusView()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-white font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition border border-white/10">
           <i class="fa-solid fa-book-open text-amber-300"></i>
           <span class="hidden md:inline">Syllabus</span>
         </button>
-        <button onclick="openRevisionView()" class="flex items-center gap-1.5 bg-indigo-800/90 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700">
+        <button onclick="openRevisionView()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 text-amber-300 font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition border border-white/10">
           <i class="fa-solid fa-bolt"></i>
-          <span class="hidden sm:inline">Quick Revision</span>
+          <span class="hidden sm:inline">Revision</span>
         </button>
-        <button onclick="openAiGeneratorModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition shadow-sm border border-emerald-400/30">
-          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
-          <span class="hidden sm:inline">Generate MCQ</span>
+        <button onclick="openAiGeneratorModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm transition shadow-md shadow-emerald-500/20">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i>
+          <span class="hidden sm:inline">AI MCQ</span>
         </button>
-        <button onclick="openSettingsModal()" class="flex items-center gap-2 bg-indigo-800/80 hover:bg-indigo-700 px-3 py-1.5 rounded-lg text-sm transition border border-indigo-700" title="Sync Google Sheet">
+        <button onclick="openSettingsModal()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition border border-white/10" title="Sync Google Sheet">
           <i class="fa-solid fa-sheet-plastic text-emerald-400"></i>
           <span class="hidden md:inline">Sync</span>
         </button>
-        <button onclick="openMistakeNotebook()" class="flex items-center gap-1.5 bg-rose-900/60 hover:bg-rose-800 text-rose-200 px-3 py-1.5 rounded-lg text-sm transition border border-rose-700/50">
+        <button onclick="openMistakeNotebook()" class="flex items-center gap-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-200 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm transition border border-rose-400/30">
           <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
-          <span id="mistake-count-badge" class="font-bold bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-xs">0</span>
+          <span id="mistake-count-badge" class="font-black bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-[11px]">0</span>
           <span class="hidden md:inline">Mistakes</span>
         </button>
-        <button id="btn-dark-mode" onclick="toggleDarkMode()" class="p-2 bg-indigo-800/80 hover:bg-indigo-700 text-amber-300 rounded-lg text-sm transition border border-indigo-700" title="Toggle Dark Mode">
+        <button id="btn-dark-mode" onclick="toggleDarkMode()" class="p-2 bg-white/10 hover:bg-white/20 text-amber-300 rounded-xl text-sm transition border border-white/10" title="Toggle Dark Mode">
           <i class="fa-solid fa-moon"></i>
         </button>
       </div>
@@ -163,55 +177,58 @@
     <!-- VIEW 1: HOME DASHBOARD -->
     <section id="view-home" class="space-y-8">
       
-      <!-- Exam Info Hero Banner -->
-      <div class="bg-gradient-to-r from-indigo-700 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-        <div class="relative z-10 max-w-3xl">
-          <div class="flex flex-wrap items-center gap-2 mb-3">
-            <span class="inline-block px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-semibold rounded-full">
-              Exam Date: 17/12/2026 • 100 Marks • 10 Modules
+      <!-- Exam Info Hero Banner (Modern Bento Hero) -->
+      <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-9 shadow-2xl border border-indigo-500/20 relative overflow-hidden">
+        <!-- Ambient Glowing Orbs -->
+        <div class="absolute -top-24 -right-24 w-72 h-72 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-16 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-4xl">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 text-amber-300 border border-white/15 text-xs font-bold rounded-full backdrop-blur-md">
+              <i class="fa-regular fa-calendar-check"></i> Exam: 17/12/2026 • 100 Marks
             </span>
-            <span id="exam-countdown-badge" class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/25 text-rose-200 border border-rose-400/40 text-xs font-extrabold rounded-full">
+            <span id="exam-countdown-badge" class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 text-rose-200 border border-rose-400/30 text-xs font-extrabold rounded-full backdrop-blur-md">
               <i class="fa-solid fa-hourglass-half text-amber-300"></i>
               <span id="exam-countdown-text">Calculating...</span>
             </span>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold mb-2">Target Rank 1: Daily MCQ Practice</h2>
-          <p class="text-indigo-200 text-sm sm:text-base mb-6">
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-2.5 bg-gradient-to-r from-white via-indigo-100 to-amber-200 bg-clip-text text-transparent">
+            Target Rank 1: Daily MCQ Practice
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base mb-6 max-w-2xl leading-relaxed">
             ഓരോ മൊഡ്യൂളും ആഴത്തിൽ പഠിച്ച് തെറ്റിയ ചോദ്യങ്ങൾ വീണ്ടും പരിശീലിക്കൂ. ഗൂഗിൾ ഷീറ്റിൽ ചോദ്യങ്ങൾ ആഡ് ചെയ്യുന്ന മുറയ്ക്ക് തത്സമയം വെബ് ആപ്പിൽ ലഭ്യമാകും.
           </p>
           <div class="flex flex-wrap gap-2.5 sm:gap-3">
-            <button onclick="openSyllabusView()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 text-sm">
-              <i class="fa-solid fa-book-open"></i>
-              Official Syllabus & AI Topics
-            </button>
-            <button onclick="startWeightedMockExam()" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 border border-indigo-300/40 text-sm" title="100 Questions strictly weighted by Syllabus Marks (M1:12, M2:8, M3-10:10)">
-              <i class="fa-solid fa-scale-balanced text-amber-300"></i>
+            <button onclick="startWeightedMockExam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-2xl shadow-lg shadow-amber-500/20 hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm" title="100 Questions strictly weighted by Syllabus Marks (M1:12, M2:8, M3-10:10)">
+              <i class="fa-solid fa-scale-balanced"></i>
               Weighted PSC Mock (100Q)
             </button>
-            <button onclick="startFullMockExam()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition flex items-center gap-2 border border-indigo-400/40 text-sm">
+            <button onclick="startFullMockExam()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-indigo-600/25 hover:-translate-y-0.5 transition-all flex items-center gap-2 border border-indigo-400/30 text-sm">
               <i class="fa-solid fa-play"></i>
               Random 100Q Mock
             </button>
-            <button onclick="openToolsView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/20 text-sm">
-              <i class="fa-solid fa-calculator text-cyan-300"></i>
-              Hardware Cheat Sheet
+            <button onclick="openSyllabusView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-2xl transition backdrop-blur-md flex items-center gap-2 border border-white/15 text-sm">
+              <i class="fa-solid fa-book-open text-amber-300"></i>
+              Syllabus
             </button>
-            <button onclick="openRevisionView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/20 text-sm">
+            <button onclick="openToolsView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-2xl transition backdrop-blur-md flex items-center gap-2 border border-white/15 text-sm">
+              <i class="fa-solid fa-calculator text-cyan-300"></i>
+              Cheat Sheet & Tools
+            </button>
+            <button onclick="openRevisionView()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-2xl transition backdrop-blur-md flex items-center gap-2 border border-white/15 text-sm">
               <i class="fa-solid fa-bolt text-amber-300"></i>
               Quick Revision
             </button>
-            <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+            <button onclick="openAiGeneratorModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 transition-all flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i>
               Generate MCQ (AI)
             </button>
-            <button onclick="openMistakeNotebook()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-xl transition backdrop-blur flex items-center gap-2 border border-white/10 text-sm">
-              <i class="fa-solid fa-book-bookmark text-amber-300"></i>
+            <button onclick="openMistakeNotebook()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2.5 rounded-2xl transition backdrop-blur-md flex items-center gap-2 border border-white/15 text-sm">
+              <i class="fa-solid fa-book-bookmark text-rose-300"></i>
               Mistakes (<span id="home-mistakes-count">0</span>)
             </button>
           </div>
-        </div>
-        <div class="absolute -right-10 -bottom-10 opacity-10 text-white text-[15rem] pointer-events-none">
-          <i class="fa-solid fa-award"></i>
         </div>
       </div>
 
@@ -349,116 +366,105 @@
         </div>
       </div>
 
-      <!-- PSC Previous Exams Section -->
+      <!-- PSC Previous Exams Section (Modern 3-Column Bento Grid) -->
       <div class="space-y-4">
-        <!-- Paper 1: Tradesman CHM 170/2014 (100 Qs Full Paper) -->
-        <div class="bg-gradient-to-r from-blue-950 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-blue-400/40 relative overflow-hidden">
-          <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div class="space-y-2.5 max-w-2xl">
-              <div class="flex items-center flex-wrap gap-2">
-                <span class="bg-blue-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                  <i class="fa-solid fa-star"></i> 100 പൂർണ്ണ ചോദ്യങ്ങൾ (Full Paper)
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-landmark text-indigo-600"></i>
+              <span>Official Kerala PSC Previous Papers</span>
+            </h3>
+            <p class="text-xs text-slate-500">യഥാർത്ഥ പി.എസ്.സി പരീക്ഷാ ചോദ്യപേപ്പറുകൾ (283 Verified Questions)</p>
+          </div>
+          <span class="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold">3 Papers</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <!-- Paper 1: Tradesman CHM 170/2014 -->
+          <div class="bento-card bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 border-t-4 border-t-blue-600 flex flex-col justify-between gap-4">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-black px-2.5 py-0.5 rounded-full">
+                  Code: 170/2014
                 </span>
-                <span class="bg-blue-900/90 text-blue-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-700">
-                  Question Code: 170/2014
-                </span>
-                <span class="text-xs text-blue-300">
-                  Tradesman Computer Hardware (Tvm, Idk, Pkd) • 17/10/2014
-                </span>
+                <span class="text-[11px] font-bold text-slate-400">17/10/2014 • 100 Qs</span>
               </div>
-              <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-                Tradesman (CHM) - യഥാർത്ഥ മുൻകാല പരീക്ഷ (100 Qs)
-              </h3>
-              <p class="text-sm text-blue-100 leading-relaxed">
-                കേരള പി.എസ്.സി നടത്തിയ Tradesman CHM പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ ഫൈനൽ ആൻസർ കീയും (Alpha Code A) മലയാളം വിശദീകരണങ്ങളും സഹിതം.
+              <h4 class="text-lg font-extrabold text-slate-900 leading-snug">
+                Tradesman (CHM) – Full Paper
+              </h4>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Tvm, Idk, Pkd ജില്ലകളിലെ യഥാർത്ഥ Tradesman CHM പരീക്ഷയിലെ 100 ചോദ്യങ്ങളും ഫൈനൽ കീയും.
               </p>
-              <label class="inline-flex items-center gap-2 bg-blue-900/60 border border-blue-500/40 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-100 cursor-pointer hover:bg-blue-900 transition">
-                <input type="checkbox" id="tech-only-170" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span>🎯 Technical Questions Only (Q1–Q80 മാത്രം — GK ഒഴിവാക്കുക)</span>
+              <label class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-slate-700 cursor-pointer hover:border-blue-400 transition">
+                <input type="checkbox" id="tech-only-170" class="w-3.5 h-3.5 accent-blue-600 rounded cursor-pointer">
+                <span>🎯 Technical Only (Q1–Q80)</span>
               </label>
             </div>
-            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
-              <button onclick="startTradesman170Practice()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-blue-300/40">
-                <i class="fa-solid fa-book-open-reader text-amber-300"></i>
-                <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+              <button onclick="startTradesman170Practice()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-book-open-reader"></i> Practice
               </button>
-              <button onclick="startTradesman170Exam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
-                <i class="fa-solid fa-stopwatch"></i>
-                <span>Exam Mode</span>
+              <button onclick="startTradesman170Exam()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-stopwatch"></i> Exam
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Paper 2: Tradesman CHM 191/2015 (Exact Post) -->
-        <div class="bg-gradient-to-r from-teal-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-teal-400/40 relative overflow-hidden">
-          <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div class="space-y-2.5 max-w-2xl">
-              <div class="flex items-center flex-wrap gap-2">
-                <span class="bg-teal-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                  <i class="fa-solid fa-star"></i> ഇതേ തസ്തികയുടെ യഥാർത്ഥ ചോദ്യപേപ്പർ
+          <!-- Paper 2: Tradesman CHM 191/2015 -->
+          <div class="bento-card bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 border-t-4 border-t-teal-600 flex flex-col justify-between gap-4">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="bg-teal-50 text-teal-700 border border-teal-200 text-[11px] font-black px-2.5 py-0.5 rounded-full">
+                  Code: 191/2015
                 </span>
-                <span class="bg-teal-900/90 text-teal-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-teal-700">
-                  Question Code: 191/2015
-                </span>
-                <span class="text-xs text-teal-300">
-                  Tradesman Computer Hardware • 09/10/2015
-                </span>
+                <span class="text-[11px] font-bold text-slate-400">09/10/2015 • 83 Qs</span>
               </div>
-              <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-                Tradesman (CHM) - യഥാർത്ഥ മുൻകാല പരീക്ഷ (83 Qs)
-              </h3>
-              <p class="text-sm text-teal-100 leading-relaxed">
-                കേരള പി.എസ്.സി നടത്തിയ Tradesman - Computer Hardware Maintenance പരീക്ഷയിലെ ഒഫീഷ്യൽ ചോദ്യങ്ങളും ഫൈനൽ ആൻസർ കീയും (Alpha Code A) മലയാളം വിശദീകരണങ്ങളും സഹിതം.
+              <h4 class="text-lg font-extrabold text-slate-900 leading-snug">
+                Tradesman (CHM) – Official
+              </h4>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                ഇതേ തസ്തികയിലേക്കുള്ള Tradesman Computer Hardware പരീക്ഷയുടെ 83 ചോദ്യങ്ങളും ഉത്തരങ്ങളും.
               </p>
-              <label class="inline-flex items-center gap-2 bg-teal-900/60 border border-teal-500/40 px-3 py-1.5 rounded-xl text-xs font-bold text-teal-100 cursor-pointer hover:bg-teal-900 transition">
-                <input type="checkbox" id="tech-only-191" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span>🎯 Technical Questions Only (Q1–Q80 മാത്രം — GK ഒഴിവാക്കുക)</span>
+              <label class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-slate-700 cursor-pointer hover:border-teal-400 transition">
+                <input type="checkbox" id="tech-only-191" class="w-3.5 h-3.5 accent-teal-600 rounded cursor-pointer">
+                <span>🎯 Technical Only (Q1–Q80)</span>
               </label>
             </div>
-            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
-              <button onclick="startTradesman191Practice()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-teal-300/40">
-                <i class="fa-solid fa-book-open-reader text-amber-300"></i>
-                <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+              <button onclick="startTradesman191Practice()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-book-open-reader"></i> Practice
               </button>
-              <button onclick="startTradesman191Exam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
-                <i class="fa-solid fa-stopwatch"></i>
-                <span>Exam Mode</span>
+              <button onclick="startTradesman191Exam()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-stopwatch"></i> Exam
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Paper 2: Junior Instructor COPA 147/2023 -->
-        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-amber-400/30 relative overflow-hidden">
-          <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div class="space-y-2.5 max-w-2xl">
-              <div class="flex items-center flex-wrap gap-2">
-                <span class="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                  <i class="fa-solid fa-certificate"></i> Official PSC Paper
+          <!-- Paper 3: Junior Instructor COPA 147/2023 -->
+          <div class="bento-card bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 border-t-4 border-t-indigo-600 flex flex-col justify-between gap-4">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-black px-2.5 py-0.5 rounded-full">
+                  Code: 147/2023
                 </span>
-                <span class="bg-indigo-800 text-indigo-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-indigo-700">
-                  Question Code: 147/2023
-                </span>
-                <span class="text-xs text-indigo-300">
-                  Junior Instructor COPA • Cat. 745/2021 • 11/08/2023
-                </span>
+                <span class="text-[11px] font-bold text-slate-400">11/08/2023 • 100 Qs</span>
               </div>
-              <h3 class="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-                Junior Instructor (COPA) - യഥാർത്ഥ മുൻകാല ചോദ്യങ്ങൾ (100 Qs)
-              </h3>
-              <p class="text-sm text-indigo-200 leading-relaxed">
-                കേരള പി.എസ്.സി നടത്തിയ യഥാർത്ഥ പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ ആൻസർ കീയും മലയാളം വിശദീകരണങ്ങളും സഹിതം.
+              <h4 class="text-lg font-extrabold text-slate-900 leading-snug">
+                Junior Instructor (COPA)
+              </h4>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Cat. 745/2021 പരീക്ഷയിലെ മുഴുവൻ 100 ചോദ്യങ്ങളും ഒഫീഷ്യൽ കീയും മലയാളം വിശദീകരണങ്ങളും.
               </p>
+              <div class="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-100 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-indigo-700">
+                <i class="fa-solid fa-check-double"></i> 100% Technical & IT
+              </div>
             </div>
-            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto shrink-0">
-              <button onclick="startPscPreviousPractice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm border border-emerald-400/40">
-                <i class="fa-solid fa-book-open-reader text-amber-300"></i>
-                <span>വിശദീകരണത്തോടെ പഠിക്കുക</span>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+              <button onclick="startPscPreviousPractice()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-book-open-reader"></i> Practice
               </button>
-              <button onclick="startPscPreviousExam()" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 text-sm">
-                <i class="fa-solid fa-stopwatch"></i>
-                <span>100Q Exam (75 Min)</span>
+              <button onclick="startPscPreviousExam()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-stopwatch"></i> Exam
               </button>
             </div>
           </div>
@@ -924,6 +930,14 @@
     </section>
 
   </main>
+
+  <!-- Modern Footer -->
+  <footer class="border-t border-slate-200/70 bg-white/60 backdrop-blur-sm py-5 px-4 text-center text-xs text-slate-500 mt-8">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span class="font-bold text-slate-700">CHM Rank 1 Master • Kerala PSC Tradesman (Cat. No. 884/2025)</span>
+      <span>Built for Smart Revision, Mock Exams & Live Google Sheets Sync</span>
+    </div>
+  </footer>
 
   <!-- Google Sheet Sync Settings Modal -->
   <div id="settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
