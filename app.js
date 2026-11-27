@@ -2806,7 +2806,7 @@ function openToolsView() {
 }
 
 function switchToolTab(tab) {
-  ['resistor', 'converter', 'specs', 'network'].forEach(t => {
+  ['resistor', 'converter', 'specs', 'network', 'ip'].forEach(t => {
     const btn = document.getElementById(`tool-tab-${t}`);
     if (btn) {
       btn.className = t === tab
@@ -3087,6 +3087,102 @@ function switchToolTab(tab) {
         </div>
       </div>
     `;
+  } else if (tab === 'ip') {
+    const cidrOptions = Array.from({ length: 23 }, (_, i) => i + 8)
+      .map(c => `<option value="${c}" ${c === 24 ? 'selected' : ''}>/${c}</option>`).join('');
+
+    container.innerHTML = `
+      <div class="space-y-6">
+        <!-- Interactive IPv4 Subnet Calculator -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+          <div>
+            <h4 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-calculator text-indigo-600"></i>
+              <span>Interactive IPv4 Analyzer & Subnet Calculator</span>
+            </h4>
+            <p class="text-xs text-slate-500">ഏതെങ്കിലും ഒരു IPv4 അഡ്രസ്സും CIDR-ഉം നൽകിയാൽ Class, Private/Public, Subnet Mask, Network/Broadcast IP, Usable Hosts എന്നിവ തത്സമയം ലഭിക്കും:</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1">IPv4 Address</label>
+              <input type="text" id="ip-input" value="192.168.1.10" oninput="calculateIpv4Subnet()" placeholder="e.g. 192.168.1.10" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">CIDR Prefix</label>
+              <select id="ip-cidr" onchange="calculateIpv4Subnet()" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-sm font-bold">${cidrOptions}</select>
+            </div>
+          </div>
+          <div id="ip-calc-output" class="p-4 rounded-2xl bg-slate-900 text-slate-100 text-xs font-mono space-y-1.5"></div>
+        </div>
+
+        <!-- IPv4 vs IPv6 & Private Ranges -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 space-y-2">
+            <h4 class="font-bold text-sm text-indigo-950">📌 IPv4 vs IPv6 (പ്രധാന വ്യത്യാസങ്ങൾ)</h4>
+            <ul class="space-y-1.5 text-slate-700 leading-relaxed">
+              <li>• <strong>IPv4:</strong> <strong>32-bit</strong> (4 Bytes / 4 Octets). ഉദാ: <code class="font-mono font-bold">192.168.1.1</code> (Dotted Decimal).</li>
+              <li>• <strong>IPv6:</strong> <strong>128-bit</strong> (16 Bytes / 8 Groups). ഉദാ: <code class="font-mono font-bold">2001:0db8::1</code> (Colon Hexadecimal).</li>
+              <li>• <strong>PSC ചോദ്യം (191/2015):</strong> IPv6-ന് IPv4-നേക്കാൾ <strong>96 ബിറ്റ്</strong> (128 - 32 = 96 bits) കൂടുതൽ നീളമുണ്ട്.</li>
+            </ul>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
+            <h4 class="font-bold text-sm text-emerald-950">🔒 Private IP (RFC 1918) & Special IPs</h4>
+            <ul class="space-y-1.5 font-mono text-[11px] text-slate-700">
+              <li>• <strong>Class A Private:</strong> 10.0.0.0 – 10.255.255.255 (/8)</li>
+              <li>• <strong>Class B Private:</strong> 172.16.0.0 – 172.31.255.255 (/12)</li>
+              <li>• <strong>Class C Private:</strong> 192.168.0.0 – 192.168.255.255 (/16)</li>
+              <li>• <strong>Loopback (Localhost):</strong> 127.0.0.0 – 127.255.255.255 (127.0.0.1)</li>
+              <li>• <strong>APIPA (DHCP Fail):</strong> 169.254.0.0 – 169.254.255.255</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- IPv4 Classes Table -->
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">📊 IPv4 Address Classes (A, B, C, D, E)</h4>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-700 font-bold">
+                <tr>
+                  <th class="p-2.5">Class</th>
+                  <th class="p-2.5">1st Octet Range</th>
+                  <th class="p-2.5">Leading Bits</th>
+                  <th class="p-2.5">Default Subnet Mask</th>
+                  <th class="p-2.5">Usable Hosts / Network</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-slate-100"><td class="p-2.5 font-black text-indigo-700">Class A</td><td class="p-2.5 font-mono">1 – 126</td><td class="p-2.5 font-mono">0</td><td class="p-2.5 font-mono font-bold">255.0.0.0 (/8)</td><td class="p-2.5 font-mono">2²⁴ - 2 = 16,777,214</td></tr>
+                <tr class="border-b border-slate-100"><td class="p-2.5 font-black text-emerald-700">Class B</td><td class="p-2.5 font-mono">128 – 191</td><td class="p-2.5 font-mono">10</td><td class="p-2.5 font-mono font-bold">255.255.0.0 (/16)</td><td class="p-2.5 font-mono">2¹⁶ - 2 = 65,534</td></tr>
+                <tr class="border-b border-slate-100"><td class="p-2.5 font-black text-amber-700">Class C</td><td class="p-2.5 font-mono">192 – 223</td><td class="p-2.5 font-mono">110</td><td class="p-2.5 font-mono font-bold">255.255.255.0 (/24)</td><td class="p-2.5 font-mono">2⁸ - 2 = 254</td></tr>
+                <tr class="border-b border-slate-100"><td class="p-2.5 font-black text-rose-700">Class D</td><td class="p-2.5 font-mono">224 – 239</td><td class="p-2.5 font-mono">1110</td><td class="p-2.5 text-slate-500">N/A (Multicasting)</td><td class="p-2.5 text-slate-500">Multicast Groups</td></tr>
+                <tr class="border-b border-slate-100"><td class="p-2.5 font-black text-slate-700">Class E</td><td class="p-2.5 font-mono">240 – 255</td><td class="p-2.5 font-mono">1111</td><td class="p-2.5 text-slate-500">N/A (Experimental)</td><td class="p-2.5 text-slate-500">Research & Future</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Subnetting Procedure & Example -->
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-2">
+          <h4 class="font-bold text-sm text-amber-950">🧮 സബ്നെറ്റിംഗ് കണക്കുകൂട്ടുന്ന രീതി (Subnetting Formula & Example)</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3 rounded-xl bg-white border border-amber-200 space-y-1 text-slate-700">
+              <div>• <strong>Host Bits (h):</strong> <code class="font-mono font-bold">32 - CIDR</code></div>
+              <div>• <strong>Usable Hosts:</strong> <code class="font-mono font-bold">2ʰ - 2</code> (Network ID-യും Broadcast ID-യും കുറയ്ക്കുക)</div>
+              <div>• <strong>Number of Subnets:</strong> <code class="font-mono font-bold">2ˢ</code> (s = കടം എടുത്ത ബിറ്റുകൾ / Borrowed bits)</div>
+            </div>
+            <div class="p-3 rounded-xl bg-white border border-amber-200 space-y-1 font-mono text-[11px] text-slate-700">
+              <div class="font-bold text-slate-900">ഉദാഹരണം: 192.168.1.0/26 (Class C)</div>
+              <div>• Borrowed bits (s) = 26 - 24 = 2 → Subnets = 2² = <strong>4</strong></div>
+              <div>• Host bits (h) = 32 - 26 = 6 → Hosts = 2⁶ - 2 = <strong>62</strong></div>
+              <div class="text-emerald-700 font-bold">• Subnet Mask: 255.255.255.192</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    calculateIpv4Subnet();
   }
 }
 
@@ -3153,6 +3249,65 @@ function convertNumberBase(source) {
       <div>• Octal (Base 8): <span class="text-amber-300 font-bold">(${octStr})₈</span></div>
     `;
   }
+}
+
+function calculateIpv4Subnet() {
+  const ipStr = document.getElementById('ip-input')?.value.trim() || '';
+  const cidr = parseInt(document.getElementById('ip-cidr')?.value || '24', 10);
+  const outEl = document.getElementById('ip-calc-output');
+  if (!outEl) return;
+
+  const parts = ipStr.split('.');
+  if (parts.length !== 4 || parts.some(p => !/^\d+$/.test(p) || parseInt(p, 10) < 0 || parseInt(p, 10) > 255)) {
+    outEl.innerHTML = `<div class="text-rose-400 font-bold">⚠️ ശരിയായ IPv4 അഡ്രസ്സ് നൽകുക (ഉദാ: 192.168.1.10)</div>`;
+    return;
+  }
+
+  const octets = parts.map(p => parseInt(p, 10));
+  const ipInt = ((octets[0] << 24) | (octets[1] << 16) | (octets[2] << 8) | octets[3]) >>> 0;
+  const maskInt = cidr === 0 ? 0 : (0xffffffff << (32 - cidr)) >>> 0;
+  const netInt = (ipInt & maskInt) >>> 0;
+  const bcastInt = (netInt | (~maskInt)) >>> 0;
+
+  const toIp = (n) => [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+  const hostBits = 32 - cidr;
+  const usableHosts = hostBits >= 2 ? (Math.pow(2, hostBits) - 2) : 0;
+  const firstHost = hostBits >= 2 ? toIp((netInt + 1) >>> 0) : toIp(netInt);
+  const lastHost = hostBits >= 2 ? toIp((bcastInt - 1) >>> 0) : toIp(bcastInt);
+
+  const o1 = octets[0];
+  let ipClass = 'Class E (Experimental)';
+  if (o1 >= 1 && o1 <= 126) ipClass = 'Class A';
+  else if (o1 === 127) ipClass = 'Loopback (Reserved)';
+  else if (o1 >= 128 && o1 <= 191) ipClass = 'Class B';
+  else if (o1 >= 192 && o1 <= 223) ipClass = 'Class C';
+  else if (o1 >= 224 && o1 <= 239) ipClass = 'Class D (Multicast)';
+  else if (o1 === 0) ipClass = 'Default / Reserved';
+
+  let scope = 'Public IP';
+  if (o1 === 10 || (o1 === 172 && octets[1] >= 16 && octets[1] <= 31) || (o1 === 192 && octets[1] === 168)) {
+    scope = 'Private IP (RFC 1918)';
+  } else if (o1 === 127) {
+    scope = 'Loopback Address';
+  } else if (o1 === 169 && octets[1] === 254) {
+    scope = 'APIPA (Link-Local)';
+  }
+
+  const binIp = octets.map(o => o.toString(2).padStart(8, '0')).join('.');
+
+  outEl.innerHTML = `
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div>• Class & Type: <span class="text-amber-400 font-bold">${ipClass} • ${scope}</span></div>
+      <div>• Subnet Mask: <span class="text-emerald-300 font-bold">${toIp(maskInt)} (/${cidr})</span></div>
+      <div>• Network Address: <span class="text-cyan-300 font-bold">${toIp(netInt)}</span></div>
+      <div>• Broadcast Address: <span class="text-rose-300 font-bold">${toIp(bcastInt)}</span></div>
+      <div>• Usable Host Range: <span class="text-white font-bold">${firstHost} – ${lastHost}</span></div>
+      <div>• Total Usable Hosts: <span class="text-amber-300 font-bold">${usableHosts.toLocaleString()} (2^${hostBits} - 2)</span></div>
+    </div>
+    <div class="pt-1.5 border-t border-slate-700 text-[11px] text-slate-400">
+      • Binary: <span class="text-slate-200">${binIp}</span>
+    </div>
+  `;
 }
 
 // ============================================================================
